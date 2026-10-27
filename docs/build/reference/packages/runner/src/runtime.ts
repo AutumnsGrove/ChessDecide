@@ -30,7 +30,7 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: { mock: 
   const rng = mulberry32(game.config.seed);
   const mk = async (side: Color, desc: PlayerDesc): Promise<Player> => {
     if (desc.type === 'model') {
-      if (!opts.mock) throw new Error('real model players are added in task T14');
+      if (!opts.mock) throw new Error('real model players are added in task T01');
       return new MockPlayer({ seed: game.config.seed + (side === 'white' ? 1 : 2) });
     }
     const level = DEFAULT_LADDER.levels.find((l) => l.id === (desc.type === 'ladder' ? desc.level : 'uci1500'))!;
