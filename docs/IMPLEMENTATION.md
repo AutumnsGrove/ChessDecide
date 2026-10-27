@@ -84,7 +84,7 @@ branches on type and model-vs-model (M8) needs no new game code.
 - **S1** — **done, passed** (`SPIKE.md` §8; scripts in `spikes/s1-d1/`). Original brief: a Node script that opens local D1 via `getPlatformProxy()`,
   applies a Drizzle migration, inserts and reads 10,000 ply rows. Pass if < 5 s; else adopt the
   `better-sqlite3` fallback behind the same `Store` interface and record why.
-- **S2**: one paid probe (≤ $0.01): send a board PNG to `typesafe/jev-1.14` and `liquid/d1-ultra`
+- **S2** — **done** (`SPIKE.md` §9; scripts in `spikes/s2-image/`): works; image did not help; forced-move rule found. Original brief: one paid probe (≤ $0.01): send a board PNG to `typesafe/jev-1.14` and `liquid/d1-ultra`
   with bare text options; record the exact request shape that works, latency, tokens, cost, and
   whether the pick differs from the text arm. Write results into `SPIKE.md`.
 
@@ -146,7 +146,7 @@ $0.042/M). `MOCK_FAIL` env injects 429/502 reproducibly by seed; latency 300–1
 **Accept:** same input → same output; failure injection reproducible by seed.
 
 ### T1.7 Game stepper and local runner
-`stepGame` per §1 and `API.md` §3.2 state machine: decide player → budget check → `move` →
+`stepGame` per §1 and `API.md` §3.2 state machine: decide player → **if exactly one legal move, play it with no model call** (`PROMPTS.md` §8b) → budget check → `move` →
 apply → persist ply (transaction) → publish `ply` → judge → persist judge → publish `judged` →
 adjudication and termination checks. `packages/runner` CLI: `chessdecide game --white mock --black uci1500`
 (loop `stepGame` until terminal, write to DB, print PGN and totals).

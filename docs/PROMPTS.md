@@ -160,6 +160,13 @@ Validate in this order; any failure is a typed error stored on the attempt:
 5. `usage.input_tokens`, `usage.output_tokens`, `usage.cost` recorded (missing → null, not 0).
 6. Record `id`, returned `model`, `provider`.
 
+## 8b. Forced moves
+
+A `choice` question needs at least 2 options (D1, D1 Ultra and Clef return HTTP 422 for one). When
+`legal.length === 1` the game plays that move **without calling the model**: no attempt row, no
+cost, `decision` is `null` and the ply is flagged `forced: true`. Forced plies are excluded from
+ACPL, acceptable-rate and calibration metrics.
+
 ## 9. Retry, rate limit, cache
 
 - **Retry** HTTP 429 / 5xx / network errors up to **3 attempts**: waits 1 s, 2 s, 4 s (±20 %
@@ -203,7 +210,7 @@ A separate arm; never merged with text arms.
   no check highlight. Deterministic bytes for a fixed position (hash pinned in a test).
 - **Question.** Same `choice` question and the same **bare** `plain` options and UCI keys as `clean`;
   `instructions` use the `neutral` template with the lead-in `This image shows the current position.`
-- **Request shape** (from OpenRouter's Multimodal Decisions docs; live-verified in `SPIKE.md` §9):
+- **Request shape** (OpenRouter's Multimodal Decisions docs; **live-verified** on 6 models in `SPIKE.md` §9):
   `state` is an **array**: `[ {game, side_to_move, move_number}, {"type":"image_url","image_url":{"url":"data:image/png;base64,…"}} ]`.
   Jev needs 256–1,568 px per side; Clef needs the image under ~300 KB. 512×512 PNG ≈ 38 KB satisfies both.
 - **Caveats.** Jev switches to long-context mode for any image (slower, possibly less accurate), so

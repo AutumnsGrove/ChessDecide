@@ -335,8 +335,9 @@ Tasks and acceptance checks: [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 5. Does `GET /api/v1/key` expose remaining credit?
 6. Measured Stockfish `movetime` to use for ladder (default 50 ms) and calibration time
    (CPU, one-off).
-7. How strong are these models really? (A 10-game pilot against the weak ladder decides the
-   first series' starting level; the algorithm handles any answer.)
+7. How strong are these models really? **Partly answered (SPIKE §9):** on 48 positions, D1 Ultra text
+   plays clearly above a random mover (30 % best-move vs 11 %); Jev text is about random on CPL and
+   blunder rate. Expect Jev near the bottom of the ladder; a 10-game pilot picks the starting level.
 
 ## 10. Risks
 
