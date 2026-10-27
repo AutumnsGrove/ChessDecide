@@ -1,285 +1,282 @@
 # ChessDecide — Implementation guide
 
-**Audience: the implementing model.** Read in this order: `PLAN.md` → `METRICS.md` →
-`PROMPTS.md` → `API.md` → `UI.md` → this file, then open `docs/mockups/index.html` in a browser.
+**Audience: the implementing model.** Read in this order: `PLAN.md` → `ARCHITECTURE.md` →
+`METRICS.md` → `PROMPTS.md` → `API.md` → `UI.md` → this file, then open
+`docs/mockups/simple.html` (the target look and flow) in a browser. `mockups/index.html` holds
+the older, denser screens for reference.
 These documents are normative. When something is ambiguous, **stop and ask** (or write the
-question into `docs/QUESTIONS.md` and continue with the most conservative interpretation) —
-do not invent behaviour. When you change behaviour, change the doc in the same commit.
+question into `docs/QUESTIONS.md` and continue with the most conservative interpretation).
+When you change behaviour, change the doc in the same commit.
+
+**Build order is viewer-first.** The goal is to *watch a model play* as early and as cheaply as
+possible (mock provider, $0), run one real game (about half a cent), and only then build the
+ladder, Series and Elo.
 
 ## 0. Ground rules
 
-**Stack**: Go 1.26 (no cgo), `github.com/corentings/chess/v2` v2.6.1, `modernc.org/sqlite`,
-`github.com/oklog/ulid/v2`, stdlib `net/http` (1.22+ pattern routing), `log/slog`. Frontend:
-SvelteKit + Svelte 5 + TypeScript strict, `chessground@9.2.1`, Vite, Bun or npm. Tests:
-stdlib `testing` (table-driven). Stockfish from `STOCKFISH_PATH`/PATH (Stockfish 19).
+**Stack**: TypeScript (strict, ESM), npm or pnpm workspaces, Node 22+ (Bun optional) for the
+runner, `chess.js` for rules, `drizzle-orm` + `drizzle-kit` (SQLite dialect), `vitest` for tests,
+SvelteKit + Svelte 5 + `adapter-cloudflare`, `chessground@9.2.1`, `wrangler`. Stockfish 19 from
+`STOCKFISH_PATH` or `PATH`. **Raw CSS only: no Tailwind, no UI kit, no chart library.**
 
 **Conventions**
 
-- Module name `chessdecide`. `gofmt` + `go vet` clean; `go test ./...` green before each commit.
-- Every function that does I/O takes `context.Context` first. Errors are wrapped with `%w`
-  and carry a typed `code` where the API exposes them (see `API.md` §1).
-- Never log or persist the API key. Never send it to the browser. Do not print request
-  headers.
-- Money is `float64` USD parsed straight from `usage.cost`; never recompute it from tokens.
-  Missing cost → NULL, not 0.
-- Moves: canonical id is **UCI**; SAN only for display/hinted keys.
-- All randomness is seeded and the seed is logged on the row it affects.
-- JSON field names `snake_case`; times RFC 3339 UTC.
+- `packages/core` is pure: no `node:*` imports, no `fetch`, no `Date.now()` or randomness
+  except through injected `clock` and seeded `rng`. It must run in Workers and the browser.
+- Everything with I/O lives behind the ports in `ARCHITECTURE.md` §2. Core takes ports as
+  arguments; it never imports adapters.
+- Moves: canonical id is **UCI**; SAN only for display and `hinted` keys.
+- Money is a number in USD parsed from `usage.cost`; never recomputed from tokens. Missing → `null`.
+- All randomness is seeded (`mulberry32`) and the seed is stored on the row it affects.
+- JSON field names `snake_case`; times ISO 8601 UTC strings.
+- Never log or persist the API key; never send it to the browser or to published data.
 - Python (tools only): run with `uv run`, format with Black.
 - Commit messages: present tense, first line < 50 chars. The user uses she/her pronouns.
-- **Never spend money in tests.** Tests use `httptest` servers, fixtures, and the mock
-  provider. A test that needs the network must be behind `-tags live` and read the key from env.
+- **Never spend money in tests.** Tests use fixtures, a fake `fetch`, and the mock provider.
+  A network test sits behind `LIVE=1` and reads the key from the environment.
 
-**Definition of done (every task)**: code + tests + doc updates + a note in
-`docs/CHANGELOG.md`; the acceptance check listed in the task passes; `go test ./...` and (for
-web) `npm run check && npm test` pass.
+**Definition of done (every task)**: code + tests + doc updates + a note in `docs/CHANGELOG.md`;
+the task's acceptance check passes; `npm test`, `npm run typecheck` and (web) `npm run check` pass.
 
-## 1. Core Go types (shared by all packages)
+## 1. Core types (`packages/core/src/types.ts`)
 
-```go
-// internal/chessx
-type Position struct { FEN string; HistorySAN []string; hashHist []string /* for repetition */ }
-type Move struct { UCI, SAN string; From, To string; Promo string; Capture, EP, Castle, Check, Mate bool; Piece, Captured string }
-func Parse(fen string) (Position, error)
-func (p Position) Legal() []Move                     // sorted by UCI ascending
-func (p Position) Apply(uci string) (Position, error)
-func (p Position) Outcome() Outcome                  // checkmate|stalemate|insufficient|threefold|fifty|none
-func (m Move) DescPlain() string; func (m Move) DescAnnotated() string // PROMPTS.md §4
+```ts
+export type Uci = string;
+export interface Move { uci: Uci; san: string; from: string; to: string; promo?: string;
+  capture: boolean; ep: boolean; castle: boolean; check: boolean; mate: boolean;
+  piece: string; captured?: string }
+export interface Position { fen: string; historySan: string[] }
 
-// internal/providers
-type Arm struct { KeyFormat, Descriptor, StateVariant, Template string }
-type MoveRequest struct {
-    Position chessx.Position; Legal []chessx.Move; Arm Arm
-    Seed int64; Repeat int; SessionID string
-    Purpose string; GameID string; Ply int; SeriesID string
-}
-type AttemptMeta struct {
-    AttemptID int64; ModelSlug, ReturnedModel, Provider string
-    LatencyMS, InputTokens, OutputTokens, Retries int
-    CostUSD *float64; CacheHit bool; RequestHash string
-}
-type MoveResponse struct {
-    Move chessx.Move
-    Probs map[string]float64   // keyed by UCI, renormalised; nil if absent
-    Confidence float64; ProbSum float64
-    Meta AttemptMeta; Raw json.RawMessage
-}
-type MoveProvider interface { ID() string; Move(ctx context.Context, r MoveRequest) (MoveResponse, error) }
+export interface Arm {
+  interface: 'text' | 'image';
+  keyFormat: 'uci' | 'san'; descriptor: 'plain' | 'annotated';
+  stateVariant: 'slim' | 'full'; template: 'neutral' | 'instructive' | 'minimal';
+}   // presets: clean, hinted, image (PROMPTS.md §12)
 
-// internal/engine
-type Opponent interface { Move(ctx context.Context, pos chessx.Position) (uci string, info OpponentInfo, err error); Close() error }
-// internal/game: a Player is either a MoveProvider-backed ModelPlayer or an Opponent-backed LadderPlayer.
-type Player interface { Move(ctx context.Context, g *Game) (PlayerMove, error); Describe() PlayerDesc }
+export interface MoveRequest { position: Position; legal: Move[]; arm: Arm; seed: number;
+  repeat: number; purpose: 'game' | 'ladder' | 'probe'; gameId?: string; ply?: number; seriesId?: string }
+export interface AttemptMeta { attemptId?: number; modelSlug: string; returnedModel?: string;
+  provider?: string; latencyMs: number; inputTokens?: number; outputTokens?: number;
+  retries: number; costUsd: number | null; cacheHit: boolean; requestHash: string }
+export interface MoveResponse { move: Move; probs?: Record<Uci, number>; confidence?: number;
+  probSum?: number; meta: AttemptMeta; raw?: unknown }
+
+export interface MoveProvider { id(): string; move(req: MoveRequest, signal?: AbortSignal): Promise<MoveResponse> }
+export interface Opponent { move(pos: Position, signal?: AbortSignal): Promise<{ uci: Uci; info: OpponentInfo }>; close(): Promise<void> }
+export interface Player { move(g: GameState, signal?: AbortSignal): Promise<PlayerMove>; describe(): PlayerDesc }
+
+export interface Ports { engine: EngineFactory; provider: (p: PlayerDesc) => MoveProvider;
+  store: Store; events: EventSink; clock: () => number; rng: (seed: number) => () => number }
+
+/** Plays exactly one ply. Pure apart from the ports. */
+export function stepGame(state: GameState, ports: Ports, signal?: AbortSignal): Promise<GameState>;
 ```
 
-## 2. Milestone 1 — Go core (no UI)
+A game is `(white: Player, black: Player)`; both sides implement `Player`, so the loop never
+branches on type and model-vs-model (M8) needs no new game code.
 
-### T1.0 Repo bootstrap
-Files: `go.mod`, `Makefile` (`test`, `run`, `mock`, `lint`), `internal/config/config.go`
-(env per `API.md` §5; refuse non-loopback bind), `.golangci.yml` optional, `docs/CHANGELOG.md`,
-`docs/QUESTIONS.md`. **Accept:** `go build ./...` and `go test ./...` run green on an empty skeleton.
+## 2. M0.5 — Spikes (before M1 code that depends on them)
 
-### T1.1 `chessx` + golden tests
-1. Wrap `corentings/chess/v2`: `Parse`, `Legal` (sorted by UCI), `Apply`, SAN/UCI encoding,
-   `Outcome` (threefold needs a hash history — key = FEN fields 1–4; 50-move from halfmove clock).
-   Castling UCI must be the king move (`e1g1`); promotions `e7e8q`. Add `+`/`#` to SAN via
-   applying the move and checking status.
-2. Descriptors per `PROMPTS.md` §4 (piece names, capture, en passant, castles, promotion,
-   check/checkmate for annotated).
-3. `tools/gen_golden.py` (python-chess, `uv run --with chess`): generate
-   `internal/chessx/testdata/golden.jsonl`, one JSON object per line:
-   `{fen, legal:[{uci,san,plain,annotated}], outcome}` for ≥ 3,000 positions from seeded random
-   games **plus** hand-picked edge cases (promotions incl. captures, en passant, both castles,
-   pinned pieces, discovered check, stalemate, insufficient material, mate in 1, 60+ moves).
-   The python script implements the descriptor grammar *independently* from the Go code.
-4. `TestGolden` must match 100 %. **Accept:** golden test green; a perft test (startpos depth 4 = 197,281)
-   green; any mismatch is a bug in Go, fix it there.
+- **S1** (`ARCHITECTURE.md` §9): a Node script that opens local D1 via `getPlatformProxy()`,
+  applies a Drizzle migration, inserts and reads 10,000 ply rows. Pass if < 5 s; else adopt the
+  `better-sqlite3` fallback behind the same `Store` interface and record why.
+- **S2**: one paid probe (≤ $0.01): send a board PNG to `typesafe/jev-1.14` and `liquid/d1-ultra`
+  with bare text options; record the exact request shape that works, latency, tokens, cost, and
+  whether the pick differs from the text arm. Write results into `SPIKE.md`.
 
-### T1.2 Prompt builders and response parser (`internal/providers/decisions`)
-Implement `PROMPTS.md` §2–§9 exactly. `Build(req) (body []byte, keyToUCI map[string]string, order []string)`;
-`Parse(resp []byte, keyToUCI) (MoveResponse parts, error)` with the typed errors of §8.
-Fixtures in `testdata/` per §11 (**byte-exact** expected JSON for `clean` and `hinted`).
-**Accept:** fixtures pass; changing one character of a description fails a test; `invalid_choice`,
-`missing_answer`, `unexpected_type`, `invalid_probs`, `prob_sum_warn` are each covered.
+## 3. M1 — Core, engine, store (no UI)
 
-### T1.3 Engine (`internal/engine`)
-1. `Client`: spawn Stockfish, `uci`/`uciok`, `setoption`, `isready`/`readyok`, `ucinewgame`,
-   `position fen …`, `go depth D` | `go movetime M`, parse `info … depth … score cp|mate … wdl W D L … pv …`
-   keeping the last line at the greatest depth with `multipv 1`; read until `bestmove`. Line-reader
-   goroutine; per-search timeout; if the process dies, restart once and retry; `Close` sends `quit`.
-2. `Opponent` implementations: `StockfishOpponent{elo, movetimeMS}` (`UCI_LimitStrength`, `UCI_Elo`,
-   `Threads=1`, `Hash=32`) and `EpsOpponent{eps, inner, rng}` (probability ε → uniformly random legal move,
-   else inner) and `RandomOpponent`. `OpponentInfo` reports whether a random move replaced the engine move.
-3. `JudgePool`: `N = min(4, NumCPU-2)` clients (`Threads=1`, `Hash=64`, `UCI_ShowWDL=true`); a work queue;
-   `Submit(ctx, job) <-chan result`.
-**Accept (needs stockfish; skip with a clear message if absent):** `bestmove` for the M0 mate-in-1 FEN is
-`h5f7`; WDL parsed; `UCI_Elo` 1320 vs 2800 over 20 games (50 ms) → 2800 wins ≥ 18; EpsOpponent(ε=1)
-== uniform over legal moves (chi-square on 2,000 draws); killing the process mid-search recovers.
+### T1.0 Bootstrap
+Workspace skeleton per `ARCHITECTURE.md` §3, `vitest`, `tsconfig` strict, `docs/CHANGELOG.md`,
+`docs/QUESTIONS.md`, `.env.example`, `.gitignore` (`data/`, `.wrangler/`, `.env`, `spikes/out/`).
+**Accept:** `npm test` and `npm run typecheck` green on the empty skeleton.
 
-### T1.4 Oracle (`internal/oracle`)
-Implement `METRICS.md` §3 exactly (child-position search, mover POV, clamp ±1000, wp from WDL, terminal
-children handled directly), cache table `oracle_moves` keyed
-`(position_hash, sf_version, depth, hash_mb, threads, uci)`. API: `Evaluate(ctx, pos, depth) (Oracle, error)`
-with derived `best`, `cpl`, `wl`, sets, `Class(wl)`; also `PlayedJudge(oracle, playedUCI) Judge` (fields of `API.md` `Judge`).
-**Accept:** on the mate-in-1 FEN `h5f7` has `cp=1000`, `wp=100`, best; CPL of the best move is exactly 0 and
-`wl ≥ 0` for every move (property test on 200 random positions); second call is a pure cache hit (no engine
-use); for the SPIKE §3 "Quiet Italian" the best-set contains `Re1`, `h3`, `b4`. Record oracle seconds per
-position at depth 14 and 18 in `docs/CHANGELOG.md` (open question 6/10).
+### T1.1 Chess rules + golden tests (`packages/core/chess`)
+1. Wrap `chess.js`: `parse(fen)`, `legal(pos)` (sorted by UCI ascending), `apply(pos, uci)`, SAN/UCI,
+   `outcome` (threefold by FEN fields 1–4 history; fifty-move from halfmove clock; insufficient
+   material; stalemate; checkmate). Castling UCI is the king move (`e1g1`); promotions `e7e8q`.
+2. Descriptors per `PROMPTS.md` §4: `plain` is fully bare, `annotated` adds capture/check/mate.
+3. `tools/gen_golden.py` (python-chess via `uv run --with chess`): ≥ 3,000 positions from seeded
+   random games plus edge cases (promotions incl. captures, en passant, both castles, pins,
+   discovered check, stalemate, insufficient material, mate in 1, 60+ moves) →
+   `packages/core/test/golden.jsonl` of `{fen, legal:[{uci,san,plain,annotated}], outcome}`.
+   The Python script implements the descriptor grammar **independently** of the TS code.
+**Accept:** golden test matches 100 %; perft startpos depth 4 = 197,281; any mismatch is a TS bug.
 
-### T1.5 Store (`internal/store`)
-Embedded numbered migrations = `API.md` §4 DDL. WAL, `foreign_keys=ON`, one writer connection + read pool.
-Typed queries for games/plies/attempts/series/ladder. **Accept:** migrations apply to an empty DB twice (idempotent
-runner), CRUD tests on in-memory SQLite, spend aggregation correct with `cache_hit` rows.
+### T1.2 Prompt builders and parser (`packages/core/prompts`)
+Implement `PROMPTS.md` §2–§9 and §12 exactly, as pure functions:
+`build(req) → { body, keyToUci, order }`, `parse(json, keyToUci) → parts | TypedError`.
+Fixtures per `PROMPTS.md` §11, **byte-exact** for `clean`, `hinted`, `image`.
+**Accept:** fixtures pass; changing one character of a description fails a test; each of
+`invalid_choice`, `missing_answer`, `unexpected_type`, `invalid_probs`, `prob_sum_warn` is covered.
 
-### T1.6 OpenRouter client (`internal/openrouter`)
-1. `Catalog`: `GET /api/v1/models?output_modalities=decisions` (public), 1 h cache, map to `ModelInfo`
-   (`slug`, `canonical_slug`, `context_length`, `price_in_per_m`, modalities); roster flags.
-2. `Decisions.Create(ctx, body) (respBytes, status, headers, error)`: auth header from config, `X-Title`, 60 s timeout.
-3. Retry/backoff/limiter/cache per `PROMPTS.md` §9: per-slug semaphore 2, ≤ 4 req/s token bucket, 429 halves concurrency
-   for 60 s, `Retry-After`, ±20 % jitter, every HTTP call → `attempts` row (`retry_of`), cache by request hash.
-4. `GET /api/v1/key` probe for remaining credit (M1 open question 5); tolerate failure.
-**Accept:** `httptest` servers for: success, 429→200, 502×3→error, invalid JSON, slow response (timeout), cache hit
-(no second HTTP call), concurrency never exceeds 2 (counter). No real network in tests.
+### T1.3 Store (`packages/db`)
+Drizzle schema = `API.md` §4. `Store` interface in core; Drizzle implementation here;
+`drizzle-kit` migrations. **Accept:** migrations apply to an empty DB twice; CRUD tests on an
+in-memory/local DB; spend aggregation correct with `cache_hit` rows; no transaction held across
+a network call.
 
-### T1.7 Budget (`internal/budget`)
-Estimator (`PROMPTS.md` §10) with rolling-mean calibration from `attempts`, `Check(cap, spent, estNext)`,
-ledger queries (session/today/all). **Accept:** table tests incl. calibration switch at 20 attempts and the
-cap boundary (`spent + est == cap` is allowed, `>` is not).
+### T1.4 Engine port + native UCI adapter (`packages/engine`)
+1. `NativeUciEngine`: spawn, `uci`/`uciok`, `setoption`, `isready`/`readyok`, `ucinewgame`,
+   `position fen …`, `go depth D | movetime M`; parse `info … depth … score cp|mate … wdl W D L … multipv N … pv …`
+   keeping the last line per multipv at the greatest depth; read until `bestmove`; per-search
+   timeout; restart once if the process dies; `close` sends `quit`.
+2. Opponents on top of `Engine`: `StockfishOpponent{elo, movetimeMs}` (`UCI_LimitStrength`,
+   `UCI_Elo`, `Threads=1`, `Hash=32`), `EpsOpponent{eps, inner, rng}`, `RandomOpponent`.
+3. `JudgePool`: N = min(4, cores − 2) engines (`Threads=1`, `Hash=64`, `UCI_ShowWDL=true`), queue.
+**Accept (needs stockfish; skip with a clear message if absent):** mate-in-1 FEN `h5f7`; WDL parsed;
+`UCI_Elo` 1320 vs 2800 over 20 games at 50 ms → 2800 wins ≥ 18; `EpsOpponent(ε=1)` is uniform over
+legal moves (chi-square on 2,000 draws); killing the process mid-search recovers.
 
-### T1.8 Providers
-`decisions.Provider` (builds → client → parse → map back to UCI), `mock.Provider`: deterministic given
-`(fen, seed)`, picks via softmax over a cheap heuristic (material after the move + centre control) with
-temperature 1.0 (normal play) and a `CHESSDECIDE_MOCK_FAIL` env controlling injected 429/502 rates and a
-latency distribution (300–1200 ms, `0` in tests). Returns realistic `Probs`, `Confidence`, `Meta` (cost
-computed from fake tokens × $0.042/M). **Accept:** same input → same output; failure injection reproducible by seed.
+### T1.5 Oracle / judge (`packages/core/oracle` + engine)
+Implement `METRICS.md` §3 exactly. Cache table `oracle_moves`. API: `evaluate(engine, pos, depth)`
+and `judgePlayed(oracle, playedUci) → Judge`.
+**Accept:** on the mate-in-1 FEN `h5f7` has `cp=1000`, `wp=100`, best; CPL of the best move is 0 and
+`wl ≥ 0` for every move (property test, 200 random positions); second call is a pure cache hit;
+record oracle seconds per position at depth 14 and 18 in `CHANGELOG`.
 
-### T1.9 CLI + M1 experiments
-`cmd/chessdecide` subcommands: `serve` (later), `probe --model M --arm clean --fen F` (one paid call; prints pick,
-P, latency, tokens, cost), `game --model M --arm clean --level uci1500 [--mock]` (headless full game via the
-orchestrator interface stub: loop `Player.Move` until termination, judge each ply at depth 14, write to DB, print PGN
-and totals), `m1 questions` (≤ $0.05: on 20 oracle positions compare `slim` vs `full` state picks and tokens; SAN
-history 16 vs none; `session_id` on/off; prints a table to paste into `docs/SPIKE.md` §M1).
-**Accept:** `game --mock` completes in < 60 s with a PGN; with the real key one game costs < $0.02 and the ledger
-matches `usage.cost`; M1 question results recorded in `docs/SPIKE.md`.
+### T1.6 Mock provider
+Deterministic given `(fen, seed)`: softmax over a cheap heuristic (material after the move + centre
+control), temperature 1.0, realistic `probs`, `confidence`, fake `meta` (cost from fake tokens ×
+$0.042/M). `MOCK_FAIL` env injects 429/502 reproducibly by seed; latency 300–1200 ms (0 in tests).
+**Accept:** same input → same output; failure injection reproducible by seed.
 
-## 3. Milestone 2 — Single games, API, Viewer
-
-### T2.1 Game orchestrator (`internal/game`)
-States and transitions exactly as `API.md` §3.2. Loop (per ply): decide player → `Move(ctx)` (budget
-`Check` first; `thinking` event; retry events from the client) → apply move → persist `plies` row → publish
-`ply` → submit judge job → on result persist `judge_json`, publish `judged`, evaluate **adjudication**
-(`METRICS.md` B1) and termination. Pacing: ensure ≥ `pace_ms` between `ply` events. One goroutine per game;
-`Step` runs exactly one ply; `Pause` waits for the in-flight ply; `Stop` cancels its context. On start-up, games
-left `running` become `paused` (`server_restart`). Serialise state changes with a mutex; SSE hub fan-out with
-per-subscriber buffered channels (drop-and-resync slow consumers via `snapshot`).
-**Accept (mock provider, no network):** 10 games × 2 concurrent complete with correct terminations; Step/Pause/
-Stop/restart-recovery tests; budget stop at the cap boundary; adjudication triggers on a scripted position
+### T1.7 Game stepper and local runner
+`stepGame` per §1 and `API.md` §3.2 state machine: decide player → budget check → `move` →
+apply → persist ply (transaction) → publish `ply` → judge → persist judge → publish `judged` →
+adjudication and termination checks. `packages/runner` CLI: `chessdecide game --white mock --black uci1500`
+(loop `stepGame` until terminal, write to DB, print PGN and totals).
+**Accept (mock, no network):** 10 games × 2 concurrent finish with correct terminations; Step/Pause/
+Stop and restart recovery tests; budget stop at the cap boundary; adjudication triggers on a scripted
 sequence; PGN export round-trips through python-chess in a golden test.
 
-### T2.2 HTTP API (`internal/api`)
-Implement `API.md` §3.1–§3.2 (health, models, estimate, spend, positions/validate, oracle, games, SSE) with
-the error envelope and `Last-Event-ID` replay. Serve `web/build` when present. **Accept:** `httptest` end-to-end:
-create game (mock) → open SSE → `auto` → receive `snapshot`, `thinking`, `ply`, `judged`, `status` in order →
-`GET /api/games/{id}` equals the SSE-built state.
+## 4. M2 — Viewer, one real game, go/no-go
 
-### T2.3 Web scaffold
-`web/` SvelteKit (SPA: `adapter-static`, `ssr=false`, `fallback: index.html`), Vite proxy `/api` →
-`127.0.0.1:8080`, port `app.css` tokens, app shell + nav, `types.ts` mirroring `API.md`, stores
-(`game.svelte.ts` SSE with reconnect/`Last-Event-ID`, `spend`, `catalog`, `settings`).
-**Accept:** `npm run check` clean; shell renders with health chips against the mock server.
+### T2.1 Web scaffold
+`apps/web` SvelteKit (Svelte 5, TS strict, `adapter-cloudflare`), tokens from `UI.md` in `app.css`,
+`chessground` CSS/JS vendored from `docs/mockups/vendor/`, app shell, `types.ts` mirroring `API.md`.
+**Accept:** `npm run check` clean; shell renders; `wrangler dev` serves it.
 
-### T2.4 Viewer
-Components per `UI.md` §5 and behaviour per §6. Build **replay first** (load a finished game, transport, graph,
-move list, decision panel), then **live attach**. Match the mockup pixel-for-pixel in tokens/layout.
-**Accept (Playwright, mock server):** scripted tests — load game; `→` ×5 advances 5 plies; `Home`/`End`; space
-autoplays and stops at the end; clicking the eval graph seeks; "pause on mistakes" stops on a flagged ply; live
-game: new plies follow when attached, stop following after `←`, pill shows `+N`, `End` re-attaches; screenshots
-of replay + live + each banner state compared against stored baselines (manual approval).
+### T2.2 Local control API + SSE
+Endpoints from `API.md` §3.1–§3.2 as SvelteKit `+server.ts` routes, enabled only when
+`CHESSDECIDE_MODE=local`; SSE with `Last-Event-ID` replay from the DB. The runner and the web app
+share `packages/db`. **Accept:** vitest end-to-end with the mock: create game → open SSE → `auto` →
+`snapshot`, `thinking`, `ply`, `judged`, `status` in order → `GET /api/games/{id}` equals the
+SSE-built state.
 
-### T2.5 Games list, New game dialog, banners
-Games table + filters, dialog with live `/api/estimate`, banners (retry/error/budget), no-key and empty states.
-**Accept:** every row of the `UI.md` §7 state table has a Playwright test.
+### T2.3 Viewer
+Match `docs/mockups/simple.html` first (board, transport, eval bar, tappable eval graph, plain
+one-line status, stats), then the denser parts of `UI.md` §5–§6 (move list, decision panel).
+Build **replay first**, then **live attach**. **No generated commentary** (it costs money);
+text beside a move comes from fixed templates over Judge numbers only.
+**Accept (Playwright, mock):** load game; `→` ×5 advances 5 plies; `Home`/`End`; space autoplays and
+stops at the end; clicking the graph seeks; live game follows new plies and stops following after `←`.
+Works at 400 px width.
 
-### T2.6 Real run
-With the real key: a 60-ply game vs `uci1500` (uncalibrated ladder allowed) watched live in the browser; ledger,
-estimate and actual cost agree within the estimator's stated conservatism; update `SPIKE.md`.
+### T2.4 Games list and New game dialog
+Table + filters; dialog with live estimate and cap; banners for retry/error/budget; no-key and
+empty states. **Accept:** each row of the `UI.md` §7 state table has a test.
 
-## 4. Milestone 3 — Ladder and Series (the headline)
+### T2.5 OpenRouter client + budget
+`DecisionsProvider` using `fetch`: catalog (public, 1 h cache), request build, retry/backoff/
+limiter/cache per `PROMPTS.md` §9 (per-slug concurrency 2, ≤ 4 req/s, 429 halves concurrency for
+60 s, `Retry-After`, ±20 % jitter), every HTTP call → `attempts` row. Budget estimator
+(`PROMPTS.md` §10), `check(cap, spent, estNext)`, ledger. `GET /api/v1/key` probe, tolerate failure.
+**Accept:** fake-`fetch` tests for success, 429→200, 502×3→error, invalid JSON, timeout, cache hit
+(no second call), concurrency ≤ 2; cap boundary (`spent + est == cap` allowed, `>` not).
 
-### T3.1 Ladder definitions (`internal/ladder`)
-Level recipes (`METRICS.md` B2), `default_ladder.json` (nominal Elos, `calibrated:false`), loader for
-`data/ladder/ladder-vN.json`, `Resolve(id) engine.Opponent`. **Accept:** all 12 levels construct and play a legal move
-from the start position; ε-levels reproducible per seed.
+### T2.6 First real game (**go/no-go**)
+One game, `typesafe/jev-1.14`, `clean` arm, vs `uci1500` (or an ε level if too strong), watched live
+in the viewer. Expected ≈ $0.003–0.006. Record cost, latency, how it played, and whether the
+estimate matched. **Stop here and ask Autumn whether to continue to Series.**
+
+### T2.7 M1 experiments (≤ $0.05 total)
+On 20 oracle positions: `slim` vs `full` picks and tokens; SAN history 16 vs none; `session_id`
+on/off. Record in `SPIKE.md`.
+
+## 5. M3 — Ladder and Series (the headline)
+
+### T3.1 Ladder definitions
+Level recipes (`METRICS.md` B2), `default_ladder.json` (nominal, `calibrated:false`), loader for
+`data/ladder/ladder-vN.json`, `resolve(id) → Opponent`. **Accept:** all levels play a legal move from
+the start; ε-levels reproducible per seed.
 
 ### T3.2 Calibration job
-`chessdecide ladder calibrate` and `POST /api/ladder/calibrate`: schedule games (`METRICS.md` B2), run on a CPU
-worker pool (4), persist `ladder_games`, fit Elo (maximise quasi-likelihood with `uci1320` anchored at 1320; use the
-same grid routine, treating each level as a free parameter via coordinate ascent until max change < 0.5 Elo),
-write `ladder-vN.json`, print the nominal-vs-measured table and warnings. Resumable (skips finished pairs).
-**Accept:** on a synthetic set of results generated from known Elos the fit recovers them within 25; a real run
-completes (record wall-clock in `CHANGELOG`); a SPIKE note records how far measured Elo deviates from nominal.
+`chessdecide ladder calibrate`: schedule games (`METRICS.md` B2), run on a CPU worker pool (4),
+persist `ladder_games`, fit Elo (quasi-likelihood, `uci1320` anchored at 1320, coordinate ascent
+until max change < 0.5), write `ladder-vN.json`, print nominal-vs-measured. Resumable.
+**Accept:** synthetic results from known Elos are recovered within 25; a real run completes (record
+wall-clock).
 
-### T3.3 Elo posterior (`internal/series/elo.go`)
-Implement `METRICS.md` B3 literally. **Accept:** reproduces the worked-example table (751/220–1150,
-681/368–949, 733/518–933, prior 1233/196–2381) to ±1; property tests: more games never widen the interval on
-consistent data; 0–5 and 5–0 blocks give finite estimates.
+### T3.3 Elo posterior (`packages/core/elo`)
+Implement `METRICS.md` B3 literally. **Accept:** reproduces the worked-example table
+(751/220–1150, 681/368–949, 733/518–933, prior 1233/196–2381) to ±1; more games never widen the
+interval on consistent data; 0–5 and 5–0 blocks give finite estimates.
 
-### T3.4 Series scheduler (`internal/series`)
-Create/validate configs; block loop (`METRICS.md` B4): choose the level, generate games (colour alternation,
-paired openings from `seed`), run ≤ 2 in parallel through the orchestrator, recompute the posterior after each
-game, publish `elo`; stop rules (Quick 25, Standard 50, completion, budget, 3 consecutive aborted games);
-restart recovery (in-flight games `paused`; the scheduler resumes the block); `PATCH` extend/raise-cap;
-immutability once finished; opening generator `random4` (4 random legal plies, accept only if depth-14 eval within
-±100 cp, else resample with the next sub-seed).
-**Accept (mock, fast engine):** a Quick series completes with exactly 25 finished games; Standard 50;
-"completion" stops at the target or 200 games; a budget stop mid-block leaves a resumable series and no game is
-double-counted; aborted games are excluded from the posterior; restart mid-series resumes correctly;
-deterministic given `seed` (same sequence of levels, colours, openings).
+### T3.4 Series scheduler
+Block loop (`METRICS.md` B4): choose level, generate games (colour alternation, paired openings from
+`seed`), ≤ 2 in parallel, recompute the posterior after each game, publish `elo`; stop rules (Quick 25,
+Standard 50, completion, budget, 3 consecutive aborted games); restart recovery; immutability once
+finished; `random4` opening generator (eval within ±100 cp at depth 14, else resample).
+**Accept (mock, fast engine):** Quick = exactly 25 finished games, Standard 50; completion stops at
+the target or 200; budget stop leaves a resumable series with no double-counting; aborted games are
+excluded; deterministic given `seed`.
 
-### T3.5 Series API + SSE
-`API.md` §3.3–§3.5 endpoints, events, estimate (`typical` + `worst_case`), leaderboard with `separated_from`.
-**Accept:** `httptest` end-to-end with mock; `GET /api/series/{id}` equals the SSE-built state.
+### T3.5 Series API + UI
+`API.md` §3.3–§3.5; new-series dialog, Series list, Series detail (Elo chart, blocks, games table,
+mini boards). **Accept:** Playwright on the mock: Quick series updates the Elo card as games finish;
+budget stop → raise cap → continues; overlapping arms show "not separable yet".
 
-### T3.6 Series UI
-New-series dialog, Series list (ladder axis + leaderboard), Series detail (cards, Elo chart, blocks, live mini boards,
-games table). Mini boards subscribe to the game SSE of the 2 running games; clicking opens the Viewer.
-**Accept:** Playwright against the mock server: start a Quick series → Elo card updates as games finish →
-finished state; budget stop → raise cap → continues; overlapping arms show "not separable yet".
+### T3.6 First real series
+One Quick series, `jev-1.14 · clean` (≈ $0.10–0.15). Record Elo, interval, cost, wall-clock in `SPIKE.md`.
 
-### T3.7 First real series
-Run one Quick series for `jev-1.14 · clean` with the real key (ladder v1 calibrated). Expected spend ≈ $0.10–0.15.
-Record the Elo, interval, cost and wall-clock in `SPIKE.md`; sanity-check against the 10-game pilot guess.
+## 6. M4 — Publish and leaderboard
 
-## 5. Milestone 4 — Leaderboard and polish
+T4.1 leaderboard computation (`separated_from`, `P(A>B)` by grid convolution). T4.2 `chessdecide publish`:
+copy finished series, games, plies, ladder into remote D1 via the D1 HTTP API or `wrangler d1 execute`,
+idempotent by id, **excluding** raw request/response blobs, keys and settings. T4.3 read-only deployed
+build (`CHESSDECIDE_MODE=public`): routes load from D1, control endpoints absent. T4.4 exports
+(JSON/CSV/PGN). **Accept:** publish twice → no duplicates; public site renders a published series and
+replays a game with no local server; exports re-import and reproduce the Elo to ±0.5.
 
-T4.1 leaderboard computation (`separated_from`, overlap, `P(A>B)` from grid convolution); T4.2 exports (JSON/CSV)
-and PGN bundle; T4.3 "Extend to completion" flow; T4.4 cross-series filters (ladder version); T4.5 README update with
-screenshots; T4.6 a `make demo` target that starts the server in mock mode with a pre-baked series so the UI can be
-shown without a key. **Accept:** exports re-import into a notebook and reproduce the displayed Elo to ±0.5.
+## 7. M5 — Image arm (optional)
 
-## 6. Later (outline only — do not build in v1)
+Board renderer (SVG from position, cburnett pieces, coordinates) → PNG; request builder per
+`PROMPTS.md` §12 using the shape found in S2; `image` arm in the New game/series dialogs; leaderboard
+labels it separately. **Accept:** renderer output is byte-stable for a fixed position (golden PNG hash);
+request fixture byte-exact; one paid game with the image arm completes and is recorded.
 
-M5: model-vs-model matches (`METRICS.md` B8), position suite + ablations (`PROMPTS.md` ablation arms), calibration
-curves, Elo-vs-cost scatter, optional position lab. M6: text arm (`TEXT_ARM.md`).
+## 8. M6 — Live runs on Cloudflare (phase 2)
 
-## 7. Known gotchas (from the spikes)
+`apps/live` Worker + `RunDO` using `stepGame` per alarm; `HttpEngine` adapter + a small Stockfish
+HTTP service (container or server); secrets as Worker secrets; Cloudflare Access on control routes;
+viewers attach over SSE. **Accept:** a mock game runs entirely in `wrangler dev` via alarms; the same
+game state and ply rows match the local runner for a fixed seed.
 
-- `liquid/d1-ultra` returned 429 on back-to-back calls; the limiter and backoff are mandatory, not optional.
-- Pick is stable across repeats but probabilities drift ≈ 0.02: never compare probabilities exactly; keep a fixed
-  option order within a game ply.
-- `confidence ≈ P(pick)`; don't present them as independent signals.
-- Jev's output tokens grow with option count but are free; only `usage.cost` counts.
-- Jev slows above ~32 KB — we are far below, but log the request byte length on every attempt.
-- A 63-option request is ~15 KB in `full` state; `slim` is smaller. The M0 "63 legal moves" position was synthetic;
-  real games rarely exceed 45.
-- Stockfish `UCI_LimitStrength` minimum is 1320; weaker play comes only from our ε levels.
-- `go movetime` makes ladder games timing-dependent (CPU load changes strength). Run calibration with the machine
-  otherwise idle, keep `Threads=1`, and record `ladder_movetime_ms`; series games reuse the same value.
-- Do not let the judge pool starve the opponent engines: opponents are separate processes with their own budget.
-- SQLite: one writer; batch ply + attempt writes in a transaction; never hold a transaction across a network call.
+## 9. M7 — Scale (phase 3)
+`SchedulerDO`/Workflows fan-out, per-model rate limiters, container pool, remote runner Docker image.
+Outline only until M6 is proven.
 
-## 8. Reporting back
+## 10. M8 — Later (outline only)
+Model-vs-model matches (`METRICS.md` B8), other engines via `NativeUciEngine` config, position suite and
+ablations, calibration curves, text arm (`TEXT_ARM.md`).
 
-At the end of each milestone append to `docs/CHANGELOG.md`: what was built, deviations from the docs (and why),
-measured numbers (oracle seconds, judge plies/s, game wall-clock, spend), and open questions. Ask before changing a
-locked decision in `PLAN.md` §0.
+## 11. Known gotchas (from the spikes)
+
+- `liquid/d1-ultra` returned 429 on back-to-back calls; limiter and backoff are mandatory.
+- Pick is stable across repeats but probabilities drift ≈ 0.02: never compare probabilities exactly;
+  keep a fixed option order within a game ply.
+- `confidence ≈ P(pick)`; do not present them as independent signals.
+- Jev slows above ~32 KB of text **and for any image**; log the request byte length per attempt and
+  expect the image arm to differ for reasons unrelated to chess.
+- Stockfish `UCI_LimitStrength` minimum is 1320; weaker play comes from our ε levels.
+- `go movetime` makes ladder games timing-dependent: calibrate on an otherwise idle machine,
+  `Threads=1`, record `ladder_movetime_ms` and reuse it in series games.
+- Do not let the judge pool starve opponent engines: opponents are separate processes.
+- D1/SQLite: batch ply + attempt writes in one transaction; never hold one across a network call.
+- Workers cap subrequests at 50 per invocation: one `stepGame` per alarm in phase 2.
+
+## 12. Reporting back
+At the end of each milestone append to `docs/CHANGELOG.md`: what was built, deviations from the docs (and
+why), measured numbers (oracle seconds, judge plies/s, game wall-clock, spend), and open questions. Ask
+before changing a locked decision in `PLAN.md` §0.

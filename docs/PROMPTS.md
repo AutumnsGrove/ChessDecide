@@ -2,14 +2,14 @@
 
 This is the experiment. Builders must be pure functions, covered by **golden tests** (a
 fixture position → exact JSON bytes). Any change bumps `PROMPT_VERSION`, which is stored on
-every attempt. `PROMPT_VERSION = 2`.
+every attempt. `PROMPT_VERSION = 3` (v3: `clean` is fully bare; `image` arm added; TypeScript).
 
 ## 1. Inputs
 
 - `fen` — position FEN
 - `history_san` — full SAN history from the game's start (may be empty for suite positions)
 - `legal` — all legal moves, each with canonical `uci`, `san`, and board context
-- `arm` — `{key_format: uci|san, descriptor: plain|annotated, state_variant: slim|full, template}`
+- `arm` — `{interface: text|image, key_format: uci|san, descriptor: plain|annotated, state_variant: slim|full, template}`
 - `order` — `sorted` (default) | `reverse` | `shuffle(seed)`
 
 **Canonical move id = UCI.** Castling is the king move (`e1g1`), promotions carry a lowercase
@@ -18,8 +18,8 @@ piece letter (`e7e8q`). SAN is derived with standard disambiguation and `+`/`#` 
 ## 2. Option order
 
 1. Sort `legal` by UCI string ascending (this is `sorted`).
-2. `reverse` reverses it; `shuffle(seed)` applies `math/rand` `Shuffle` with `rand.New(rand.NewSource(seed))`.
-3. JSON object keys are emitted **in this order**. Order is stored as `order_json` (array of UCI).
+2. `reverse` reverses it; `shuffle(seed)` applies a Fisher–Yates shuffle driven by `mulberry32(seed)` (the reference implementation is in `packages/core/rng.ts`; tests pin its output).
+3. JSON object keys are emitted **in this order** (JavaScript object insertion order; none of the keys are integer-like, so order is preserved; build the body with an ordered array of entries and `Object.fromEntries`). Order is stored as `order_json` (array of UCI).
 
 ## 3. Option key
 
@@ -36,23 +36,26 @@ back to UCI through it. An unknown key is an error `invalid_choice` (retry once,
 Piece names are lowercase in running text; the first word of a description is capitalised.
 Squares are lowercase algebraic.
 
-**`plain`** (no check/mate information):
+**`plain`** (the `clean` arm: **fully bare**, no capture, check or mate information):
 
 | Case | Pattern | Example |
 | --- | --- | --- |
-| Quiet move | `{Piece} {from} to {to}` | `Knight g1 to f3` |
-| Capture | `{Piece} {from} to {to}, captures {piece}` | `Queen h5 to f7, captures pawn` |
-| En passant | `{Pawn} … , captures pawn en passant` | `Pawn e5 to d6, captures pawn en passant` |
-| Castling | `King {from} to {to}, castles {kingside\|queenside}` | `King e1 to g1, castles kingside` |
-| Promotion | append `, promotes to {piece}` | `Pawn e7 to e8, promotes to queen` |
-| Both | capture first, then promotion | `Pawn d7 to c8, captures rook, promotes to queen` |
+| Any non-promotion move | `{Piece} {from} to {to}` | `Knight g1 to f3`, `Queen h5 to f7`, `Pawn e5 to d6` |
+| Castling | `King {from} to {to}` | `King e1 to g1` |
+| Promotion | append `, promotes to {piece}` (needed to tell `e7e8q` from `e7e8n`) | `Pawn e7 to e8, promotes to queen` |
 
-**`annotated`** = `plain` plus a trailing `, check` or `, checkmate` (checkmate replaces
-check). Stalemate and other outcomes are never annotated.
+So a capture, an en passant capture and a quiet move look identical in form. The model must work
+out from the position what each move does.
+
+**`annotated`** (the `hinted` arm) = `plain` plus, in this order: `, captures {piece}` (or
+`, captures pawn en passant`), `, castles {kingside|queenside}`, `, promotes to {piece}`, then a
+trailing `, check` or `, checkmate` (checkmate replaces check). Examples:
+`Queen h5 to f7, captures pawn, checkmate`; `King e1 to g1, castles kingside`;
+`Pawn d7 to c8, captures rook, promotes to queen`. Stalemate and other outcomes are never annotated.
 
 ## 5. State
 
-Serialise with **this exact key order**; `encoding/json` struct field order is sufficient.
+Serialise with **this exact key order** (object literal insertion order).
 
 `slim` (default):
 
@@ -68,12 +71,12 @@ Serialise with **this exact key order**; `encoding/json` struct field order is s
 
 - `history_san` = the last **16** plies. `history_len=full` is an ablation. Empty → `[]`.
 - `hinted` arm additionally includes `"in_check": true|false` after `move_number`
-  (a derived fact; omitted from `clean` to keep it hint-free).
+  (a derived fact; omitted from `clean` and `image` to keep them hint-free).
 
 `full` (ablation) adds `"legal_moves"` after `history_san`:
 
 ```json
-"legal_moves": [{ "uci": "h5f7", "desc": "Queen h5 to f7, captures pawn" }]
+"legal_moves": [{ "uci": "h5f7", "desc": "Queen h5 to f7" }]
 ```
 
 (`hinted` entries also carry `"san"`.) This duplicates the criteria and roughly doubles
@@ -132,7 +135,7 @@ Timeout 60 s per HTTP call.
     "instructions": "Choose the strongest legal chess move for White in this position.",
     "criteria": {
       "c4b5": "Bishop c4 to b5",
-      "h5f7": "Queen h5 to f7, captures pawn",
+      "h5f7": "Queen h5 to f7",
       "h5h4": "Queen h5 to h4"
     }
   } }
@@ -140,7 +143,8 @@ Timeout 60 s per HTTP call.
 ```
 
 The `hinted` arm for the same position uses keys `Bb5`, `Qxf7#`, `Qh4` and the description
-`Queen h5 to f7, captures pawn, checkmate`, with `"in_check": false` in the state.
+`Queen h5 to f7, captures pawn, checkmate`, with `"in_check": false` in the state. In the `clean`
+arm the description is `Queen h5 to f7` (no "captures pawn").
 
 ## 8. Response handling
 
@@ -187,3 +191,20 @@ Store under `internal/providers/testdata/`:
   `castling.fen`, `in_check.fen` with the expected JSON for both default arms
   (`*.clean.json`, `*.hinted.json`) — byte-exact.
 - Recorded Decisions responses from M0 for the response-handling tests (strip keys/ids).
+
+## 12. Image arm (`interface: image`)
+
+A separate arm; never merged with text arms.
+
+- **State.** No FEN and no `history_san`. The position is one rendered board image. The text
+  `state` carries only what the picture cannot: `{"game":"chess","side_to_move":"white","move_number":4}`.
+- **Image.** Server-rendered SVG → PNG, 512×512, standard orientation (White at the bottom),
+  cburnett pieces, rank/file coordinates, last-move highlight **off** (it would hint), no arrows,
+  no check highlight. Deterministic bytes for a fixed position (hash pinned in a test).
+- **Question.** Same `choice` question and the same **bare** `plain` options and UCI keys as `clean`;
+  `instructions` use the `neutral` template with the lead-in `This image shows the current position.`
+- **Request shape.** The Decisions API's image-part format is **unverified**; spike S2
+  (`ARCHITECTURE.md` §9) records the exact body. Until then the builder is a stub that throws.
+- **Caveats.** Jev switches to long-context mode for any image (slower, possibly less accurate), so
+  the arm's rating is a measure of "picture + options", not of chess alone. Input tokens per image
+  are measured in S2 and folded into the estimator.

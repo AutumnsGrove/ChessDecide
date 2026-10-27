@@ -67,7 +67,7 @@ Read settings from the live catalog (`model.reasoning`), do not assume.
 
 ## 5. What to build if revived
 
-`internal/providers/chat/` implementing `MoveProvider` per mode; a catalog-driven reasoning
+`packages/providers/chat/` implementing `MoveProvider` per mode; a catalog-driven reasoning
 resolver; the parser; extra attempt columns; a "Text models" section in the model picker that
 is hidden unless `CHESSDECIDE_TEXT_ARM=1`; Compare gains a "text" cell type. All existing
 metrics apply unchanged, plus `illegal_rate`, `parse_failure_rate`, `no_answer_rate`,
