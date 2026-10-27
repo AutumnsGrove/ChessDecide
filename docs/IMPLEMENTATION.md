@@ -81,7 +81,7 @@ branches on type and model-vs-model (M8) needs no new game code.
 
 ## 2. M0.5 — Spikes (before M1 code that depends on them)
 
-- **S1** (`ARCHITECTURE.md` §9): a Node script that opens local D1 via `getPlatformProxy()`,
+- **S1** — **done, passed** (`SPIKE.md` §8; scripts in `spikes/s1-d1/`). Original brief: a Node script that opens local D1 via `getPlatformProxy()`,
   applies a Drizzle migration, inserts and reads 10,000 ply rows. Pass if < 5 s; else adopt the
   `better-sqlite3` fallback behind the same `Store` interface and record why.
 - **S2**: one paid probe (≤ $0.01): send a board PNG to `typesafe/jev-1.14` and `liquid/d1-ultra`

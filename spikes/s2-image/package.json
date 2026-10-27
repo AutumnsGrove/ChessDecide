@@ -1,0 +1,1 @@
+{"name":"s2","private":true,"type":"module","packageManager":"pnpm@10.28.0","dependencies":{"@resvg/resvg-js":"^2.6.2","chess.js":"^1.4.0","tsx":"^4.23.15","typescript":"^7.0.2"}}

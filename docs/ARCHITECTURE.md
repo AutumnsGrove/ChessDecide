@@ -135,7 +135,7 @@ Consequences:
   by the same files.
 - **Preferred local setup:** the runner and `wrangler dev` both use a local D1 via wrangler's
   `getPlatformProxy()`, so there is one data path. **Fallback:** `better-sqlite3` behind the same
-  Drizzle schema. Spike S1 picks one.
+  Drizzle schema. Spike S1 passed, so the D1 path is the choice.
 - Raw request/response bodies (`request_gz`/`response_gz` in earlier drafts) are stored **locally
   only** and are not published. In phase 2+ they go to R2.
 - D1 rows are limited to 2 MB and 100 columns; per-ply decision JSON stays well below that.
@@ -159,6 +159,6 @@ options** as `clean`, and **no FEN**, so the picture is the only description of 
 
 | # | Question | Cost |
 | --- | --- | --- |
-| S1 | Local D1 through `getPlatformProxy()` from a Node script with Drizzle: does it work and is it fast enough for the runner? Else `better-sqlite3`. | $0 |
+| S1 | **Done, pass** (`SPIKE.md` §8): local D1 via `getPlatformProxy()` + Drizzle works from Node; 10k rows in 6.5 s batched; shared across processes by the `persist` path. | $0 |
 | S2 | How does `/api/alpha/decisions` accept an image (content-part shape, size limits, PNG vs JPEG)? Do Jev/D1 Ultra pick sensibly from a board image? | ≈ $0.01 |
 | S3 | (optional) Does a single-thread WASM Stockfish fit and run in a Worker on the paid plan? | $0 |

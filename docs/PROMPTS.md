@@ -203,8 +203,9 @@ A separate arm; never merged with text arms.
   no check highlight. Deterministic bytes for a fixed position (hash pinned in a test).
 - **Question.** Same `choice` question and the same **bare** `plain` options and UCI keys as `clean`;
   `instructions` use the `neutral` template with the lead-in `This image shows the current position.`
-- **Request shape.** The Decisions API's image-part format is **unverified**; spike S2
-  (`ARCHITECTURE.md` §9) records the exact body. Until then the builder is a stub that throws.
+- **Request shape** (from OpenRouter's Multimodal Decisions docs; live-verified in `SPIKE.md` §9):
+  `state` is an **array**: `[ {game, side_to_move, move_number}, {"type":"image_url","image_url":{"url":"data:image/png;base64,…"}} ]`.
+  Jev needs 256–1,568 px per side; Clef needs the image under ~300 KB. 512×512 PNG ≈ 38 KB satisfies both.
 - **Caveats.** Jev switches to long-context mode for any image (slower, possibly less accurate), so
   the arm's rating is a measure of "picture + options", not of chess alone. Input tokens per image
   are measured in S2 and folded into the estimator.

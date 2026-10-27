@@ -232,3 +232,46 @@ primary decision-vs-text comparison about the interface rather than about test-t
   effectively equal (Re1/h3 CPL 0). Judge on win% loss and decisiveness strata.
 - Provider routing/rate limits will change results; record `provider` and retry.
 - The temp API key used for these spikes must not be committed.
+
+---
+
+## 8. Session 2 spikes (2026-10-27)
+
+### S1 — local D1 + Drizzle from a Node script: **PASS**
+
+`spikes/s1-d1/`. Installed with pnpm (`wrangler 4.154`, `drizzle-orm`, `drizzle-kit`, `tsx`);
+`drizzle-kit generate` produced the migration; a Node script opened local D1 through wrangler's
+`getPlatformProxy({ persist: { path } })`, applied the SQL and used `drizzle-orm/d1`.
+
+- 10,000 ply rows in 1,000 batched statements: **6.5 s**; read of the count: 21 ms.
+- 50 single-row inserts: **0.9 s** (≈ 18 ms each). A 60-ply game writes in about a second.
+- A second Node process opened the same persisted state and read all 10,000 rows (61 ms), so a
+  runner and a local web app can share one D1 by pointing at the same `persist` path.
+- D1 limits bind: ≤ 100 bound parameters per statement (so ~10 rows of 6 columns per `INSERT`);
+  use `db.batch([...])` for groups. Single inserts are fine for plies.
+- **pnpm 10 gotcha:** dependency build scripts are blocked by default (the install printed
+  "Ignored build scripts: esbuild, workerd"). Wrangler still ran, but declare
+  `"pnpm": { "onlyBuiltDependencies": ["esbuild", "workerd", "@resvg/resvg-js"] }` (or
+  `pnpm approve-builds`) in the root `package.json` so installs are reproducible.
+- Decision: **use the local D1 path** (`getPlatformProxy`); keep `better-sqlite3` out unless a
+  later task shows a real problem. Wrangler prints a proxy warning in this sandbox; harmless.
+
+### S2 — image input (partly done)
+
+`spikes/s2-image/`. Findings from OpenRouter's *Multimodal Decisions* page (not yet live-tested):
+
+- Image part goes **inside the `state` array**:
+  `{ "type": "image_url", "image_url": { "url": "data:image/png;base64,…" } }`; `state` may mix
+  strings/objects and image parts.
+- **Jev**: each image 256–1,568 px per side, 78,400–2,458,624 pixels total, PNG/JPEG ≤ 16 MiB;
+  images count as normal input tokens. Below minimum → `400`; above limits → `413`.
+- **Clef / Clef Flash** (Workers AI): estimate ≈ 4 base64 chars per token, `413` past a 65,536
+  token window, so keep each image **< 300 KB**. **Clef reads only roughly the first 2,000 tokens
+  of text in `state` and silently drops the rest** (relevant to the text arm's history/FEN).
+- **Mercury Decide**: a 7 MB JPEG is accepted and billed as ~1,000 input tokens.
+- Image-capable decision models in the catalog today (input `image`): jev-1.13/1.14, liquid d1,
+  d1.1, d1-ultra, cloudflare clef, clef-flash, clef-omni, inception mercury-decide, perplexity
+  pplx-decider(-flash) v1.2, respan span-02, nace drex-max, scaledown classify-1,
+  openai gpt-6-luna-decisions.
+- Renderer built and checked by eye: 512×512 PNG ≈ 38 KB (resvg, cburnett pieces).
+- Live results: see §9 once run.
