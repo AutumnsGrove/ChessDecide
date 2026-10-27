@@ -57,7 +57,7 @@ export function estimateGame(config: GameConfig, catalog: ModelInfo[]): GameEsti
 
 ## 3. Runtime: real players (`runtime.ts`)
 
-Replace the `throw new Error('real model players are added in task T14')` branch with:
+Replace the `throw new Error('real model players are added in task T01')` branch with:
 ```ts
 const catalog = await getCatalog();           // module-level createCatalog(), shared
 const info = (await catalog.list()).find((m) => m.slug === desc.model);
