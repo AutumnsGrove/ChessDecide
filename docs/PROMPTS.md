@@ -185,7 +185,7 @@ in the UI if `est_input_tokens` > 80 % of its context length.
 
 ## 11. Fixtures required (M1)
 
-Store under `internal/providers/testdata/`:
+Store under `packages/core/test/fixtures/prompts/`:
 
 - `mate1.fen`, `quiet_italian.fen`, `startpos.fen`, `promotion.fen`, `enpassant.fen`,
   `castling.fen`, `in_check.fen` with the expected JSON for both default arms
