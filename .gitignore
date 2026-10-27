@@ -1,0 +1,33 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# spike output (do not commit results or keys)
+spikes/out/
+*.key
+
+# data / runs
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# go
+bin/
+dist/
+
+# node / sveltekit
+web/node_modules/
+web/.svelte-kit/
+web/build/
+web/.env
+web/.env.*
+
+# macOS
+.DS_Store
+
+# python
+__pycache__/
+*.pyc
