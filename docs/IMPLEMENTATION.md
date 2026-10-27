@@ -14,10 +14,14 @@ ladder, Series and Elo.
 
 ## 0. Ground rules
 
-**Stack**: TypeScript (strict, ESM), npm or pnpm workspaces, Node 22+ (Bun optional) for the
-runner, `chess.js` for rules, `drizzle-orm` + `drizzle-kit` (SQLite dialect), `vitest` for tests,
+**Stack**: TypeScript (strict, ESM), **pnpm** workspaces (`pnpm-workspace.yaml`, `packageManager` pinned in the root
+`package.json`, `engines` set; Corepack or `pnpm self-update`), Node 22+ as the runtime pnpm
+itself needs (the runner runs through `pnpm exec tsx` / `pnpm run`), `chess.js` for rules, `drizzle-orm` + `drizzle-kit` (SQLite dialect), `vitest` for tests,
 SvelteKit + Svelte 5 + `adapter-cloudflare`, `chessground@9.2.1`, `wrangler`. Stockfish 19 from
 `STOCKFISH_PATH` or `PATH`. **Raw CSS only: no Tailwind, no UI kit, no chart library.**
+**Package manager: pnpm only.** Never write `npm`, `npx`, `yarn` or `bun` in scripts, docs or CI;
+use `pnpm add`, `pnpm exec`, `pnpm dlx`, `pnpm run`, `pnpm -r`, `pnpm --filter`. Wrangler runs as
+`pnpm exec wrangler`.
 
 **Conventions**
 
@@ -36,7 +40,7 @@ SvelteKit + Svelte 5 + `adapter-cloudflare`, `chessground@9.2.1`, `wrangler`. St
   A network test sits behind `LIVE=1` and reads the key from the environment.
 
 **Definition of done (every task)**: code + tests + doc updates + a note in `docs/CHANGELOG.md`;
-the task's acceptance check passes; `npm test`, `npm run typecheck` and (web) `npm run check` pass.
+the task's acceptance check passes; `pnpm test`, `pnpm typecheck` and (web) `pnpm check` pass.
 
 ## 1. Core types (`packages/core/src/types.ts`)
 
@@ -89,7 +93,7 @@ branches on type and model-vs-model (M8) needs no new game code.
 ### T1.0 Bootstrap
 Workspace skeleton per `ARCHITECTURE.md` §3, `vitest`, `tsconfig` strict, `docs/CHANGELOG.md`,
 `docs/QUESTIONS.md`, `.env.example`, `.gitignore` (`data/`, `.wrangler/`, `.env`, `spikes/out/`).
-**Accept:** `npm test` and `npm run typecheck` green on the empty skeleton.
+**Accept:** `pnpm install --frozen-lockfile`, `pnpm test` and `pnpm typecheck` green on the empty skeleton; `pnpm-lock.yaml` committed; a CI/lint check fails if `package-lock.json`, `yarn.lock` or `bun.lockb` appears.
 
 ### T1.1 Chess rules + golden tests (`packages/core/chess`)
 1. Wrap `chess.js`: `parse(fen)`, `legal(pos)` (sorted by UCI ascending), `apply(pos, uci)`, SAN/UCI,
@@ -155,7 +159,7 @@ sequence; PGN export round-trips through python-chess in a golden test.
 ### T2.1 Web scaffold
 `apps/web` SvelteKit (Svelte 5, TS strict, `adapter-cloudflare`), tokens from `UI.md` in `app.css`,
 `chessground` CSS/JS vendored from `docs/mockups/vendor/`, app shell, `types.ts` mirroring `API.md`.
-**Accept:** `npm run check` clean; shell renders; `wrangler dev` serves it.
+**Accept:** `pnpm check` clean; shell renders; `wrangler dev` serves it.
 
 ### T2.2 Local control API + SSE
 Endpoints from `API.md` §3.1–§3.2 as SvelteKit `+server.ts` routes, enabled only when

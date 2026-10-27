@@ -40,7 +40,7 @@ for quick general decisions copes in an environment it was never trained for.
 
 ## Scope (locked)
 
-- **Stack:** TypeScript, SvelteKit (raw CSS, no Tailwind), Drizzle over SQLite/D1, `chess.js`,
+- **Stack:** TypeScript with **pnpm** (only), SvelteKit (raw CSS, no Tailwind), Drizzle over SQLite/D1, `chess.js`,
   `chessground`, Stockfish behind an `Engine` adapter (other UCI engines pluggable).
 - **Phases:** (1) run locally, publish results to a read-only Cloudflare site; (2) run live on
   Cloudflare (Durable Objects + Stockfish container/server); (3) scale to many models and hundreds
@@ -68,7 +68,7 @@ data/                local DB, ladder files, exports (gitignored)
 ## Before building
 
 1. `OPENROUTER_API_KEY` in the environment (never committed).
-2. Stockfish installed (`brew install stockfish`, or the binary on `PATH`).
+2. `pnpm` installed (Node is only its runtime). Stockfish installed (`brew install stockfish`, or the binary on `PATH`).
 3. Read `docs/IMPLEMENTATION.md` and follow its task order.
 
 ## Non-goals (v1)

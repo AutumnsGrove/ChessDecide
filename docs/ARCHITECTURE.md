@@ -2,7 +2,8 @@
 
 Supersedes the Go architecture in earlier drafts. Decided 2026-10-27 with Autumn:
 
-- **TypeScript everywhere**, SvelteKit frontend, raw CSS (**no Tailwind**).
+- **TypeScript everywhere**, SvelteKit frontend, raw CSS (**no Tailwind**), **pnpm for everything**
+  (no npm, no yarn, no Bun).
 - **SQLite via Drizzle**, so the same schema runs locally and on **Cloudflare D1**.
 - **Run locally first, publish results**, then run live on Cloudflare, then scale out. Moving
   between phases means swapping adapters, not rewriting the core.
@@ -12,7 +13,7 @@ Supersedes the Go architecture in earlier drafts. Decided 2026-10-27 with Autumn
 
 1. **The core is pure.** Chess rules, prompt builders, response parsers, Elo math, ladder
    recipes and the game step function use no Node-only APIs and no I/O. They run unchanged in
-   Node, Bun, Workers and the browser.
+   Node, Workers and the browser.
 2. **I/O sits behind ports** (TypeScript interfaces). Each runtime supplies adapters.
 3. **A game advances one step at a time.** `stepGame(state, ports) → state'` plays exactly one
    ply. A local loop calls it repeatedly; a Durable Object calls it once per alarm. This is
@@ -48,7 +49,7 @@ named `{ engineId, level }` in game rows so results stay comparable per engine.
 ## 3. Repository layout
 
 ```
-package.json                  npm/pnpm workspaces
+package.json  pnpm-workspace.yaml   pnpm workspaces (pnpm only)
 packages/core/                pure TS: chess (chess.js wrapper), descriptors, prompts, parsers,
                               elo, ladder recipes, oracle math, stepGame, mock heuristics
 packages/engine/              Engine port; adapters: native-uci, http (wasm: optional spike)

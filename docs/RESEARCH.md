@@ -153,7 +153,7 @@ in v1 calls `/api/v1/chat/completions`.
   `UCINotation{}.Encode`, `pos.Turn()`, `pos.Board()`, `game.PushMove(san, nil)`.
   Move tags: `Capture`, `EnPassant`, `Check`, `KingSideCastle`, `QueenSideCastle`.
   No explicit mate tag → use `game.Outcome()` / `pos.Status()` to add `#`.
-- Node 26 / Bun installed. SvelteKit + Vite (now also hosting the API routes).
+- Node 26 / Bun installed (Bun is not used; the project uses pnpm). SvelteKit + Vite (now also hosting the API routes).
 - Board: `chessground@9.2.1` (framework-agnostic lichess board) + `chessground.base.css` and a
   theme. Frontend does not need chess rules (the server/core owns the game), only FEN/highlights/shapes.
 

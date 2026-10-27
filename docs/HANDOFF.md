@@ -83,7 +83,7 @@ Artifact link for the simple mockup (private to Autumn): https://claude.ai/artif
 
 ## 6. Facts and caveats
 
-- Environment (her machine): Stockfish 19 (Homebrew), Node 26/Bun, `uv`. No browser automation in the
+- Environment (her machine): Stockfish 19 (Homebrew), Node 26 (needed by pnpm), `uv`. Package manager: **pnpm only** (Autumn's rule; no npm, yarn or Bun). No browser automation in the
   CLI sandbox; Chromium + Playwright exist in the cloud sandbox and were used to screenshot the mockup.
 - Chessground 9.2.1 is vendored in `docs/mockups/vendor/` (min.js patched to `window.Chessground`;
   GPL-3 licence included). `simple.html` inlines it plus the piece/board images, so it works as a

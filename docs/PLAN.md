@@ -30,7 +30,7 @@ go/no-go after one real game; no generated commentary (costs money); raw CSS, no
 
 ### Stack, hosting and build order (v4)
 
-1. **TypeScript** monorepo, **SvelteKit** (Svelte 5) frontend, **raw CSS** (no Tailwind), `chessground`
+1. **TypeScript** monorepo managed with **pnpm only** (no npm/yarn/Bun), **SvelteKit** (Svelte 5) frontend, **raw CSS** (no Tailwind), `chessground`
    board, `chess.js` for rules, **Drizzle** over SQLite, targeting **Cloudflare** (D1, Workers,
    Durable Objects). Details: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 2. **Three phases, one core.** (1) run locally with native Stockfish and **publish results** to a
