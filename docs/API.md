@@ -1,7 +1,8 @@
 # ChessDecide — API, types and schema
 
-HTTP surface of the SvelteKit app (`apps/web`, `+server.ts` routes) and, in phase 2, of the
-`apps/live` Worker. Locally it listens on `127.0.0.1:5173` (dev) / `:8080` (preview). JSON
+HTTP surface implemented once in `packages/api` (Hono, `createApi`) and hosted by (a) the Node
+runner daemon on `127.0.0.1:8787` (local mode; `vite dev` proxies `/api` to it), (b) a SvelteKit
+route in the deployed read-only site, and (c) in phase 2 the `apps/live` Worker. JSON
 everywhere, UTF-8. Times are ISO 8601 UTC strings; durations are integer milliseconds; money is
 USD as a JSON number (6 decimals shown in UI). Move ids are **UCI**; SAN is display-only. Field
 names are `snake_case` in JSON; the TypeScript types below live in `packages/core/src/types.ts`
@@ -74,13 +75,15 @@ export interface Decision {
   cache_hit: boolean; retries: number; attempt_id: number;
 }
 
-export interface Judge {     // filled asynchronously after the ply
+export interface PositionEval {   // every ply, White POV, position AFTER the ply
+  depth: number; white_eval_cp: number;        // clamped [-1000, 1000]; forced mate = +-1000
+  wdl: [number, number, number];               // [W, D, L] per mille
+}
+export interface Judge {         // MODEL plies only (full per-move oracle); engine plies have judge = null
   depth: number; best_uci: string; best_san: string; best_cp: number; played_cp: number;
   cpl: number; win_loss: number;                    // pp
   class: 'ok' | 'inaccuracy' | 'mistake' | 'blunder';
-  white_eval_cp: number;                            // position AFTER the ply, White POV, clamped
-  wdl: [number, number, number];                    // after the ply, White POV, per mille
-  acceptable: boolean; p_acceptable?: number; e_win_loss?: number; // model plies only
+  acceptable: boolean; p_acceptable?: number; e_win_loss?: number;
 }
 
 export interface Ply {
@@ -91,6 +94,8 @@ export interface Ply {
   decision?: Decision;       // model plies
   engine_info?: { engine_id: string; level_id: string; elo: number; time_ms: number;
                   random: boolean /* ε-random replaced the engine move */ };
+  forced?: boolean;          // exactly one legal move: no model call
+  eval?: PositionEval | null;
   judge?: Judge | null;      // null until judged
   created_at: string;
 }
@@ -222,7 +227,7 @@ Terminal: `finished`, `aborted`. `stopped_budget` and `paused` are resumable.
 | `thinking` | `{ply, side, by, model?, arm?, attempt, started_at}` |
 | `retry` | `{ply, attempt, max, reason: "429"|"5xx"|"network"|"invalid_choice", wait_ms}` |
 | `ply` | `Ply` (judge may be null) |
-| `judged` | `{ply, judge: Judge, decision_options?: OptionProb[]}` — fills oracle numbers |
+| `judged` | `{ply, eval: PositionEval, judge: Judge \| null}` — fills oracle numbers |
 | `status` | `{status, status_reason}` |
 | `spend` | `{game_usd, session_usd, cap_usd}` |
 | `error` | `{code, message, ply?}` |

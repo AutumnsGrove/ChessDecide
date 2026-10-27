@@ -1,0 +1,10 @@
+{
+  "name": "@chessdecide/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc -p tsconfig.json", "test": "vitest run --passWithNoTests" },
+  "dependencies": { "@chessdecide/core": "workspace:*", "@chessdecide/db": "workspace:*", "hono": "4.13.14" },
+  "devDependencies": { "wrangler": "4.154.0", "@cloudflare/workers-types": "5.20261027.1", "drizzle-orm": "0.45.4" }
+}

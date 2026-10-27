@@ -23,6 +23,15 @@ rewrote the docs. Nothing has been run against the live API since M0.
 
 Artifact link for the simple mockup (private to Autumn): https://claude.ai/artifact/VLGNvGEUkvB8p8mf7D3eww
 
+## 1b. Curriculum for the implementing model (added later in session 2)
+
+`docs/build/` is the brief for DeepSeek (or any smaller model): `README.md` (workflow), `DECISIONS.md` (every decision pre-made, versions pinned, gotchas),
+`CONTRACTS.md`, `tasks/T00–T12`, `fixtures/`, and `reference/` = a **working, tested foundation** (80+ tests; verified from a fresh copy with
+`pnpm install --frozen-lockfile && pnpm db:migrate && pnpm verify`). T00 installs it; T01–T03 add real models/web/viewer; **T04 and T08 are STOP-and-ask checkpoints**
+(first real game, first real series). Key findings while building it: SvelteKit 3 needs TypeScript 6.0.3 (7.x breaks it), `$lib` is gone (`#lib`), `getPlatformProxy`
+state path vs wrangler CLI (`…/v3`), Workers cannot spawn Stockfish so games run in a Node **daemon** with a Hono API (the same API is mounted read-only in the deployed site),
+and the FK order game-before-ply. Publishing = generate idempotent SQL and run it with `wrangler d1 execute --remote` (no tokens in the repo).
+
 ## 2. What changed this session (v3 → v4)
 
 - **Why chess works for her:** she liked the Pokémon run because the model was dropped into an

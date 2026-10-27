@@ -1,5 +1,9 @@
 # ChessDecide — Implementation guide
 
+> **The build is now driven by [`build/README.md`](build/README.md)** (decisions, contracts, tested reference code and task files T00–T12 for the implementing model).
+> This file remains as the long-form spec the curriculum was derived from. Where they differ (e.g. the daemon + Hono API instead of SvelteKit control routes, `stepGame` judging synchronously),
+> the curriculum and the reference code win.
+
 **Audience: the implementing model.** Read in this order: `PLAN.md` → `ARCHITECTURE.md` →
 `METRICS.md` → `PROMPTS.md` → `API.md` → `UI.md` → this file, then open
 `docs/mockups/simple.html` (the target look and flow) in a browser. `mockups/index.html` holds

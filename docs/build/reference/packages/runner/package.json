@@ -1,0 +1,30 @@
+{
+  "name": "@chessdecide/runner",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "chessdecide": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "cli": "tsx src/cli.ts",
+    "dev": "tsx src/cli.ts serve"
+  },
+  "dependencies": {
+    "@chessdecide/core": "workspace:*",
+    "@chessdecide/db": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "wrangler": "4.154.0",
+    "@chessdecide/engine": "workspace:*",
+    "@chessdecide/providers": "workspace:*",
+    "ulid": "3.0.2",
+    "tsx": "4.23.15",
+    "@chessdecide/api": "workspace:*",
+    "@hono/node-server": "2.1.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261027.1"
+  }
+}

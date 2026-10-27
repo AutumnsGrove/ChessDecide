@@ -56,7 +56,8 @@ packages/engine/              Engine port; adapters: native-uci, http (wasm: opt
 packages/providers/           DecisionsProvider (OpenRouter client, retry, limiter, cache), MockProvider
 packages/db/                  Drizzle schema + migrations (SQLite dialect), Store implementation
 packages/runner/              Node CLI: game, series, ladder calibrate, probe, publish
-apps/web/                     SvelteKit (adapter-cloudflare); raw CSS; chessground; routes + SSE
+packages/api/                 Hono app `createApi({db, mode, control?, hub?})`: one API, two hosts
+apps/web/                     SvelteKit (adapter-cloudflare); raw CSS; chessground; Viewer
 apps/live/                    (phase 2) Worker + Durable Objects that host runs
 docs/  data/  tools/          docs, local data (gitignored), python golden-fixture helpers
 ```
@@ -66,7 +67,8 @@ docs/  data/  tools/          docs, local data (gitignored), python golden-fixtu
 ### Phase 1 — Local runs, published results (**v1**)
 
 ```
- you ──► runner CLI / local web (control mode) ──► core stepGame
+ you ──► web UI (vite dev, proxies /api) ──► runner daemon (Node, Hono API + SSE) ──► core stepGame
+ you ──► runner CLI (game, series, ladder, publish) ──────────────────────────────────┘
                                    │                 ├─ Engine: native Stockfish (opponent + judge)
                                    │                 └─ MoveProvider: OpenRouter Decisions
                                    ▼
@@ -78,8 +80,15 @@ docs/  data/  tools/          docs, local data (gitignored), python golden-fixtu
   sends the API key, raw request/response logs or anything not needed to replay a game.
 - The deployed site is **read-only**: leaderboard, series pages, game viewer. It runs on the
   free tier (reads only, no engine, no model calls).
-- Local web = the same SvelteKit app in *control mode* (new game/series, pause, budget). Control
-  endpoints are compiled in only when `CHESSDECIDE_MODE=local`.
+- **Why a daemon:** SvelteKit/Wrangler run inside `workerd`, which cannot spawn Stockfish. So
+  games run in a **Node runner daemon** (`chessdecide serve`, `127.0.0.1:8787`) that owns the
+  engine processes and the game loops, and serves the API with **Hono**. `vite dev` proxies
+  `/api` to it. The same `createApi()` (`packages/api`) is mounted by the deployed SvelteKit app
+  as a **read-only** route (`src/routes/api/[...path]/+server.ts`, no `ControlPlane`), so the UI
+  code talks to one API shape in every mode. Live events: SSE from the daemon's in-memory hub;
+  a reconnecting client just gets a fresh `snapshot`.
+- Verified in `docs/build/reference/`: runner → local D1 (`data/d1/v3`) ← web dev server, and the
+  public route serving the same rows.
 
 ### Phase 2 — Live runs on Cloudflare
 
@@ -144,8 +153,11 @@ Consequences:
 
 SvelteKit (Svelte 5 runes, TypeScript strict), `adapter-cloudflare`, `chessground@9.2.1`,
 **plain CSS custom properties** (tokens in `UI.md`), hand-written SVG charts. No Tailwind, no UI
-kit, no chart library. In the deployed read-only build the data comes from D1 through SvelteKit
-`+page.server.ts` loaders; in local mode it also exposes the control and SSE endpoints.
+kit, no chart library. The UI is a client-rendered SPA (`ssr = false`) over `/api`. In the deployed
+read-only build `/api` is the Hono app mounted in a SvelteKit route reading D1; in local dev it is
+the runner daemon. SvelteKit 3 notes: no `svelte.config.js` (pass options to `sveltekit()` in
+`vite.config.ts`), `$lib` is replaced by `#lib/*` (`package.json` `imports`), bindings come from
+`import { env } from 'cloudflare:workers'`, and TypeScript must be **6.0.3** (7.x breaks Kit).
 
 ## 8. Image arm (optional)
 

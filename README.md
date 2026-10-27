@@ -20,7 +20,8 @@ move by move. Costs are tiny and capped (a game ≈ half a cent, a 25-game serie
 | [`docs/PROMPTS.md`](docs/PROMPTS.md) | Verbatim request builders: clean / hinted / image arms, parsing, retries |
 | [`docs/API.md`](docs/API.md) | HTTP + SSE contract, TypeScript types, SQLite/D1 schema |
 | [`docs/UI.md`](docs/UI.md) | Design tokens, screens, components, playback behaviour, states |
-| [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) | **Build guide** for the implementing model: ordered tasks + acceptance checks |
+| [`docs/build/README.md`](docs/build/README.md) | **Build curriculum** for the implementing model: decisions, contracts, tested reference code, tasks T00–T12 |
+| [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) | Long-form spec the curriculum derives from |
 | [`docs/SPIKE.md`](docs/SPIKE.md), [`docs/RESEARCH.md`](docs/RESEARCH.md) | M0 measurements; API/toolchain facts |
 | [`docs/TEXT_ARM.md`](docs/TEXT_ARM.md) | Deferred: text-model comparison (not in v1) |
 
