@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series · ChessDecide (mockup)</title>
+<link rel="stylesheet" href="app.css">
+<style>
+  .axisbox svg { width: 100%; display: block; }
+  tr.sr { cursor: pointer; }
+  .sep { font-size: 12px; }
+  .sep.yes { color: var(--green-hi); } .sep.no { color: var(--orange); }
+  .uncal { background: rgba(216,176,74,.1); border: 1px solid rgba(216,176,74,.35); color: #e8d29a; border-radius: 4px; padding: 7px 12px; font-size: 12.5px; margin-bottom: 14px; }
+  .hint { display:flex; gap:10px; align-items:center; padding:10px 14px; border-top:1px solid var(--line); font-size:13px; }
+</style>
+</head>
+<body>
+<main class="page" style="max-width:1300px">
+  <div class="uncal"><b>Illustrative numbers.</b> Every rating below is invented to show the layout (ladder v1 placeholder values, simulated games). Nothing here says one model or arm is stronger.</div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h3><span>Where the arms sit on the ladder</span><span class="dim" style="text-transform:none;letter-spacing:0">bars = 95% credible interval · white tick = estimate</span></h3>
+    <div class="card-b axisbox"><svg id="ax" viewBox="0 0 1200 250" preserveAspectRatio="xMidYMid meet"></svg></div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h3><span>Leaderboard · ladder v1</span><span class="dim" style="text-transform:none;letter-spacing:0">arms with overlapping intervals are not ranked against each other</span></h3>
+    <table class="t lb" id="lb"></table>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="card">
+    <h3><span>All series</span><button class="btn small primary" onclick="openNewSeries()">New series</button></h3>
+    <table class="t lb" id="all"></table>
+  </div>
+</main>
+<div class="demobar"><b>Mockup</b><span class="dim">Click a row to open the series dashboard. Reference rows (random mover, ladder levels) come from the calibrated ladder.</span><span style="flex:1"></span><span class="sample-tag" style="margin:0">ILLUSTRATIVE DATA</span></div>
+<script src="common.js"></script>
+<script src="newgame.js"></script>
+<script>
+(function () {
+  const { LADDER, fmtUSD } = CD, $ = (id) => document.getElementById(id);
+  CD.header('Series');
+  const arms = [
+    { id: 'jev-hinted', n: 'jev-1.14 · hinted', c: '#8cc4f5', e: 1246, lo: 1118, hi: 1374, g: 25, wdl: [10, 3, 12], acpl: 58, acc: 44, bl: 8, cost: 0.118 },
+    { id: 'jev-clean', n: 'jev-1.14 · clean', c: '#3692e7', e: 1082, lo: 951, hi: 1213, g: 25, wdl: [8, 2, 15], acpl: 66, acc: 38, bl: 10, cost: 0.104 },
+    { id: 'd1-hinted', n: 'd1-ultra · hinted', c: '#f2cf6b', e: 988, lo: 859, hi: 1117, g: 25, wdl: [6, 3, 16], acpl: 71, acc: 35, bl: 12, cost: 0.092 },
+    { id: 'd1-clean', n: 'd1-ultra · clean', c: '#e69d00', e: 905, lo: 770, hi: 1040, g: 25, wdl: [5, 2, 18], acpl: 79, acc: 31, bl: 14, cost: 0.089 },
+  ];
+  const overlap = (a, b) => a.lo <= b.hi && b.lo <= a.hi;
+
+  /* ladder axis with CI bars */
+  const W = 1200, x = (e) => 40 + (e / 3000) * (W - 80);
+  let s = '';
+  LADDER.forEach((l) => { s += `<line x1="${x(l.elo)}" x2="${x(l.elo)}" y1="14" y2="196" stroke="#2f2c28"/><text x="${x(l.elo)}" y="214" fill="#8a8681" font-size="11" text-anchor="middle" font-family="monospace">${l.elo}</text><text x="${x(l.elo)}" y="230" fill="#625f5a" font-size="9.5" text-anchor="middle">${l.id.replace('uci', 'SF ').replace('eps', 'ε.').replace('random', 'random')}</text>`; });
+  arms.forEach((a, i) => { const y = 34 + i * 40; s += `<rect x="${x(a.lo)}" y="${y}" width="${x(a.hi) - x(a.lo)}" height="22" rx="3" fill="${a.c}" opacity=".35"/><rect x="${x(a.lo)}" y="${y}" width="${x(a.hi) - x(a.lo)}" height="22" rx="3" fill="none" stroke="${a.c}"/><line x1="${x(a.e)}" x2="${x(a.e)}" y1="${y - 3}" y2="${y + 25}" stroke="#fff" stroke-width="3"/><text x="${x(a.hi) + 10}" y="${y + 16}" fill="#d0d0d0" font-size="12.5">${a.n} <tspan fill="#fff" font-weight="700" font-family="monospace">${a.e}</tspan></text>`; });
+  $('ax').innerHTML = s;
+
+  $('lb').innerHTML = `<thead><tr><th class="arm">Arm</th><th>Elo</th><th>95% interval</th><th>Games</th><th>W-D-L</th><th>Score</th><th>ACPL</th><th>Acceptable</th><th>Blunders</th><th>Cost</th><th class="arm">Separated from</th></tr></thead><tbody>` +
+    arms.map((a) => { const sep = arms.filter((b) => b !== a && !overlap(a, b)).map((b) => b.n.replace('-1.14', '').replace('-ultra', '')); const sc = Math.round(((a.wdl[0] + a.wdl[1] / 2) / a.g) * 100);
+      return `<tr class="sr" onclick="location.href='series.html?demo=finished'"><td class="arm" style="text-align:left"><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${a.c};margin-right:7px"></i><span class="hi">${a.n}</span></td><td class="hi" style="font-weight:800;font-size:15px">${a.e}</td><td>${a.lo} – ${a.hi}</td><td>${a.g}</td><td>${a.wdl.join('-')}</td><td>${sc}%</td><td>${a.acpl}</td><td>${a.acc}%</td><td>${a.bl}%</td><td>${fmtUSD(a.cost, 3)}</td><td class="arm sep ${sep.length ? 'yes' : 'no'}" style="text-align:left">${sep.length ? '✓ ' + sep.join(', ') : '— overlaps all'}</td></tr>`; }).join('') +
+    `<tr><td class="arm dim" style="text-align:left">reference · random mover</td><td class="dim">250</td><td class="dim">—</td><td class="dim" colspan="8">ladder floor; a model must beat this to rate at all</td></tr></tbody>`;
+  const pairs = []; arms.forEach((a, i) => arms.slice(i + 1).forEach((b) => overlap(a, b) && pairs.push([a, b])));
+  $('hint').innerHTML = `<span class="dim">${pairs.length} pairs of arms overlap, so their order is not established.</span> <b class="hi">${pairs[0][0].n}</b> vs <b class="hi">${pairs[0][1].n}</b> overlap by ${Math.min(pairs[0][0].hi, pairs[0][1].hi) - Math.max(pairs[0][0].lo, pairs[0][1].lo)} Elo.<span style="flex:1"></span><button class="btn small">Extend both to completion</button><button class="btn small ghost" onclick="location.href='series.html?demo=completion'">See how that looks</button>`;
+
+  const all = [
+    ['jev-1.14 · clean', 'Standard 50', 'finished', 'Today 17:20', '1,095 ± 94', 50, 0.205],
+    ['jev-1.14 · hinted', 'Quick 25', 'finished', 'Today 16:51', '1,246 ± 128', 25, 0.118],
+    ['d1-ultra · clean', 'Quick 25', 'finished', 'Today 16:30', '905 ± 135', 25, 0.089],
+    ['d1-ultra · hinted', 'Quick 25', 'stopped · budget', 'Yesterday', '988 ± 129', 25, 0.092],
+  ];
+  $('all').innerHTML = `<thead><tr><th class="arm">Arm</th><th class="arm">Size</th><th class="arm">Status</th><th class="arm">When</th><th>Elo</th><th>Games</th><th>Cost</th></tr></thead><tbody>` +
+    all.map((r) => `<tr class="sr" onclick="location.href='series.html?demo=finished'"><td class="arm hi" style="text-align:left">${r[0]}</td><td class="arm" style="text-align:left">${r[1]}</td><td class="arm" style="text-align:left">${r[2]}</td><td class="arm" style="text-align:left">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${fmtUSD(r[6], 3)}</td></tr>`).join('') + '</tbody>';
+})();
+</script>
+</body>
+</html>

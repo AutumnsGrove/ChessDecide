@@ -1,5 +1,13 @@
 # M0 spike findings
 
+> **Status of claims (v3 docs).** These are M0 *observations* — N=1–2 positions, 3–4 models.
+> Treat §2.3–2.5 (determinism, order invariance, calibration across position types) as hypotheses
+> that M1 re-tests (`PLAN.md` §9). §3's CPL/win-loss numbers were produced with a root-search
+> reference and child-search move scores (e.g. `d1`: CPL 61 in §3 vs 75 in §4.1; `Re1` cp 23 > best
+> cp 19) — the oracle in `METRICS.md` §3 replaces that method. §2.1/§4.2's mate-in-1 "saturation"
+> is confounded by SAN `#` and "checkmate" in descriptions (`clean` arm removes both). Text-model
+> material (§4–§5) is parked in `TEXT_ARM.md`.
+
 Date: 2026-10-27 · OpenRouter Decisions API (alpha) · Stockfish 19 · small N, illustrative only.
 
 Scripts: `spikes/m0_decisions.py`, `spikes/m0_engine.py`, `spikes/m0_compare.py`

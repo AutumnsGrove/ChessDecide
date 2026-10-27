@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Games · ChessDecide (mockup)</title>
+<link rel="stylesheet" href="app.css">
+<style>
+  .filters { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; align-items: center; }
+  .filters button { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
+  .filters button.on { background: var(--green-soft); border-color: var(--green); color: var(--green-hi); }
+  tr.gr { cursor: pointer; }
+  .res { font-weight: 800; } .res.w { color: var(--green-hi); } .res.l { color: #ff6b6b; } .res.d { color: var(--text-dim); }
+</style>
+</head>
+<body>
+<main class="page" style="max-width:1300px">
+  <div class="card">
+    <h3><span>Games</span><span class="dim" style="text-transform:none;letter-spacing:0">click a row to open it in the viewer (live follow or playback)</span></h3>
+    <div class="filters" id="filters"><button class="on" data-f="all">All</button><button data-f="single">Single games</button><button data-f="series">Series games</button><button data-f="running">Running</button><span style="flex:1"></span><span class="dim" style="font-size:12px">model: <b class="hi">any</b> · arm: <b class="hi">any</b></span></div>
+    <table class="t lb" id="tbl"></table>
+  </div>
+</main>
+<div class="demobar"><b>Mockup</b><span class="dim">The first row is the real sample game; the rest are placeholders.</span><span style="flex:1"></span><span class="sample-tag" style="margin:0">SAMPLE DATA</span></div>
+<script src="sample_game.js"></script>
+<script src="common.js"></script>
+<script src="newgame.js"></script>
+<script>
+(function () {
+  const { winPct, fmtUSD } = CD, $ = (id) => document.getElementById(id);
+  CD.header('Games');
+  const M = window.SAMPLE_GAME.meta, real = window.SAMPLE_GAME.plies.map((p) => p.eval_cp);
+  const synth = (seed, len, bias) => { let v = 10, out = [10]; for (let i = 0; i < len; i++) { seed = (seed * 9301 + 49297) % 233280; v += (seed / 233280 - 0.5) * 90 + bias * (i > len * 0.5 ? 18 : 0); out.push(Math.max(-950, Math.min(950, v))); } return out; };
+  const spark = (ev) => { const w = 120, h = 26, n = ev.length - 1; const pts = ev.map((cp, i) => `${(i / n * w).toFixed(1)},${(h - (winPct(cp) / 100) * h).toFixed(1)}`); return `<svg width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#1c1a18" rx="2"/><line x1="0" x2="${w}" y1="${h / 2}" y2="${h / 2}" stroke="#3b3834"/><polyline points="${pts.join(' ')}" fill="none" stroke="#c9c8c2" stroke-width="1.3"/></svg>`; };
+  const rows = [
+    { kind: 'single', when: 'Today 17:20', w: 'jev-1.14 · clean', b: 'SF 1500', res: 'stopped', pl: M.plies, acpl: M.acpl_model, mb: '4 · 1', cost: M.cost_total, ev: real, ser: '—' },
+    { kind: 'running', when: 'Now', w: 'jev-1.14 · clean', b: 'ε.30 SF', res: '…', pl: 34, acpl: 61.2, mb: '2 · 0', cost: 0.0021, ev: synth(5, 34, 1), ser: 'Quick 25 · game 14' },
+    { kind: 'series', when: 'Today 17:12', w: 'ε.30 SF', b: 'jev-1.14 · clean', res: '0–1', pl: 63, acpl: 48.9, mb: '3 · 0', cost: 0.0031, ev: synth(9, 63, -1), ser: 'Quick 25 · game 13' },
+    { kind: 'series', when: 'Today 17:10', w: 'jev-1.14 · clean', b: 'ε.30 SF', res: '1–0 adj', pl: 52, acpl: 57.4, mb: '4 · 1', cost: 0.0026, ev: synth(13, 52, 1), ser: 'Quick 25 · game 12' },
+    { kind: 'series', when: 'Today 17:08', w: 'SF 1320', b: 'jev-1.14 · clean', res: '1–0', pl: 71, acpl: 88.1, mb: '7 · 3', cost: 0.0035, ev: synth(3, 71, 2), ser: 'Quick 25 · game 11' },
+    { kind: 'single', when: 'Yesterday', w: 'jev-1.14 · hinted', b: 'd1-ultra · clean', res: '½–½', pl: 200, acpl: 52.6, mb: '11 · 4', cost: 0.0094, ev: synth(11, 120, 0), ser: 'match (M5 preview)' },
+  ];
+  let f = 'all';
+  function draw() {
+    const list = rows.filter((r) => f === 'all' || r.kind === f);
+    $('tbl').innerHTML = `<thead><tr><th>When</th><th class="arm">White</th><th class="arm">Black</th><th>Result</th><th>Plies</th><th>ACPL</th><th>Mist · Blund</th><th>Cost</th><th>Eval</th><th class="arm">Series</th></tr></thead><tbody>` +
+      list.map((r) => `<tr class="gr" onclick="location.href='play.html${r.kind === 'running' ? '?demo=live' : ''}'"><td style="text-align:left">${r.when}</td><td class="arm hi" style="text-align:left">${r.w}</td><td class="arm" style="text-align:left">${r.b}</td><td><span class="res ${r.res.startsWith('1–0') ? 'w' : r.res.startsWith('0–1') ? 'l' : 'd'}">${r.res}</span></td><td>${r.pl}</td><td>${r.acpl}</td><td>${r.mb}</td><td>${fmtUSD(r.cost, 4)}</td><td>${spark(r.ev)}</td><td class="arm dim" style="text-align:left">${r.ser}</td></tr>`).join('') + '</tbody>';
+  }
+  $('filters').addEventListener('click', (e) => { const b = e.target.closest('button[data-f]'); if (!b) return; f = b.dataset.f; $('filters').querySelectorAll('button[data-f]').forEach((x) => x.classList.toggle('on', x === b)); draw(); });
+  draw();
+})();
+</script>
+</body>
+</html>

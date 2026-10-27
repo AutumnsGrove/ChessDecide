@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play · ChessDecide (mockup)</title>
+<link rel="stylesheet" href="vendor/chessground.base.css">
+<link rel="stylesheet" href="vendor/chessground.brown.css">
+<link rel="stylesheet" href="vendor/chessground.cburnett.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+  <div class="play-grid" id="grid">
+
+    <!-- ── LEFT: board column ───────────────────────────── -->
+    <section class="board-col">
+      <div class="banner warn" id="bnRetry"><span class="spinner"></span><span class="grow"><b>liquid/d1-ultra</b> returned <b>429</b> — retrying in <span class="num">2 s</span> (attempt 2 of 3). Nothing is lost.</span><button class="btn small">Cancel</button></div>
+      <div class="banner bad" id="bnError"><span class="grow"><b>Paused at ply 22.</b> OpenRouter returned 502 after 3 attempts. The game is saved — pick up where it stopped.</span><button class="btn small" data-act="step">Step</button><button class="btn small primary" data-act="resume">Resume ▶</button></div>
+      <div class="banner warn" id="bnBudget"><span class="grow"><b>Budget cap reached.</b> <span class="num">$1.0000</span> of <span class="num">$1.00</span> spent in this game.</span><span>New cap $</span><input id="newCap" type="number" value="2.00" step="0.25"><button class="btn small primary" data-act="resume">Raise &amp; continue</button></div>
+
+      <div class="player" id="pTop"></div>
+      <div class="board-row">
+        <div class="evalbar" id="evalbar"><div class="lbl top" id="evTop"></div><div class="w" id="evW" style="height:50%"></div><div class="lbl bot" id="evBot"></div></div>
+        <div class="boardwrap"><div id="board"></div></div>
+      </div>
+      <div class="player" id="pBot"></div>
+
+      <div class="controls" id="gameCtl" style="display:none;margin-bottom:6px">
+        <span class="think" id="gcStatus"></span>
+        <span class="sp"></span>
+        <button class="btn small" id="gcAuto"></button>
+        <button class="btn small" id="gcStep">Step</button>
+        <button class="btn small ghost" id="gcStop">Stop</button>
+      </div>
+
+      <div class="controls" id="controls">
+        <button class="ib" data-nav="first" title="Start (Home)">__first__</button>
+        <button class="ib" data-nav="prev" title="Previous (←)">__prev__</button>
+        <button class="ib play" id="playBtn" title="Play / pause (Space)"></button>
+        <button class="ib" data-nav="next" title="Next (→)">__next__</button>
+        <button class="ib" data-nav="last" title="End (End)">__last__</button>
+        <div class="seg" id="speed" title="Playback speed ( [ and ] )"><button data-v="0.5">0.5×</button><button data-v="1" class="on">1×</button><button data-v="2">2×</button><button data-v="4">4×</button></div>
+        <span class="sp"></span>
+        <button class="livepill replay" id="pill"></button>
+        <button class="ib on" id="tgBest" title="Show Stockfish's preferred move (A)">__arrow__</button>
+        <button class="ib" id="tgFlip" title="Flip board (F)">__flip__</button>
+      </div>
+      <div class="controls" style="margin-top:4px;padding:2px 10px">
+        <label class="toggle"><input type="checkbox" id="pauseMistake"> Pause playback on mistakes &amp; blunders</label>
+      </div>
+
+      <div class="graph" id="graph">
+        <div class="gh"><span>Evaluation <span class="dim">(White POV · <span id="judgeLbl"></span>)</span></span><span id="graphCur" class="num"></span></div>
+        <svg id="gsvg" viewBox="0 0 600 96" preserveAspectRatio="none"></svg>
+        <div class="tip" id="gtip"></div>
+      </div>
+    </section>
+
+    <!-- ── MIDDLE: moves / table ────────────────────────── -->
+    <section class="card col-mid">
+      <div class="gamehead">
+        <div class="t" id="ghTitle"></div>
+        <div class="s" id="ghSub"></div>
+      </div>
+      <div class="tabs" id="tabs"><button data-t="moves" class="on">Moves</button><button data-t="table">Decisions table</button></div>
+      <div id="movesTab"><div class="moves" id="moves"></div></div>
+      <div id="tableTab" style="display:none"><div class="moves" id="tbl" style="padding:0"></div></div>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <!-- ── RIGHT: decision panel ────────────────────────── -->
+    <section class="card col-dec" id="decCard"></section>
+  </div>
+
+  <div class="empty" id="emptyKey" hidden>
+    <svg width="46" height="46" viewBox="0 0 24 24" fill="#625f5a"><path d="M12.65 10A6 6 0 1 0 12.65 14H17v4h4v-4h2v-4zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+    <h2>No OpenRouter API key found</h2>
+    <p class="dim">ChessDecide reads <span class="num">OPENROUTER_API_KEY</span> from the environment when the server starts. It is never sent to the browser.</p>
+    <p><code class="cmd">export OPENROUTER_API_KEY=sk-or-…  &amp;&amp; go run ./cmd/chessdecide</code></p>
+    <p class="dim">Want to explore without spending anything? <a href="#" data-demo="replay">Open the saved sample game</a> or run with <span class="num">CHESSDECIDE_MOCK=1</span>.</p>
+  </div>
+  <div class="empty" id="emptyGames" hidden>
+    <svg width="46" height="46" viewBox="0 0 24 24" fill="#625f5a"><path d="M19 22H5v-2h14v2zM13 2c-1.25 0-2.42.62-3.11 1.66L7 8l2 2 2.12-1.41c.38-.25.88-.04 1 .39.12.44-.1.9-.52 1.08L8 12l-1 3v3h12c0-6-1-11-6-16z"/></svg>
+    <h2>No games yet</h2>
+    <p class="dim">Start a game to watch a decision model play Stockfish, move by move — or start a series to rate it.<br>A typical 60-ply game costs about <span class="num hi">$0.003</span>; a 25-game series about <span class="num hi">$0.10</span>.</p>
+    <p><button class="btn" onclick="openNewGame()">New game</button> <button class="btn primary" onclick="openNewSeries()">New series</button></p>
+  </div>
+</main>
+
+<div class="demobar">
+  <b>Mockup</b>
+  <label>State <select id="demoSel">
+    <option value="replay">Saved game · playback</option>
+    <option value="live">Live game (simulated)</option>
+    <option value="retry">Live · 429 retry</option>
+    <option value="error">Live · paused on error</option>
+    <option value="budget">Live · budget cap hit</option>
+    <option value="nokey">No API key</option>
+    <option value="empty">No games yet</option>
+  </select></label>
+  <span class="dim">Keys: <span class="kbd">←</span><span class="kbd">→</span> step · <span class="kbd">Space</span> play · <span class="kbd">Home</span><span class="kbd">End</span> · <span class="kbd">F</span> flip · <span class="kbd">A</span> best-move arrow · <span class="kbd">[</span><span class="kbd">]</span> speed</span>
+  <span class="grow" style="flex:1"></span>
+  <span class="sample-tag" style="margin:0">SAMPLE DATA · evals are real Stockfish, model probabilities are simulated</span>
+</div>
+
+<script src="sample_game.js"></script>
+<script src="vendor/chessground.min.js"></script>
+<script src="common.js"></script>
+<script>
+/* Fill icon placeholders (kept out of the markup above for readability). */
+document.getElementById('controls').innerHTML = document.getElementById('controls').innerHTML.replace(/__(first|prev|next|last|arrow|flip)__/g, (_, n) => CD.ico(n));
+</script>
+<script src="newgame.js"></script>
+<script>
+(function () {
+  const { ico, winPct, fmtEval, fmtUSD, ANN, wlClass, BRUSHES, setSpend } = CD;
+  const G = window.SAMPLE_GAME, P = G.plies, META = G.meta, START = META.start_fen;
+  const $ = (id) => document.getElementById(id);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const BASE_SPEND = 0.0031;
+
+  CD.header('Games');
+
+  const S = {
+    demo: 'replay', live: false, paused: false, status: '', arm: 'clean',
+    cur: 21, total: P.length, attached: false, unread: 0,
+    playing: false, speed: 1, flip: false, showBest: true, pauseMistake: false,
+    tab: 'moves', judged: P.map(() => true), thinking: null, spend: 0, runId: 0,
+  };
+
+  const fenAt = (i) => (i === 0 ? START : P[i - 1].fen);
+
+  /* ── chessground ─────────────────────────────────────── */
+  const cg = Chessground($('board'), {
+    fen: fenAt(S.cur), viewOnly: true, coordinates: true,
+    animation: { enabled: true, duration: 220 },
+    highlight: { lastMove: true, check: true },
+    drawable: { enabled: false, visible: true, brushes: BRUSHES },
+  });
+
+  /* ── rendering ───────────────────────────────────────── */
+  function lastPly() { return S.cur > 0 ? P[S.cur - 1] : null; }
+
+  function renderBoard() {
+    const ply = lastPly();
+    const fen = fenAt(S.cur);
+    const check = !!ply && /[+#]/.test(ply.san);
+    cg.set({
+      fen, orientation: S.flip ? 'black' : 'white',
+      turnColor: fen.split(' ')[1] === 'w' ? 'white' : 'black',
+      check, lastMove: ply ? [ply.uci.slice(0, 2), ply.uci.slice(2, 4)] : undefined,
+    });
+    const shapes = [];
+    if (S.showBest && ply && S.judged[S.cur - 1] && ply.sf_best_uci !== ply.uci) {
+      shapes.push({ orig: ply.sf_best_uci.slice(0, 2), dest: ply.sf_best_uci.slice(2, 4), brush: 'best' });
+    }
+    cg.setAutoShapes(shapes);
+  }
+
+  function evalAt(i) { // white-POV cp after ply i, holding the last judged value while the judge is pending
+    for (let k = i; k >= 1; k--) if (S.judged[k - 1]) return P[k - 1].eval_cp;
+    return 18;
+  }
+
+  function renderEvalBar() {
+    const cp = evalAt(S.cur), pend = S.cur > 0 && !S.judged[S.cur - 1];
+    const wp = winPct(cp);
+    $('evW').style.height = wp.toFixed(1) + '%';
+    $('evalbar').classList.toggle('pending', pend);
+    const label = fmtEval(cp).replace('+', '');
+    $('evTop').textContent = cp < 0 ? label : '';
+    $('evBot').textContent = cp >= 0 ? label : '';
+    $('evalbar').style.transform = S.flip ? 'rotate(180deg)' : '';
+    $('evTop').style.transform = $('evBot').style.transform = S.flip ? 'rotate(180deg)' : '';
+  }
+
+  function playerHTML(side) {
+    const isModel = side === 'white';
+    const done = P.slice(0, S.total).filter((p) => p.by === (isModel ? 'model' : 'engine'));
+    const seen = P.slice(0, S.cur).filter((p) => p.by === (isModel ? 'model' : 'engine'));
+    const toMove = fenAt(S.cur).split(' ')[1] === (side === 'white' ? 'w' : 'b');
+    const thinking = S.thinking && S.thinking.side === side;
+    const cost = seen.reduce((a, p) => a + (p.decision ? p.decision.cost : 0), 0);
+    const lat = seen.length && isModel ? Math.round(seen.reduce((a, p) => a + p.decision.latency_ms, 0) / seen.length) : 0;
+    const stat = isModel
+      ? `<div class="stat">cost <b class="num">${fmtUSD(cost, 5)}</b><br>avg <b class="num">${lat || '—'} ms</b></div>`
+      : `<div class="stat">ladder Elo <b class="num">1500</b><br><b class="num">50 ms</b>/move</div>`;
+    const sub = isModel ? `Decision model · arm <b>${S.arm}</b>` : 'Ladder level uci1500 · Stockfish 19';
+    const name = isModel ? META.white.name.replace('typesafe/', '') : 'Stockfish 19';
+    const right = thinking
+      ? `<span class="think"><span class="spinner"></span>${isModel ? 'asking model…' : 'thinking…'} <span class="num" id="thinkT">0.0s</span></span>`
+      : '';
+    return `<div class="pic ${isModel ? 'model' : 'engine'}">${isModel ? 'J' : 'SF'}</div>
+      <div><div class="name">${name}</div><div class="sub">${sub}</div></div>
+      <div class="grow"></div>${right}${stat}`;
+  }
+  function renderPlayers() {
+    const top = S.flip ? 'white' : 'black', bot = S.flip ? 'black' : 'white';
+    $('pTop').innerHTML = playerHTML(top); $('pBot').innerHTML = playerHTML(bot);
+    const live = S.live && S.attached;
+    const tm = fenAt(S.cur).split(' ')[1] === 'w' ? 'white' : 'black';
+    $('pTop').classList.toggle('turn', live && tm === top);
+    $('pBot').classList.toggle('turn', live && tm === bot);
+  }
+
+  function renderMoves() {
+    let h = '';
+    const rows = Math.ceil((S.total + (S.thinking ? 1 : 0)) / 2);
+    const cell = (i) => {
+      if (i < S.total) {
+        const p = P[i], pending = !S.judged[i];
+        const ann = !pending && ANN[p.cls] ? `<span class="ann ${p.cls}">${ANN[p.cls]}</span>` : '';
+        return `<button data-ply="${i + 1}" class="${S.cur === i + 1 ? 'sel' : ''}">${p.san}${ann}<span class="mdot ${p.by === 'model' ? '' : 'eng'}" title="${p.by}"></span></button>`;
+      }
+      if (i === S.total && S.thinking) return `<button class="pend"><span class="spinner" style="width:11px;height:11px"></span>…</button>`;
+      return '<button class="pend"></button>';
+    };
+    for (let r = 0; r < rows; r++) h += `<div class="mrow"><div class="n">${r + 1}</div>${cell(2 * r)}${cell(2 * r + 1)}</div>`;
+    const el = $('moves'); el.innerHTML = h || '<div class="dim" style="padding:20px;text-align:center">No moves yet.</div>';
+    const sel = el.querySelector('.sel');
+    if (sel) { const top = sel.parentElement.offsetTop, bot = top + sel.offsetHeight; if (top < el.scrollTop) el.scrollTop = top - 4; else if (bot > el.scrollTop + el.clientHeight) el.scrollTop = bot - el.clientHeight + 4; }
+  }
+
+  function renderTable() {
+    const rows = P.slice(0, S.total).filter((p) => p.by === 'model');
+    $('tbl').innerHTML = `<table class="t"><thead><tr><th>#</th><th>Move</th><th>P(pick)</th><th>CPL</th><th>Win loss</th><th>Class</th><th>ms</th><th>$</th></tr></thead><tbody>${rows.map((p) => {
+      const j = S.judged[p.ply - 1];
+      return `<tr data-ply="${p.ply}" class="${S.cur === p.ply ? 'sel' : ''}"><td>${Math.ceil(p.ply / 2)}</td><td class="hi">${p.san}</td><td>${(p.decision.p_pick * 100).toFixed(0)}%</td><td>${j ? p.cpl : '…'}</td><td>${j ? p.win_loss.toFixed(1) : '…'}</td><td>${j ? `<span class="pill ${p.cls}">${p.cls}</span>` : '<span class="skel" style="display:inline-block;width:46px;height:12px"></span>'}</td><td>${p.decision.latency_ms}</td><td>${p.decision.cost.toFixed(5)}</td></tr>`;
+    }).join('')}</tbody></table>`;
+  }
+
+  function renderSummary() {
+    const mp = P.slice(0, S.total).filter((p) => p.by === 'model' && S.judged[p.ply - 1]);
+    const acpl = mp.length ? (mp.reduce((a, p) => a + p.cpl, 0) / mp.length).toFixed(1) : '—';
+    const mis = mp.filter((p) => p.cls === 'mistake').length, bl = mp.filter((p) => p.cls === 'blunder').length;
+    const all = P.slice(0, S.total).filter((p) => p.by === 'model');
+    const cost = all.reduce((a, p) => a + p.decision.cost, 0);
+    const lat = all.length ? Math.round(all.reduce((a, p) => a + p.decision.latency_ms, 0) / all.length) : 0;
+    const acc = mp.length ? Math.round((100 * mp.filter((p) => p.win_loss <= 2).length) / mp.length) : null;
+    const c = (k, v) => `<div><div class="k">${k}</div><div class="v">${v}</div></div>`;
+    $('summary').innerHTML = c('ACPL (model)', acpl) + c('Acceptable moves', acc == null ? '—' : acc + '%') + c('Mistakes · blunders', `${mis} · ${bl}`) +
+      c('Cost', fmtUSD(cost, 5)) + c('Avg latency', lat ? lat + ' ms' : '—') + c('Model calls', all.length);
+  }
+
+  function renderDecision() {
+    const card = $('decCard'), ply = lastPly(), idx = S.cur - 1;
+    if (!ply) {
+      card.innerHTML = `<h3>Decision</h3><div class="card-b dim" style="padding:28px 18px;text-align:center">Start position.<br>Step forward to see each model decision — its probability over every legal move, scored by Stockfish.</div>`;
+      return;
+    }
+    const judged = S.judged[idx];
+    if (ply.by === 'engine') {
+      card.innerHTML = `<h3><span>Engine move · ply ${ply.ply}</span><span class="num dim">${ply.side}</span></h3>
+        <div class="dec-head"><div class="who">Stockfish 19 <span class="arm" style="background:var(--panel-3);color:var(--text-dim)">uci1500</span></div>
+        <div class="pickline"><span class="mv">${ply.san}</span>${judged ? `<span class="verdict ${ply.cls}">${ply.sf_best_uci === ply.uci ? 'Engine best' : `${ply.cls === 'ok' ? 'Good' : ply.cls} · −${ply.win_loss.toFixed(1)} pp`}</span>` : '<span class="verdict dim">judging…</span>'}</div></div>
+        <div class="card-b dim" style="font-size:13px">Opponent moves come from Stockfish at a limited Elo, so there is no probability distribution — but every engine move is judged too, so the evaluation graph and the opponent's ACPL stay honest.</div>
+        <div class="kv"><div><span class="k">Stockfish best</span><span class="v">${ply.sf_best_san}</span></div><div><span class="k">Win loss</span><span class="v">${judged ? ply.win_loss.toFixed(1) : '…'}<small> pp</small></span></div></div>`;
+      return;
+    }
+    const d = ply.decision;
+    const opts = d.options.slice();
+    if (!opts.find((o) => o.uci === ply.uci)) opts.push({ san: ply.san, uci: ply.uci, p: d.p_pick, win_loss: ply.win_loss, cpl: ply.cpl });
+    const maxP = Math.max(...opts.map((o) => o.p));
+    const shown = opts.reduce((a, o) => a + o.p, 0);
+    const accP = opts.filter((o) => o.win_loss <= 2).reduce((a, o) => a + o.p, 0);
+    const bars = opts.map((o) => {
+      const cls = judged ? wlClass(o.win_loss) : 'meh';
+      const star = o.uci === ply.sf_best_uci ? '<span class="star" title="Stockfish best">★</span>' : '';
+      const wl = judged ? (o.win_loss <= 0.05 ? 'best' : '−' + o.win_loss.toFixed(1)) : '…';
+      return `<div class="bar ${o.uci === ply.uci ? 'picked' : ''}"><span class="san">${o.san}${star}</span><div class="track"><div class="fill ${cls}" style="width:${((o.p / maxP) * 100).toFixed(1)}%"></div><span class="wl">${wl}</span></div><span class="p">${(o.p * 100).toFixed(1)}%</span></div>`;
+    }).join('');
+    const verdict = !judged ? '<span class="verdict dim"><span class="spinner" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"></span> judging…</span>'
+      : ply.sf_best_uci === ply.uci ? '<span class="verdict ok">Matches Stockfish ★</span>'
+      : ply.win_loss <= 2 ? `<span class="verdict ok">Acceptable · −${ply.win_loss.toFixed(1)} pp</span>`
+      : `<span class="verdict ${ply.cls}">${ply.cls[0].toUpperCase() + ply.cls.slice(1)} · −${ply.win_loss.toFixed(1)} pp</span>`;
+    const kv = (k, v, u = '') => `<div><span class="k">${k}</span><span class="v">${v}${u ? `<small> ${u}</small>` : ''}</span></div>`;
+    card.innerHTML = `<h3><span>Decision · ply ${ply.ply}</span><span class="num dim">${d.n_options} legal moves</span></h3>
+      <div class="dec-head">
+        <div class="who">${META.white.name.replace('typesafe/', '')} <span class="arm ${S.arm}">${S.arm}</span></div>
+        <div class="pickline"><span class="mv">${ply.san}</span>${verdict}</div>
+      </div>
+      <div class="bars">${bars}
+        <div class="other"><span>+ ${Math.max(0, d.n_options - opts.length)} other moves</span><span class="num">${Math.max(0, (1 - shown) * 100).toFixed(1)}%</span></div>
+      </div>
+      <div class="legend"><span><i style="background:#629924"></i>acceptable ≤ 2 pp</span><span><i style="background:#6d8794"></i>≤ 5</span><span><i style="background:#e69d00"></i>≤ 20</span><span><i style="background:#db3031"></i>blunder</span><span>numbers inside bars = win loss vs. best</span></div>
+      <div class="kv">
+        ${kv('P(pick)', (d.p_pick * 100).toFixed(1), '%')}${kv('Confidence', d.confidence.toFixed(2))}
+        ${kv('P(acceptable)', judged ? '≥ ' + (accP * 100).toFixed(0) : '…', judged ? '% (shown)' : '')}${kv('Stockfish best', judged ? ply.sf_best_san + ' ★' : '…')}
+        ${kv('CPL', judged ? ply.cpl : '…', 'cp')}${kv('Latency', d.latency_ms, 'ms')}
+        ${kv('Input tokens', d.input_tokens.toLocaleString())}${kv('Cost', fmtUSD(d.cost, 6))}
+      </div>
+      <div class="actions"><button class="btn small" data-toast="Request JSON copied (mock)">Copy request</button><button class="btn small ghost" data-toast="Position FEN copied (mock)">Copy FEN</button><button class="btn small ghost" data-toast="Raw response opened (mock)">Raw response</button></div>`;
+  }
+
+  function renderGraph() {
+    const W = 600, H = 96, N = Math.max(S.total, S.live ? 40 : 1), mid = H / 2;
+    const xs = (i) => (i / N) * W;
+    const ys = (cp) => mid - ((winPct(cp) - 50) / 50) * (mid - 6);
+    const pts = [[0, ys(18)]];
+    for (let i = 1; i <= S.total; i++) pts.push([xs(i), ys(evalAt(i))]);
+    const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const area = `M0 ${H} ` + pts.map((p) => 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') + ` L${pts[pts.length - 1][0].toFixed(1)} ${H} Z`;
+    let marks = '';
+    for (let i = 1; i <= S.total; i++) {
+      const p = P[i - 1]; if (!S.judged[i - 1] || p.by !== 'model' || !['mistake', 'blunder'].includes(p.cls)) continue;
+      marks += `<circle cx="${xs(i).toFixed(1)}" cy="${ys(evalAt(i)).toFixed(1)}" r="3.4" fill="${p.cls === 'blunder' ? '#db3031' : '#e69d00'}" stroke="#161512" stroke-width="1"/>`;
+    }
+    const cx = xs(S.cur).toFixed(1);
+    $('gsvg').innerHTML = `<rect width="${W}" height="${H}" fill="#1c1a18"/><path d="${area}" fill="#d9d8d3" opacity=".9"/>
+      <line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#625f5a" stroke-dasharray="3 4" stroke-width="1"/>
+      <path d="${line}" fill="none" stroke="#fff" stroke-width="1.4" opacity=".85"/>${marks}
+      <line x1="${cx}" x2="${cx}" y1="0" y2="${H}" stroke="#7fb82e" stroke-width="1.6"/>`;
+    $('graphCur').textContent = S.cur ? `ply ${S.cur} · ${P[S.cur - 1].san} · ${fmtEval(evalAt(S.cur))}` : 'start';
+    $('judgeLbl').textContent = META.judge;
+  }
+
+  function renderControls() {
+    $('playBtn').innerHTML = ico(S.playing ? 'pause' : 'play');
+    $('speed').querySelectorAll('button').forEach((b) => b.classList.toggle('on', parseFloat(b.dataset.v) === S.speed));
+    $('tgBest').classList.toggle('on', S.showBest);
+    $('tgFlip').classList.toggle('on', S.flip);
+    const pill = $('pill');
+    if (!S.live) { pill.className = 'livepill replay'; pill.innerHTML = 'REPLAY'; }
+    else if (S.attached) { pill.className = 'livepill live'; pill.innerHTML = '<i></i>LIVE'; }
+    else { pill.className = 'livepill detached'; pill.innerHTML = 'Jump to live' + (S.unread ? ` (+${S.unread})` : ''); }
+    // game-flow strip (live only)
+    const gc = $('gameCtl'); gc.style.display = S.live ? 'flex' : 'none';
+    if (S.live) {
+      const running = !S.paused && S.status === 'running';
+      const txt = { running: 'Running · autoplay', paused: 'Paused', error: 'Paused · upstream error', budget: 'Stopped · budget cap', finished: 'Finished' }[S.status] || 'Paused';
+      $('gcStatus').innerHTML = running ? '<span class="spinner"></span>' + txt : `<span style="color:var(--text-dim)">● ${txt}</span>`;
+      $('gcAuto').textContent = running ? 'Pause' : 'Auto ▶';
+      $('gcAuto').className = 'btn small ' + (running ? '' : 'primary');
+      $('gcStep').disabled = running || S.status === 'finished' || S.status === 'budget';
+    }
+    const ghTitle = META.white.name.replace('typesafe/', '') + ' vs Stockfish (uci1500)';
+    $('ghTitle').innerHTML = ghTitle + '<span class="sample-tag">SAMPLE</span>';
+    $('ghSub').textContent = S.live
+      ? `Live · start position · ${S.total} plies · session spend ${fmtUSD(BASE_SPEND + S.spend, 4)}`
+      : `Saved game · ${META.plies} plies · stopped (sample cut) · ${META.judge}`;
+  }
+
+  function renderAll() {
+    renderBoard(); renderEvalBar(); renderPlayers(); renderMoves(); renderSummary(); renderDecision(); renderGraph(); renderControls();
+    if (S.tab === 'table') renderTable();
+  }
+
+  /* ── navigation ──────────────────────────────────────── */
+  function goto(i, { user = true } = {}) {
+    S.cur = Math.max(0, Math.min(S.total, i));
+    if (user && S.live) { S.attached = S.cur === S.total; if (S.attached) S.unread = 0; }
+    renderAll();
+  }
+  function nav(kind) {
+    if (kind === 'first') goto(0);
+    if (kind === 'prev') goto(S.cur - 1);
+    if (kind === 'next') goto(S.cur + 1);
+    if (kind === 'last') { goto(S.total); if (S.live) { S.attached = true; S.unread = 0; renderControls(); } }
+  }
+
+  /* replay autoplay */
+  let replayTimer = null;
+  function stopReplay() { S.playing = false; clearTimeout(replayTimer); renderControls(); }
+  function startReplay() {
+    if (S.live) return;
+    if (S.cur >= S.total) goto(0, { user: false });
+    S.playing = true; renderControls();
+    const tick = () => {
+      if (!S.playing) return;
+      if (S.cur >= S.total) return stopReplay();
+      goto(S.cur + 1, { user: false });
+      const p = P[S.cur - 1];
+      if (S.pauseMistake && p.by === 'model' && ['mistake', 'blunder'].includes(p.cls)) { toast(`Paused on ${p.cls}: ${p.san}`); return stopReplay(); }
+      replayTimer = setTimeout(tick, 950 / S.speed);
+    };
+    replayTimer = setTimeout(tick, 350 / S.speed);
+  }
+  function togglePlay() { if (S.live) { toggleAuto(); return; } S.playing ? stopReplay() : startReplay(); }
+
+  /* ── live simulation ─────────────────────────────────── */
+  function resetLive(total = 0) {
+    S.runId++; S.live = true; S.attached = true; S.unread = 0; S.paused = true; S.playing = false; clearTimeout(replayTimer);
+    S.total = total; S.cur = total; S.thinking = null; S.spend = 0; S.judged = P.map((_, i) => i < total);
+    setSpend(BASE_SPEND);
+  }
+  async function liveLoop() {
+    const id = ++S.runId; S.paused = false; S.status = 'running'; renderControls();
+    while (id === S.runId && !S.paused && S.total < P.length) {
+      const n = S.total, p = P[n], t0 = performance.now();
+      S.thinking = { side: p.side, t0 }; renderPlayers(); renderMoves();
+      await sleep((p.by === 'model' ? Math.max(500, p.decision.latency_ms) : 120) / Math.min(S.speed, 2));
+      if (id !== S.runId) return;
+      await sleep(Math.max(0, 600 / S.speed - (performance.now() - t0)));
+      if (id !== S.runId) return;
+      S.thinking = null; S.total = n + 1; S.judged[n] = false;
+      if (S.attached) S.cur = S.total; else S.unread++;
+      if (p.decision) { S.spend += p.decision.cost; setSpend(BASE_SPEND + S.spend); }
+      renderAll();
+      setTimeout(() => { if (id === S.runId || true) { S.judged[n] = true; renderAll(); } }, 750);
+    }
+    if (id === S.runId) { S.thinking = null; if (S.total >= P.length) S.status = 'finished'; else S.status = 'paused'; S.paused = true; renderAll(); }
+  }
+  function toggleAuto() { if (!S.paused && S.status === 'running') { S.runId++; S.paused = true; S.status = 'paused'; S.thinking = null; renderAll(); } else if (S.status !== 'finished') liveLoop(); }
+  async function liveStep() {
+    if (S.status === 'running' || S.total >= P.length) return;
+    const id = ++S.runId, n = S.total, p = P[n];
+    S.thinking = { side: p.side, t0: performance.now() }; S.status = 'paused'; renderAll();
+    await sleep(p.by === 'model' ? p.decision.latency_ms : 120); if (id !== S.runId) return;
+    S.thinking = null; S.total = n + 1; S.judged[n] = false; if (S.attached) S.cur = S.total; else S.unread++;
+    if (p.decision) { S.spend += p.decision.cost; setSpend(BASE_SPEND + S.spend); }
+    renderAll(); setTimeout(() => { S.judged[n] = true; renderAll(); }, 750);
+  }
+
+  /* ── demo states ─────────────────────────────────────── */
+  function hideBanners() { ['bnRetry', 'bnError', 'bnBudget'].forEach((b) => $(b).classList.remove('show')); }
+  function applyDemo(name) {
+    S.demo = name; S.runId++; clearTimeout(replayTimer); S.playing = false; S.thinking = null; hideBanners();
+    $('grid').hidden = false; $('emptyKey').hidden = true; $('emptyGames').hidden = true; setSpend(BASE_SPEND);
+    $('demoSel').value = name;
+    if (name === 'replay') {
+      S.live = false; S.status = ''; S.total = P.length; S.cur = 21; S.judged = P.map(() => true); S.attached = false;
+    } else if (name === 'live') {
+      resetLive(0); S.status = 'paused'; renderAll(); liveLoop(); return;
+    } else if (name === 'retry') {
+      resetLive(22); S.status = 'running'; S.thinking = { side: 'white', t0: performance.now() }; $('bnRetry').classList.add('show');
+    } else if (name === 'error') {
+      resetLive(22); S.status = 'error'; $('bnError').classList.add('show');
+    } else if (name === 'budget') {
+      resetLive(40); S.status = 'budget'; $('bnBudget').classList.add('show');
+    } else if (name === 'nokey') {
+      $('grid').hidden = true; $('emptyKey').hidden = false; return;
+    } else if (name === 'empty') {
+      $('grid').hidden = true; $('emptyGames').hidden = false; return;
+    }
+    renderAll();
+  }
+
+  /* ── events ──────────────────────────────────────────── */
+  document.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => nav(b.dataset.nav)));
+  $('playBtn').addEventListener('click', togglePlay);
+  $('speed').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { S.speed = parseFloat(b.dataset.v); renderControls(); } });
+  $('tgBest').addEventListener('click', () => { S.showBest = !S.showBest; renderBoard(); renderControls(); });
+  $('tgFlip').addEventListener('click', () => { S.flip = !S.flip; renderAll(); });
+  $('pauseMistake').addEventListener('change', (e) => { S.pauseMistake = e.target.checked; });
+  $('pill').addEventListener('click', () => { if (S.live && !S.attached) nav('last'); });
+  $('gcAuto').addEventListener('click', toggleAuto);
+  $('gcStep').addEventListener('click', liveStep);
+  $('gcStop').addEventListener('click', () => { S.runId++; S.paused = true; S.status = 'finished'; S.thinking = null; toast('Game stopped (aborted)'); renderAll(); });
+  $('tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return; S.tab = b.dataset.t;
+    $('tabs').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+    $('movesTab').style.display = S.tab === 'moves' ? '' : 'none'; $('tableTab').style.display = S.tab === 'table' ? '' : 'none';
+    if (S.tab === 'table') renderTable();
+  });
+  $('moves').addEventListener('click', (e) => { const b = e.target.closest('[data-ply]'); if (b) goto(parseInt(b.dataset.ply, 10)); });
+  $('tbl').addEventListener('click', (e) => { const r = e.target.closest('[data-ply]'); if (r) goto(parseInt(r.dataset.ply, 10)); });
+  $('demoSel').addEventListener('change', (e) => applyDemo(e.target.value));
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-toast]'); if (t) toast(t.dataset.toast);
+    const d = e.target.closest('[data-demo]'); if (d) { e.preventDefault(); applyDemo(d.dataset.demo); }
+    const a = e.target.closest('[data-act]');
+    if (a) { hideBanners(); if (a.dataset.act === 'resume') { S.status = 'paused'; liveLoop(); } else { liveStep(); } }
+  });
+
+  /* graph scrubbing + tooltip */
+  const gs = $('gsvg');
+  const idxAt = (e) => { const r = gs.getBoundingClientRect(); const N = Math.max(S.total, S.live ? 40 : 1); return Math.max(0, Math.min(S.total, Math.round(((e.clientX - r.left) / r.width) * N))); };
+  let drag = false;
+  gs.addEventListener('mousedown', (e) => { drag = true; goto(idxAt(e)); });
+  window.addEventListener('mouseup', () => { drag = false; });
+  gs.addEventListener('mousemove', (e) => {
+    const i = idxAt(e), tip = $('gtip'), r = gs.getBoundingClientRect();
+    if (drag) goto(i);
+    tip.style.display = 'block'; tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = '24px';
+    tip.textContent = i ? `${Math.ceil(i / 2)}${i % 2 ? '.' : '...'} ${P[i - 1].san}  ${fmtEval(evalAt(i))}` : 'start';
+  });
+  gs.addEventListener('mouseleave', () => { $('gtip').style.display = 'none'; });
+
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) || document.querySelector('.modal-bg.show')) return;
+    const k = e.key;
+    if (k === 'ArrowLeft') { nav('prev'); e.preventDefault(); }
+    else if (k === 'ArrowRight') { nav('next'); e.preventDefault(); }
+    else if (k === 'Home') nav('first');
+    else if (k === 'End') nav('last');
+    else if (k === ' ') { togglePlay(); e.preventDefault(); }
+    else if (k === 'f' || k === 'F') $('tgFlip').click();
+    else if (k === 'a' || k === 'A') $('tgBest').click();
+    else if (k === '[' || k === ']') { const sp = [0.5, 1, 2, 4], i = sp.indexOf(S.speed) + (k === ']' ? 1 : -1); S.speed = sp[Math.max(0, Math.min(3, i))]; renderControls(); }
+  });
+
+  /* thinking timer */
+  setInterval(() => { const t = $('thinkT'); if (t && S.thinking) t.textContent = ((performance.now() - S.thinking.t0) / 1000).toFixed(1) + 's'; }, 100);
+
+  let toastEl;
+  function toast(msg) {
+    if (!toastEl) { toastEl = document.createElement('div'); toastEl.style.cssText = 'position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:#000e;border:1px solid var(--line);padding:8px 14px;border-radius:4px;color:var(--text-hi);z-index:60;transition:opacity .25s'; document.body.appendChild(toastEl); }
+    toastEl.textContent = msg; toastEl.style.opacity = 1; clearTimeout(toast.t); toast.t = setTimeout(() => (toastEl.style.opacity = 0), 1800);
+  }
+
+  window.onStartGame = ({ arm }) => { S.arm = arm; applyDemo('live'); };
+  applyDemo(new URLSearchParams(location.search).get('demo') || 'replay');
+})();
+</script>
+</body>
+</html>

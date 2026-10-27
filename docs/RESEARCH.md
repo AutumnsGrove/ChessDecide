@@ -3,8 +3,9 @@
 Verified 2026-10-27 against live docs and the public OpenRouter catalog. Re-verify before
 building — the Decisions API is alpha and model slugs churn.
 
-Locked: v1 uses **all legal moves** as choice options, all four text protocols, and Play +
-Compare as the first GUI. Batch benchmark comes after.
+Locked (v3): v1 uses **all legal moves** as choice options, decision models only, and rates
+each model by Elo from a series of games against a Stockfish ladder. Text models are parked in
+`TEXT_ARM.md`; the same-position Compare tool is dropped from v1.
 
 ---
 
@@ -130,82 +131,20 @@ The catalog is public — no key needed for the dropdown.
 
 ---
 
-## 2. Chat Completions comparison modes
+## 2. Chat Completions comparison modes — parked
 
-`POST https://openrouter.ai/api/v1/chat/completions` (OpenAI-compatible).
-
-- **chat_text**: messages `[{role:"system",...},{role:"user",...}]`, temperature 0, parse SAN
-  from the reply, retry on invalid/illegal.
-- **chat_tool**: forced function call:
-
-```json
-{
-  "tools": [{
-    "type": "function",
-    "function": {
-      "name": "make_move",
-      "parameters": {
-        "type": "object",
-        "properties": { "move": { "type": "string", "enum": ["e4", "d4", "..."] } },
-        "required": ["move"]
-      }
-    }
-  }],
-  "tool_choice": { "type": "function", "function": { "name": "make_move" } },
-  "temperature": 0
-}
-```
-
-Parse `choices[0].message.tool_calls[0].function.arguments`. This is the closest analog to the
-Decisions API `choice` primitive and the fairest text-vs-decision comparison.
-
-- **Provider fallback:** not every provider supports a forced named `tool_choice`. Meta's
-  `muse-spark-1.3-contributor` returns 400 ("only `auto` is supported"). Try forced, then
-  `tool_choice:"auto"`, then JSON schema. Keep `provider.require_parameters=true` for
-  tool/JSON modes.
-
-- **chat_json**: `response_format: {type:"json_schema", json_schema:{...}}`; same idea, no tool
-  call. Useful for models that support structured outputs but not tools.
-
-- **Image mode**: `state`/message content part
-  `{"type":"image_url","image_url":{"url":"data:image/png;base64,..."}}`. `corentings/chess/v2`
-  has an `image` subpackage that can render boards to PNG server-side.
-
-### Standard text models (locked)
-
-All six support tools + structured outputs and are reasoning-capable. Settings must be read
-from the live catalog (`model.reasoning`), not assumed.
-
-| Model | In $/M | Out $/M | Context | Supported reasoning | Default | Mandatory |
-| --- | --- | --- | --- | --- | --- | --- |
-| `deepseek/deepseek-v4.1-flash-1017` | 0.15 | 0.60 | 1.05M | max, high, low, none | high | no |
-| `anthropic/claude-haiku-5.5` | 0.10 | 0.50 | 1M | max, xhigh, high, medium, low, none | medium | no |
-| `openai/gpt-6-luna` | 0.10 | 0.50 | 1.05M | max, xhigh, high, medium, low, none | medium | no |
-| `xiaomi/mimo-v2.6-flash` | 0.14 | 0.28 | 1.05M | (not exposed) | on | no |
-| `z-ai/glm-5.3-flash` | 0.15 | 0.50 | 1.05M | max, high, low | max | yes |
-| `meta/muse-spark-1.3-contributor` | 0.10 | 0.20 | 1.05M | max, xhigh, high, medium, low, minimal | medium | yes |
-
-Reasoning is billed as output. `effort` is only honored by some providers; `max_tokens` caps
-are supported by others. Observations:
-
-- DeepSeek `effort:none` → `Bxf7+` in 1.2 s for $0.000024; `effort:low`, 16k cap → `Re1` in
-  24.5 s for $0.0033.
-- Mimo ignores effort; with default reasoning it burned 16,384 tokens and returned no move.
-  Disabling reasoning (`enabled:false`) → `d4` in 1.4 s for $0.000002.
-- If reasoning consumes the whole budget, `finish_reason=length` and content is empty. One
-  nudge call ("Output only your move in SAN", reasoning off) usually recovers it.
-
-**Protocol:** primary arm = lowest supported effort; secondary = default effort. Set
-`max_tokens=16384` with reasoning on, `1024` with it off. Record effort, max_tokens,
-reasoning_tokens, and provider.
+Text-model protocol notes (forced tool call, JSON schema, free text, reasoning budgets, the six
+standard models and their catalog reasoning settings) moved to [`TEXT_ARM.md`](TEXT_ARM.md). Nothing
+in v1 calls `/api/v1/chat/completions`.
 
 ---
 
 ## 3. Toolchain facts
 
 - Stockfish: **installed** (Homebrew, Stockfish 19) and verified. UCI over stdin/stdout.
-  Options for the opponent: `UCI_LimitStrength=true` + `UCI_Elo` (1320–3190), or
-  `Skill Level 0–20`. For judging: full strength, `Threads=1`, `Hash=64`.
+  Options for the opponent: `UCI_LimitStrength=true` + `UCI_Elo` (1320–3190; **1320 is the
+  floor**, weaker levels come from our ε-random ladder levels). Nominal `UCI_Elo` is calibrated for
+  different time controls than ours, so the ladder is re-measured (`METRICS.md` B2). For judging: full strength, `Threads=1`, `Hash=64`.
   `UCI_ShowWDL=true` gives win/draw/loss probabilities (better than raw cp).
 - python-chess 1.11 (via `uv run --with chess`) used for the M0 spikes; the real backend will
   use the Go library below.
