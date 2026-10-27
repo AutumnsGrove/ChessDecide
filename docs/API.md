@@ -1,10 +1,20 @@
 # ChessDecide — API, types and schema
 
-Backend: Go on `127.0.0.1:8080` (configurable `CHESSDECIDE_ADDR`). JSON everywhere, UTF-8.
-Times are RFC 3339 UTC strings; durations are integer milliseconds; money is USD as a JSON
-number (float64, 6 decimals shown in UI). Move ids are **UCI**; SAN is display-only.
-The TS types mirror the Go structs 1:1 (`web/src/lib/types.ts`); field names are `snake_case`
-in JSON.
+HTTP surface implemented once in `packages/api` (Hono, `createApi`) and hosted by (a) the Node
+runner daemon on `127.0.0.1:8787` (local mode; `vite dev` proxies `/api` to it), (b) a SvelteKit
+route in the deployed read-only site, and (c) in phase 2 the `apps/live` Worker. JSON
+everywhere, UTF-8. Times are ISO 8601 UTC strings; durations are integer milliseconds; money is
+USD as a JSON number (6 decimals shown in UI). Move ids are **UCI**; SAN is display-only. Field
+names are `snake_case` in JSON; the TypeScript types below live in `packages/core/src/types.ts`
+and are shared by runner, server and UI.
+
+**Surface by mode** (`CHESSDECIDE_MODE`):
+
+| Mode | Available |
+| --- | --- |
+| `local` (phase 1 dev) | everything below |
+| `public` (deployed, read-only, free tier) | `GET` of games, series, ladder, leaderboard, exports; **no** control, estimate, oracle, spend, catalog or SSE-for-live endpoints |
+| `live` (phase 2) | everything, behind Cloudflare Access; runs hosted in Durable Objects |
 
 ## 1. Conventions
 
@@ -33,84 +43,61 @@ Heartbeat comment line `: ping` every 15 s.
 **Idempotency** — `POST /step`, `/auto`, `/pause`, `/stop` are safe to repeat; a conflicting
 call returns `409` with the current `status`.
 
-## 2. Shared types (Go)
+## 2. Shared types (TypeScript)
 
-```go
-type Arm struct {
-    KeyFormat    string `json:"key_format"`    // "uci" | "san"
-    Descriptor   string `json:"descriptor"`    // "plain" | "annotated"
-    StateVariant string `json:"state_variant"` // "slim" | "full"
-    Template     string `json:"template"`      // "neutral" | "instructive" | "minimal"
+```ts
+export interface Arm {
+  interface: 'text' | 'image';
+  key_format: 'uci' | 'san';
+  descriptor: 'plain' | 'annotated';
+  state_variant: 'slim' | 'full';
+  template: 'neutral' | 'instructive' | 'minimal';
 }
-// Named presets: "clean" = {uci, plain, slim, neutral}; "hinted" = {san, annotated, slim, neutral}
+// Presets: clean = {text, uci, plain, slim, neutral}; hinted = {text, san, annotated, slim, neutral};
+//          image = {image, uci, plain, slim, neutral}
 
-type Money = float64
+export type Money = number;
+export interface Usage { input_tokens: number; output_tokens: number; cost_usd: Money | null }
 
-type Usage struct {
-    InputTokens  int   `json:"input_tokens"`
-    OutputTokens int   `json:"output_tokens"`
-    CostUSD      Money `json:"cost_usd"`
-}
-
-type OptionProb struct {
-    UCI       string  `json:"uci"`
-    SAN       string  `json:"san"`
-    P         float64 `json:"p"`                  // renormalised
-    Cp        *int    `json:"cp,omitempty"`       // oracle, mover POV (filled after judge)
-    Cpl       *int    `json:"cpl,omitempty"`
-    WinLoss   *float64 `json:"win_loss,omitempty"` // pp
+export interface OptionProb {
+  uci: string; san: string;
+  p: number;                 // renormalised
+  cp?: number; cpl?: number; // oracle, mover POV (filled after judge)
+  win_loss?: number;         // pp
 }
 
-type Decision struct {
-    ModelSlug     string       `json:"model_slug"`
-    ReturnedModel string       `json:"returned_model"`
-    Provider      string       `json:"provider"`
-    Arm           string       `json:"arm"`             // "clean" | "hinted" | custom id
-    PickUCI       string       `json:"pick_uci"`
-    PPick         float64      `json:"p_pick"`
-    Confidence    float64      `json:"confidence"`
-    NOptions      int          `json:"n_options"`
-    TopOptions    []OptionProb `json:"top_options"`     // top 8 by p, plus the pick and SF best if outside
-    ProbSum       float64      `json:"prob_sum"`
-    LatencyMS     int          `json:"latency_ms"`
-    Usage         Usage        `json:"usage"`
-    CacheHit      bool         `json:"cache_hit"`
-    Retries       int          `json:"retries"`
-    AttemptID     int64        `json:"attempt_id"`
+export interface Decision {
+  model_slug: string; returned_model?: string; provider?: string;
+  arm: string;               // "clean" | "hinted" | "image" | custom id
+  pick_uci: string; p_pick?: number; confidence?: number; n_options: number;
+  top_options: OptionProb[]; // top 8 by p, plus the pick and SF best if outside
+  prob_sum?: number; latency_ms: number; usage: Usage;
+  cache_hit: boolean; retries: number; attempt_id: number;
 }
 
-type Judge struct {            // filled asynchronously after the ply
-    Depth       int      `json:"depth"`
-    BestUCI     string   `json:"best_uci"`
-    BestSAN     string   `json:"best_san"`
-    BestCp      int      `json:"best_cp"`
-    PlayedCp    int      `json:"played_cp"`
-    Cpl         int      `json:"cpl"`
-    WinLoss     float64  `json:"win_loss"`        // pp
-    Class       string   `json:"class"`           // "ok"|"inaccuracy"|"mistake"|"blunder"
-    WhiteEvalCp int      `json:"white_eval_cp"`   // position AFTER the ply, White POV, clamped
-    WDL         [3]int   `json:"wdl"`             // after the ply, White POV, per mille
-    Acceptable  bool     `json:"acceptable"`
-    PAcceptable *float64 `json:"p_acceptable,omitempty"` // model plies only
-    EWinLoss    *float64 `json:"e_win_loss,omitempty"`
+export interface PositionEval {   // every ply, White POV, position AFTER the ply
+  depth: number; white_eval_cp: number;        // clamped [-1000, 1000]; forced mate = +-1000
+  wdl: [number, number, number];               // [W, D, L] per mille
+}
+export interface Judge {         // MODEL plies only (full per-move oracle); engine plies have judge = null
+  depth: number; best_uci: string; best_san: string; best_cp: number; played_cp: number;
+  cpl: number; win_loss: number;                    // pp
+  class: 'ok' | 'inaccuracy' | 'mistake' | 'blunder';
+  acceptable: boolean; p_acceptable?: number; e_win_loss?: number;
 }
 
-type Ply struct {
-    Ply        int       `json:"ply"`             // 1-based
-    Side       string    `json:"side"`            // "white" | "black"
-    By         string    `json:"by"`              // "model" | "engine"
-    UCI        string    `json:"uci"`
-    SAN        string    `json:"san"`
-    FENAfter   string    `json:"fen_after"`
-    Decision   *Decision `json:"decision,omitempty"`  // model plies
-    EngineInfo *struct {                              // engine plies
-        LevelID   string `json:"level_id"`
-        Elo       float64 `json:"elo"`          // ladder Elo of the level
-        TimeMS    int `json:"time_ms"`
-        Random    bool `json:"random"`         // true if an ε-random move replaced the engine move
-    } `json:"engine_info,omitempty"`
-    Judge      *Judge    `json:"judge,omitempty"`     // null until judged
-    CreatedAt  time.Time `json:"created_at"`
+export interface Ply {
+  ply: number;               // 1-based
+  side: 'white' | 'black';
+  by: 'model' | 'engine';
+  uci: string; san: string; fen_after: string;
+  decision?: Decision;       // model plies
+  engine_info?: { engine_id: string; level_id: string; elo: number; time_ms: number;
+                  random: boolean /* ε-random replaced the engine move */ };
+  forced?: boolean;          // exactly one legal move: no model call
+  eval?: PositionEval | null;
+  judge?: Judge | null;      // null until judged
+  created_at: string;
 }
 ```
 
@@ -121,8 +108,8 @@ type Ply struct {
 `GET /api/health`
 
 ```json
-{ "ok": true, "version": "0.1.0",
-  "stockfish": { "ok": true, "path": "/opt/homebrew/bin/stockfish", "version": "Stockfish 19", "judge_workers": 4 },
+{ "ok": true, "version": "0.1.0", "mode": "local",
+  "engine": { "ok": true, "adapter": "native-uci", "path": "/opt/homebrew/bin/stockfish", "version": "Stockfish 19", "judge_workers": 4 },
   "openrouter": { "key_present": true, "catalog_age_s": 120 },
   "ladder": { "version": 1, "calibrated": true },
   "budget": { "session_usd": 0.0031, "today_usd": 0.0112, "total_usd": 0.0412, "credit_remaining_usd": null } }
@@ -163,7 +150,7 @@ missing; may take seconds). `{ "depth":14, "sf_version":"Stockfish 19", "best_uc
 ```json
 {
   "white": { "type": "model", "model": "typesafe/jev-1.14", "arm": "clean" },
-  "black": { "type": "ladder", "level": "uci1500" },
+  "black": { "type": "ladder", "level": "uci1500", "engine": "stockfish" },
   "opening": { "type": "startpos" },
   "pace_ms": 600,
   "budget_usd": 1.0,
@@ -174,7 +161,7 @@ missing; may take seconds). `{ "depth":14, "sf_version":"Stockfish 19", "best_uc
 }
 ```
 
-- `white`/`black` are **Player configs**: `{type:"model", model, arm}` (arm = preset name or a
+- `white`/`black` are **Player configs**: `{type:"model", model, arm}` (`arm` may be `"image"`) (arm = preset name or a
   full `Arm`), or `{type:"ladder", level:"uci1500"|"eps30"|"random"|…}` (a ladder level — the
   normal opponent), or `{type:"engine", elo}` (raw `UCI_Elo` 1320–3190, outside the ladder).
   Both sides may be `model` (model-vs-model, M5).
@@ -183,29 +170,23 @@ missing; may take seconds). `{ "depth":14, "sf_version":"Stockfish 19", "best_uc
 - Response `201`: the `Game` (below) with `status: "ready"`. Returns `402 budget_exceeded` if
   the estimate already exceeds the cap (`detail.est_cost_usd`).
 
-```go
-type Game struct {
-    ID          string   `json:"id"`           // ULID
-    Status      string   `json:"status"`       // see state machine
-    StatusReason string  `json:"status_reason,omitempty"`
-    Config      GameConfig `json:"config"`
-    StartFEN    string   `json:"start_fen"`
-    SeriesID    string   `json:"series_id,omitempty"`
-    LevelID     string   `json:"level_id,omitempty"`      // ladder level the model faced
-    ModelColor  string   `json:"model_color,omitempty"`
-    Adjudicated bool     `json:"adjudicated"`
-    Plies       []Ply    `json:"plies"`
-    Result      string   `json:"result"`       // "1-0" | "0-1" | "1/2-1/2" | "*"
-    Termination string   `json:"termination"`  // "checkmate"|"stalemate"|"repetition"|"fifty_move"|"insufficient"|"max_plies"|"adjudicated"|"aborted"|""
-    Totals      GameTotals `json:"totals"`
-    CreatedAt   time.Time `json:"created_at"`
+```ts
+export interface Game {
+  id: string;                // ULID
+  status: 'created' | 'ready' | 'running' | 'paused' | 'stopped_budget' | 'finished' | 'aborted';
+  status_reason?: string;
+  config: GameConfig; start_fen: string;
+  series_id?: string; level_id?: string; model_color?: 'white' | 'black';
+  adjudicated: boolean; plies: Ply[];
+  result: '1-0' | '0-1' | '1/2-1/2' | '*';
+  termination: 'checkmate' | 'stalemate' | 'repetition' | 'fifty_move' | 'insufficient'
+             | 'max_plies' | 'adjudicated' | 'aborted' | '';
+  totals: GameTotals; created_at: string;
 }
-type GameTotals struct {
-    CostUSD Money `json:"cost_usd"`; ModelCalls int `json:"model_calls"`; CacheHits int `json:"cache_hits"`
-    AcplWhite *float64 `json:"acpl_white,omitempty"`; AcplBlack *float64 `json:"acpl_black,omitempty"`
-    PAcceptableMean *float64 `json:"p_acceptable_mean,omitempty"`
-    Mistakes int `json:"mistakes"`; Blunders int `json:"blunders"`
-    AvgLatencyMS int `json:"avg_latency_ms"`
+export interface GameTotals {
+  cost_usd: Money; model_calls: number; cache_hits: number;
+  acpl_white?: number; acpl_black?: number; p_acceptable_mean?: number;
+  mistakes: number; blunders: number; avg_latency_ms: number;
 }
 ```
 
@@ -246,7 +227,7 @@ Terminal: `finished`, `aborted`. `stopped_budget` and `paused` are resumable.
 | `thinking` | `{ply, side, by, model?, arm?, attempt, started_at}` |
 | `retry` | `{ply, attempt, max, reason: "429"|"5xx"|"network"|"invalid_choice", wait_ms}` |
 | `ply` | `Ply` (judge may be null) |
-| `judged` | `{ply, judge: Judge, decision_options?: OptionProb[]}` — fills oracle numbers |
+| `judged` | `{ply, eval: PositionEval, judge: Judge \| null}` — fills oracle numbers |
 | `status` | `{status, status_reason}` |
 | `spend` | `{game_usd, session_usd, cap_usd}` |
 | `error` | `{code, message, ply?}` |
@@ -276,46 +257,31 @@ A series rates **one arm** against the Stockfish ladder (METRICS.md Part B).
 - `402 budget_exceeded` if even the *typical* estimate exceeds the cap; the *worst case*
   (all games reaching 200 plies) is returned in the estimate and shown as a warning only.
 
-```go
-type Series struct {
-    ID, Name, Model, Arm string
-    Status       string   // created|running|paused|finished|stopped_budget|stopped_error|aborted
-    StatusReason string
-    Size         SeriesSize
-    LadderVersion int
-    Seed         int64
-    BudgetUSD    Money; CostUSD Money
-    Games        []SeriesGame     // summaries, in play order
-    Blocks       []Block
-    Elo          *EloEstimate     // null until the first finished game
-    EloHistory   []EloPoint       // after each finished game, for the chart
-    Secondary    SeriesStats
-    CreatedAt    time.Time
+```ts
+export interface Series {
+  id: string; name: string; model: string; arm: string;
+  status: 'created' | 'running' | 'paused' | 'finished' | 'stopped_budget' | 'stopped_error' | 'aborted';
+  status_reason?: string; size: SeriesSize; ladder_version: number; seed: number;
+  budget_usd: Money; cost_usd: Money;
+  games: SeriesGame[];       // summaries, in play order
+  blocks: Block[]; elo: EloEstimate | null;   // null until the first finished game
+  elo_history: EloPoint[];   // after each finished game, for the chart
+  secondary: SeriesStats; created_at: string;
 }
-type Block struct {
-    Index int; LevelID string; LevelElo float64
-    Games int; Score float64; PosteriorBefore, PosteriorAfter float64
-}
-type SeriesGame struct {
-    GameID string; Index int; Block int; LevelID string; LevelElo float64
-    ModelColor string // "white"|"black"
-    Status string; Result string      // "1-0" etc.
-    ModelScore *float64               // 1, 0.5, 0 once finished
-    Termination string; Adjudicated bool; Plies int
-    AcplModel *float64; CostUSD Money
-}
-type EloEstimate struct {
-    Mean, Lo, Hi, HalfWidth float64
-    Games int; W, D, L int; ScorePct float64
-    TargetHalfWidth *float64
-}
-type EloPoint struct { Games int; Mean, Lo, Hi float64 }
-type SeriesStats struct {
-    Acpl, AcplMedian, AcceptableRate, MistakeRate, BlunderRate, MeanPAcceptable, MeanEWinLoss float64
-    Brier, ECE float64; ScoreAsWhite, ScoreAsBlack float64
-    AvgPlies float64; AdjudicatedFrac float64; CostPerGame Money
-    LatencyP50, LatencyP95 int; AvgInputTokens int
-}
+export interface Block { index: number; level_id: string; level_elo: number; games: number;
+  score: number; posterior_before: number; posterior_after: number }
+export interface SeriesGame { game_id: string; index: number; block: number; level_id: string;
+  level_elo: number; model_color: 'white' | 'black'; status: string; result: string;
+  model_score?: 0 | 0.5 | 1; termination: string; adjudicated: boolean; plies: number;
+  acpl_model?: number; cost_usd: Money }
+export interface EloEstimate { mean: number; lo: number; hi: number; half_width: number;
+  games: number; w: number; d: number; l: number; score_pct: number; target_half_width?: number }
+export interface EloPoint { games: number; mean: number; lo: number; hi: number }
+export interface SeriesStats { acpl: number; acpl_median: number; acceptable_rate: number;
+  mistake_rate: number; blunder_rate: number; mean_p_acceptable: number; mean_e_win_loss: number;
+  brier: number; ece: number; score_as_white: number; score_as_black: number; avg_plies: number;
+  adjudicated_frac: number; cost_per_game: Money; latency_p50: number; latency_p95: number;
+  avg_input_tokens: number }
 ```
 
 Endpoints: `GET /api/series` (summaries), `GET /api/series/{id}`, `DELETE /api/series/{id}`
@@ -367,10 +333,13 @@ intervals do not overlap this one's; the UI never ranks arms that overlap.
 `POST /api/matches` (arm vs arm), `GET /api/matches/{id}`, joint-fit leaderboard fields.
 `Player` config already allows `{type:"model"}` on both sides, so no game schema change.
 
-## 4. SQLite schema (`modernc.org/sqlite`, WAL, `foreign_keys=ON`)
+## 4. SQLite / D1 schema
 
-Migrations are numbered SQL files embedded in the binary (`internal/store/migrations/NNNN_*.sql`),
-applied at start-up in a transaction.
+This SQL is canonical. `packages/db` expresses it in Drizzle (`sqlite-core`); `drizzle-kit`
+generates numbered migrations that are applied to local SQLite/D1 and to remote D1 unchanged.
+Use only features D1 supports (no extensions; rows ≤ 2 MB). `request_gz`/`response_gz` (raw
+bodies) are **local-only**: they are never published, and in phase 2+ move to R2. Add
+`engine_id TEXT` to `games` (default `stockfish`) and `interface TEXT` to `attempts`.
 
 ```sql
 CREATE TABLE models_snapshot (
@@ -453,9 +422,11 @@ start a new series or use "completion" from the start).
 
 | Var | Default | Notes |
 | --- | --- | --- |
-| `OPENROUTER_API_KEY` | — | read once at start; never logged, never sent to the browser |
-| `CHESSDECIDE_ADDR` | `127.0.0.1:8080` | refuse non-loopback binds unless `CHESSDECIDE_ALLOW_REMOTE=1` |
-| `CHESSDECIDE_DATA` | `./data` | DB, suites, exports |
-| `STOCKFISH_PATH` | `stockfish` on PATH, then `/opt/homebrew/bin/stockfish` | |
-| `CHESSDECIDE_JUDGE_WORKERS` | `min(4, NumCPU-2)` | |
+| `OPENROUTER_API_KEY` | — | `.env` locally, Worker secret in phase 2; never logged, never sent to the browser or published |
+| `CHESSDECIDE_MODE` | `local` | `local` \| `public` \| `live` (see top of this doc) |
+| `CHESSDECIDE_DATA` | `./data` | local DB, ladder files, exports |
+| `STOCKFISH_PATH` | `stockfish` on PATH, then `/opt/homebrew/bin/stockfish` | `NativeUciEngine`; other UCI engines are extra config entries |
+| `CHESSDECIDE_ENGINE_URL` | — | phase 2: `HttpEngine` base URL |
+| `CHESSDECIDE_JUDGE_WORKERS` | `min(4, cores-2)` | |
 | `CHESSDECIDE_MOCK` | `0` | `1` uses the mock provider (no key, no spend) |
+| `CLOUDFLARE_*` | — | `publish` only: account id, D1 database id, API token |

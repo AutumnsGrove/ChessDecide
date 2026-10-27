@@ -1,0 +1,1 @@
+{"name":"s1","private":true,"type":"module","packageManager":"pnpm@10.28.0","dependencies":{"drizzle-kit":"^0.31.11","drizzle-orm":"^0.45.4","tsx":"^4.23.15","wrangler":"^4.154.0"}}

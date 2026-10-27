@@ -1,0 +1,6 @@
+{
+  "extends": "$app/tsconfig",
+  "compilerOptions": { "types": ["$app/types", "@cloudflare/workers-types"] },
+  "include": ["src", "test", "*"],
+  "exclude": ["src/service-worker"]
+}

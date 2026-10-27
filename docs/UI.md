@@ -1,10 +1,19 @@
 # ChessDecide — UI spec
 
-The mockups in `docs/mockups/` are the visual reference (open `index.html`). Where this doc and
-a mockup disagree, this doc wins; copy tokens from `mockups/app.css` rather than eyeballing.
-Stack: SvelteKit (Svelte 5 runes, TypeScript strict, SPA mode), `chessground@9.2.1`, plain CSS
-with custom properties. **No UI framework, no chart library** — charts are small hand-written
-SVG components.
+The mockups in `docs/mockups/` are the visual reference. **Start with `simple.html`**: the
+phone-friendly target for v1 (board, transport, eval bar, tappable eval graph, plain one-line
+status, stats; plus a simple Ratings tab). `index.html` and its pages show the older, denser
+screens that arrive after v1's core works. Where this doc and a mockup disagree, this doc wins;
+copy tokens from `mockups/app.css` rather than eyeballing.
+Stack: SvelteKit (Svelte 5 runes, TypeScript strict, `adapter-cloudflare`), `chessground@9.2.1`,
+**plain CSS with custom properties. No Tailwind, no UI framework, no chart library**; charts are
+small hand-written SVG components. Layouts must work at **400 px width** first (Autumn reads on a
+phone), then scale up.
+
+**v1 scope for the UI:** the Viewer (replay + live) and Games list come first; Series and
+leaderboard screens follow once the go/no-go passes. The deployed site is **read-only** (no New
+game/New series buttons, no spend meter); local mode shows the controls. **No generated
+commentary**: the one-line status under the board uses fixed templates over Judge numbers.
 
 ## 1. Principles
 

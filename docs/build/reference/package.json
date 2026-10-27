@@ -1,0 +1,36 @@
+{
+  "name": "chessdecide",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "check": "pnpm -r --if-present check",
+    "lint:lockfiles": "node scripts/no-other-lockfiles.mjs",
+    "dev": "pnpm -r --parallel --filter @chessdecide/runner --filter @chessdecide/web dev",
+    "cli": "pnpm --filter @chessdecide/runner cli",
+    "db:generate": "pnpm --filter @chessdecide/db generate",
+    "db:migrate": "pnpm --filter @chessdecide/web exec wrangler d1 migrations apply DB --local --persist-to ../../data/d1",
+    "build": "pnpm -r --if-present build",
+    "verify": "pnpm lint:lockfiles && pnpm typecheck && pnpm check && pnpm test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd",
+      "@resvg/resvg-js",
+      "sharp"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

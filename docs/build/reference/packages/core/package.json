@@ -1,0 +1,9 @@
+{
+  "name": "@chessdecide/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "test": "vitest run", "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": { "chess.js": "1.4.0" }
+}

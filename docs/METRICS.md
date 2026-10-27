@@ -236,7 +236,7 @@ use a per-game seeded RNG (logged), so a game is reproducible given its seed.
 The numbers in examples below (`random` 250, `eps75` 560, `eps50` 790, `eps30` 980,
 `eps15` 1150, `uci1320` 1320, `uci1500` 1500) are **placeholders for illustration**; real
 values come from step 3. Until a calibrated file exists the app loads
-`internal/ladder/default_ladder.json` (nominal values, `"calibrated": false`) and the UI shows
+`packages/core/ladder/default_ladder.json` (nominal values, `"calibrated": false`) and the UI shows
 a persistent "uncalibrated ladder" notice on every Elo.
 
 Every series stores the ladder `version` it used; Elo values are only comparable across

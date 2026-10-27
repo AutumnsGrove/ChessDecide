@@ -147,15 +147,15 @@ in v1 calls `/api/v1/chat/completions`.
   different time controls than ours, so the ladder is re-measured (`METRICS.md` B2). For judging: full strength, `Threads=1`, `Hash=64`.
   `UCI_ShowWDL=true` gives win/draw/loss probabilities (better than raw cp).
 - python-chess 1.11 (via `uv run --with chess`) used for the M0 spikes; the real backend will
-  use the Go library below.
-- Go 1.26 installed; `github.com/corentings/chess/v2` v2.6.1 verified:
+  use the chess library below.
+- (Superseded by the TypeScript stack, see `ARCHITECTURE.md`; the Go-library checks below are kept as history.) Go 1.26 installed; `github.com/corentings/chess/v2` v2.6.1 verified:
   `chess.FEN(fen)`, `game.ValidMoves() []Move`, `chess.AlgebraicNotation{}.Encode(pos, m)`,
   `UCINotation{}.Encode`, `pos.Turn()`, `pos.Board()`, `game.PushMove(san, nil)`.
   Move tags: `Capture`, `EnPassant`, `Check`, `KingSideCastle`, `QueenSideCastle`.
   No explicit mate tag → use `game.Outcome()` / `pos.Status()` to add `#`.
-- Node 26 / Bun installed. SvelteKit + Vite with `/api` proxy to Go.
+- Node 26 / Bun installed (Bun is not used; the project uses pnpm). SvelteKit + Vite (now also hosting the API routes).
 - Board: `chessground@9.2.1` (framework-agnostic lichess board) + `chessground.base.css` and a
-  theme. Frontend does not need chess rules (Go owns the game), only FEN/highlights/shapes.
+  theme. Frontend does not need chess rules (the server/core owns the game), only FEN/highlights/shapes.
 
 ---
 

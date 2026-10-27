@@ -232,3 +232,92 @@ primary decision-vs-text comparison about the interface rather than about test-t
   effectively equal (Re1/h3 CPL 0). Judge on win% loss and decisiveness strata.
 - Provider routing/rate limits will change results; record `provider` and retry.
 - The temp API key used for these spikes must not be committed.
+
+---
+
+## 8. Session 2 spikes (2026-10-27)
+
+### S1 — local D1 + Drizzle from a Node script: **PASS**
+
+`spikes/s1-d1/`. Installed with pnpm (`wrangler 4.154`, `drizzle-orm`, `drizzle-kit`, `tsx`);
+`drizzle-kit generate` produced the migration; a Node script opened local D1 through wrangler's
+`getPlatformProxy({ persist: { path } })`, applied the SQL and used `drizzle-orm/d1`.
+
+- 10,000 ply rows in 1,000 batched statements: **6.5 s**; read of the count: 21 ms.
+- 50 single-row inserts: **0.9 s** (≈ 18 ms each). A 60-ply game writes in about a second.
+- A second Node process opened the same persisted state and read all 10,000 rows (61 ms), so a
+  runner and a local web app can share one D1 by pointing at the same `persist` path.
+- D1 limits bind: ≤ 100 bound parameters per statement (so ~10 rows of 6 columns per `INSERT`);
+  use `db.batch([...])` for groups. Single inserts are fine for plies.
+- **pnpm 10 gotcha:** dependency build scripts are blocked by default (the install printed
+  "Ignored build scripts: esbuild, workerd"). Wrangler still ran, but declare
+  `"pnpm": { "onlyBuiltDependencies": ["esbuild", "workerd", "@resvg/resvg-js"] }` (or
+  `pnpm approve-builds`) in the root `package.json` so installs are reproducible.
+- Decision: **use the local D1 path** (`getPlatformProxy`); keep `better-sqlite3` out unless a
+  later task shows a real problem. Wrangler prints a proxy warning in this sandbox; harmless.
+
+### S2 — image input (partly done)
+
+`spikes/s2-image/`. Findings from OpenRouter's *Multimodal Decisions* page (not yet live-tested):
+
+- Image part goes **inside the `state` array**:
+  `{ "type": "image_url", "image_url": { "url": "data:image/png;base64,…" } }`; `state` may mix
+  strings/objects and image parts.
+- **Jev**: each image 256–1,568 px per side, 78,400–2,458,624 pixels total, PNG/JPEG ≤ 16 MiB;
+  images count as normal input tokens. Below minimum → `400`; above limits → `413`.
+- **Clef / Clef Flash** (Workers AI): estimate ≈ 4 base64 chars per token, `413` past a 65,536
+  token window, so keep each image **< 300 KB**. **Clef reads only roughly the first 2,000 tokens
+  of text in `state` and silently drops the rest** (relevant to the text arm's history/FEN).
+- **Mercury Decide**: a 7 MB JPEG is accepted and billed as ~1,000 input tokens.
+- Image-capable decision models in the catalog today (input `image`): jev-1.13/1.14, liquid d1,
+  d1.1, d1-ultra, cloudflare clef, clef-flash, clef-omni, inception mercury-decide, perplexity
+  pplx-decider(-flash) v1.2, respan span-02, nace drex-max, scaledown classify-1,
+  openai gpt-6-luna-decisions.
+- Renderer built and checked by eye: 512×512 PNG ≈ 38 KB (resvg, cburnett pieces).
+- Live results: §9.
+
+### S2 — image input, live results: **WORKS; no clear benefit**
+
+`spikes/s2-image/` (`run.ts`, `summ.py`, raw `results.jsonl`, oracle `oracle.json`). 6 image-capable
+models × 48 positions × 2 arms = 576 calls, total **$0.029**. Positions are the 48 White-to-move
+positions of the simulated sample game; options are the bare `plain` descriptors; arm `text` = FEN +
+last 16 SAN, arm `image` = 512×512 PNG + side/move number (no FEN). Oracle = Stockfish **16** (apt
+package; not 19) at depth 10, child-position search, mover POV, clamp ±1000. One repeat. **N = 48
+positions from one game: treat everything as a hypothesis, not a result.**
+
+| model | arm | mean CPL | median | best-move % | ≤ 30 cp % | blunder (≥ 200) % | ms | input tok |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| liquid/d1-ultra | text | **221** | **62** | **30** | **40** | **36** | 246 | 479 |
+| liquid/d1-ultra | image | 286 | 150 | 19 | 23 | 43 | 280 | 735 |
+| cloudflare/clef | text | 237 | 84 | 23 | 33 | 46 | 352 | 1037 |
+| cloudflare/clef | image | 296 | 247 | 17 | 26 | 55 | 570 | 1213 |
+| perplexity/pplx-decider-v1.2 | text | 268 | 204 | 27 | 31 | 50 | 280 | 685 |
+| perplexity/pplx-decider-v1.2 | image | 335 | 269 | 21 | 25 | 54 | 324 | 828 |
+| inception/mercury-decide | text | 341 | 218 | 17 | 21 | 52 | 325 | 918 |
+| inception/mercury-decide | image | 397 | 348 | 12 | 12 | 65 | 418 | 1057 |
+| liquid/d1 | text | 361 | 294 | 17 | 26 | 53 | 241 | 479 |
+| liquid/d1 | image | 333 | 151 | 13 | 28 | 49 | 348 | 735 |
+| typesafe/jev-1.14 | text | 429 | 434 | 19 | 25 | 60 | 190 | 1116 |
+| typesafe/jev-1.14 | image | 395 | 402 | 27 | 31 | 56 | 220 | 1741 |
+| **uniform random mover (expected)** | | **361** | | **11** | **15** | **56** | | |
+
+Findings:
+
+1. **The request shape works** on all six models (`state` array with an `image_url` data-URL PNG).
+   512×512 PNG (~38 KB) was accepted everywhere, including Jev (≥ 256 px) and Clef (< 300 KB).
+2. **Image costs more and did not help.** Image adds ~150–650 input tokens per call (Jev 1116 → 1741).
+   Paired mean-CPL difference (image − text): Clef +54 ± 40, Mercury +56 ± 94, D1 Ultra +65 ± 99,
+   Pplx +67 ± 84, D1 −27 ± 85, Jev −34 ± 85 (95 % intervals; only Clef's is near significance, and
+   all are worse-or-zero except D1/Jev which are within noise). Picks differ between arms on most
+   positions (identical in only 13–34 of 48), so the arms are genuinely different tests.
+3. **The models are weak at chess.** Best: D1 Ultra text (30 % best move, median CPL 62). **Jev text
+   is no better than a random mover on mean CPL (429 vs 361) and blunder rate (60 % vs 56 %)**, though
+   it finds the best move more often (19 % vs 11 %). This is the key planning fact: ratings will sit
+   at or below the random-mover level for some arms, so the ε-random ladder levels (`METRICS.md` B2)
+   are essential, not optional, and the first Series should start at the bottom of the ladder.
+4. **A `choice` needs at least 2 options (HTTP 422)** on D1, D1 Ultra and Clef; Jev answered a
+   1-option choice. **Rule: when there is exactly one legal move, play it without calling the model.**
+   (Position at ply 65 of the sample game.)
+5. Latency 190–570 ms per call; ~$0.00005 per call overall.
+6. Not yet tested: images vs FEN with a different piece set/orientation, higher resolution,
+   repeats (pick stability), and the `hinted` arm.

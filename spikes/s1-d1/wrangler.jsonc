@@ -1,0 +1,2 @@
+{ "name": "s1", "main": "x.js", "compatibility_date": "2026-10-01",
+  "d1_databases": [{ "binding": "DB", "database_name": "chessdecide", "database_id": "local-dev" }] }

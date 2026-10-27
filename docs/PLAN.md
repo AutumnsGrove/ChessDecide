@@ -1,28 +1,48 @@
 # ChessDecide — Plan
 
-A local harness that **rates decision models at chess**: each model plays a series of games
+A harness that **rates decision models at chess**: each model plays a series of games
 against Stockfish, and we estimate its Elo. A lichess-style dark GUI lets you watch any game
 live or play it back move by move. Cost is a first-class design constraint.
 
-Status: **design locked v3 (2026-10-27); M0 spikes passed; no app code yet.**
-v3 change: the primary workflow is now **games and series with an Elo rating** (v2 was
-position-centric with a Compare tab; Compare is dropped from v1).
+Status: **design locked v4 (2026-10-27); M0 spikes passed; no app code yet.**
+v3: the primary workflow is **games and series with an Elo rating** (Compare dropped).
+**v4 changes:** TypeScript + SvelteKit + Drizzle/D1 instead of Go (see
+[`ARCHITECTURE.md`](ARCHITECTURE.md)); run locally and publish results first, live Cloudflare runs
+later; `clean` arm is now fully bare; optional image arm; build order is viewer-first with a cheap
+go/no-go after one real game; no generated commentary (costs money); raw CSS, no Tailwind.
 
 | Doc | Purpose |
 | --- | --- |
-| `PLAN.md` (this) | What we are building and why; locked decisions; architecture; risks |
+| `PLAN.md` (this) | What we are building and why; locked decisions; risks |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | TypeScript stack, ports/adapters, the three run phases, Cloudflare limits |
 | [`METRICS.md`](METRICS.md) | Elo/series scoring, ladder calibration, per-move oracle metrics, formulas |
 | [`PROMPTS.md`](PROMPTS.md) | Verbatim request builders: keys, descriptions, state, instructions |
-| [`API.md`](API.md) | HTTP + SSE contract, Go/TS types, SQLite schema |
+| [`API.md`](API.md) | HTTP + SSE contract, TypeScript types, SQLite/D1 schema |
 | [`UI.md`](UI.md) | Design tokens, screens, components, playback behaviour, states |
 | [`IMPLEMENTATION.md`](IMPLEMENTATION.md) | Ordered tasks with acceptance checks (**the build doc**) |
 | [`SPIKE.md`](SPIKE.md) / [`RESEARCH.md`](RESEARCH.md) | M0 measurements; API and toolchain facts |
 | [`TEXT_ARM.md`](TEXT_ARM.md) | **Deferred**: text-model comparison |
-| `mockups/` | Open `mockups/index.html` in a browser |
+| `mockups/` | **`mockups/simple.html`** is the target look (phone-friendly); `index.html` has the older dense screens |
 
 ---
 
 ## 0. Locked decisions
+
+### Stack, hosting and build order (v4)
+
+1. **TypeScript** monorepo managed with **pnpm only** (no npm/yarn/Bun), **SvelteKit** (Svelte 5) frontend, **raw CSS** (no Tailwind), `chessground`
+   board, `chess.js` for rules, **Drizzle** over SQLite, targeting **Cloudflare** (D1, Workers,
+   Durable Objects). Details: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+2. **Three phases, one core.** (1) run locally with native Stockfish and **publish results** to a
+   read-only public site on the free tier; (2) run live on Cloudflare (Durable Objects + a Stockfish
+   container or server); (3) fan out hundreds of games across models. Moving between phases swaps
+   adapters (`Engine`, `Store`, `Scheduler`, `EventSink`), not the core.
+3. **Engines are adapters.** Stockfish first; any UCI engine can be added later and is recorded per game.
+4. **Viewer-first order.** Mock provider ($0) → watch a game → one real Jev game (≈ half a cent) →
+   go/no-go → ladder, Series, Elo → publish. Elo stays the headline, but it is built after the
+   viewer proves the idea is fun to watch.
+5. **No generated commentary.** Text beside moves comes from fixed templates over Stockfish numbers;
+   no extra model calls.
 
 ### Goal and scope
 
@@ -47,15 +67,16 @@ position-centric with a Compare tab; Compare is dropped from v1).
 - **Default roster: `typesafe/jev-1.14` and `liquid/d1-ultra`.** Other catalog models are
   selectable under "More models"; expand only if these go well.
 - An **arm** = `(model, interface, key_format, descriptor, state_variant, template)`. A Series
-  rates **one arm**; arms are never merged. Two default arms per model:
+  rates **one arm**; arms are never merged. Default arms per model:
 
-| Arm | `key_format` | `descriptor` | Meaning |
-| --- | --- | --- | --- |
-| **`clean`** | `uci` | `plain` | No check/mate/capture hints in keys or text. The honest test. |
-| **`hinted`** | `san` | `annotated` | SAN keys (`Qxf7#`), "check/checkmate" text. Readable; leaks. |
+| Arm | Interface | `key_format` | `descriptor` | Meaning |
+| --- | --- | --- | --- | --- |
+| **`clean`** (default) | text | `uci` | `plain` | **Fully bare:** `Knight g1 to f3`. No capture, check or mate information anywhere. The honest test. |
+| **`hinted`** | text | `san` | `annotated` | SAN keys (`Qxf7#`), "captures pawn, checkmate" text, `in_check` flag. Readable; leaks. Opt-in. |
+| **`image`** (optional) | image + text | `uci` | `plain` | Board picture instead of FEN/history; same bare options as `clean`. Separate arm, separate rating. |
 
-Defaults: `state_variant=slim`, `template=neutral`. So the first full study is four series:
-Jev·clean, Jev·hinted, D1 Ultra·clean, D1 Ultra·hinted.
+Defaults: `state_variant=slim`, `template=neutral`. First full study: Jev·clean, D1 Ultra·clean;
+then `hinted` and `image` arms if the first results are interesting.
 
 ### Series presets (locked)
 
@@ -134,7 +155,7 @@ impossible**; "illegal move rate" is a text-arm metric only.
 Details in [`RESEARCH.md`](RESEARCH.md): endpoint `POST /api/alpha/decisions` (alpha);
 `choice` returns `{choice, probabilities, confidence}`; `usage.cost` is input-only; Jev and
 D1 Ultra cost $0.042 / M input tokens; Jev degrades above ~32 KB (we send ≤ ~15 KB); the
-schema may change, so everything is isolated in `internal/openrouter`.
+schema may change, so everything is isolated in `packages/providers`.
 
 ---
 
@@ -263,60 +284,21 @@ by the rolling mean of real usage after 20 attempts. Series worst case =
 
 ## 6. Architecture
 
-```
-┌────────────────────────────┐        ┌──────────────────────────────┐
-│ SvelteKit SPA (web/)       │  /api  │ Go backend (127.0.0.1:8080)  │
-│  chessground Viewer        │ ─────► │  net/http + SSE              │
-│  Series dashboard          │        │  series scheduler (Elo)      │
-└────────────────────────────┘        │  game orchestrator           │
-                                      │  MoveProvider registry       │
-                                      │  Stockfish: judge pool +     │
-                                      │     per-game opponents       │
-                                      │  SQLite (modernc, pure Go)   │
-                                      └──────────────┬───────────────┘
-                                                     │
-                                      ┌──────────────▼───────────────┐
-                                      │ OpenRouter /api/alpha/...    │
-                                      └──────────────────────────────┘
-```
-
-Go for native Stockfish processes, goroutines for judging and parallel games, one static
-binary, trivial SSE. UI: SvelteKit in SPA mode (`adapter-static`, `ssr=false`); Vite proxies
-`/api` in dev, Go embeds `web/build` in prod.
-
-### 6.1 Go packages
+Full detail in [`ARCHITECTURE.md`](ARCHITECTURE.md). Summary:
 
 ```
-cmd/chessdecide/main.go     # server + subcommands: serve, ladder calibrate, probe
-internal/chessx/            # legal moves, SAN/UCI, descriptors, FEN utils (wraps corentings/chess/v2)
-internal/engine/            # UCI client; JudgePool; Opponent (per game); weak-level wrapper (ε-random)
-internal/oracle/            # per-move scoring, cache, win% math
-internal/openrouter/        # catalog, decisions client, usage, retry/backoff, rate limiter
-internal/providers/         # MoveProvider interface; decisions provider; mock provider
-internal/budget/            # estimator, cap enforcement, ledger
-internal/game/              # state machine, adjudication, pacing, persistence, SSE
-internal/ladder/            # level definitions, calibration job, ladder-vN.json
-internal/series/            # scheduler, Elo posterior, stop rules, SSE
-internal/bench/             # (M5) position suite + ablations
-internal/store/             # SQLite schema, migrations, queries
-internal/api/               # routes, SSE hub, error mapping, static embed
-web/  data/  tools/
+packages/core        pure TS: chess rules, descriptors, prompts, parsers, Elo, ladder, stepGame
+packages/engine      Engine port + adapters (native UCI now; HTTP/container later)
+packages/providers   OpenRouter Decisions client, retry/limiter/cache, mock provider
+packages/db          Drizzle schema + migrations (SQLite locally, D1 in Cloudflare)
+packages/runner      Node CLI: game, series, ladder calibrate, probe, publish
+apps/web             SvelteKit (adapter-cloudflare), raw CSS, chessground
+apps/live            (phase 2) Worker + Durable Objects
 ```
 
-Core interface (generic so a text provider can be added later):
-
-```go
-type MoveProvider interface {
-    ID() string
-    Move(ctx context.Context, req MoveRequest) (MoveResponse, error)
-}
-```
-
-`MoveRequest`/`MoveResponse`, `Opponent` and `Player` are specified in [`IMPLEMENTATION.md`](IMPLEMENTATION.md) §1.
-A game is `(white: Player, black: Player)` where `Player` is either a `MoveProvider` or an
-`Opponent`; both implement `Move`, so the game loop never branches on type.
-
----
+A game is `(white: Player, black: Player)`; a `Player` is a model (`MoveProvider`) or an engine
+(`Opponent`), both with one `move()` method, so the loop never branches on type. `stepGame`
+plays exactly one ply, so a local loop and a Durable Object alarm drive the same code.
 
 ## 7. UI
 
@@ -332,12 +314,15 @@ Tasks and acceptance checks: [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 | M | Deliverable |
 | --- | --- |
 | **M0** | Protocol spikes (done) |
-| **M1** | Go core: `chessx`, `engine`, `oracle`, `openrouter`, `budget`, mock provider, store; golden tests; CLI smoke game; resolve §9 questions |
-| **M2** | Single-game orchestrator + API + **Viewer** (live + playback), budget UI |
-| **M3** | **Ladder** calibration job + **Series** scheduler + Elo posterior + series dashboard |
-| **M4** | Leaderboard, exports, cross-arm comparison, precision/stop-rule polish |
-| **M5** | **Model vs model matches** + joint Elo fit; position suite, ablations, calibration plots, Elo-vs-cost views, optional position lab |
-| **M6** | *(optional)* text arm |
+| **M0.5** | Spikes: local D1 + Drizzle (S1), image input probe (S2) |
+| **M1** | Core, engine adapter, store, judge, mock provider, game stepper + CLI; golden tests |
+| **M2** | **Viewer** (replay + live, phone-friendly), local control API, OpenRouter client + budget, **one real game → go/no-go** |
+| **M3** | **Ladder** calibration + **Series** + Elo posterior + series UI (the headline) |
+| **M4** | **Publish** to D1, read-only public site, leaderboard, exports |
+| **M5** | **Image arm** (optional) |
+| **M6** | **Live runs on Cloudflare** (Durable Objects + Stockfish container/server) |
+| **M7** | Scale-out: many models, hundreds of games |
+| **M8** | Model vs model, other engines, position suite, text arm |
 
 ## 9. Open questions (each an M1 task, ≤ $0.05 total unless noted)
 
@@ -350,8 +335,9 @@ Tasks and acceptance checks: [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 5. Does `GET /api/v1/key` expose remaining credit?
 6. Measured Stockfish `movetime` to use for ladder (default 50 ms) and calibration time
    (CPU, one-off).
-7. How strong are these models really? (A 10-game pilot against the weak ladder decides the
-   first series' starting level; the algorithm handles any answer.)
+7. How strong are these models really? **Partly answered (SPIKE §9):** on 48 positions, D1 Ultra text
+   plays clearly above a random mover (30 % best-move vs 11 %); Jev text is about random on CPL and
+   blunder rate. Expect Jev near the bottom of the ladder; a 10-game pilot picks the starting level.
 
 ## 10. Risks
 
@@ -362,10 +348,12 @@ Tasks and acceptance checks: [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 - **Contamination** — openings are random plies, not book lines (reduces memorisation).
 - **Long games cost money** — adjudication, 200-ply cap, hard budget.
 - **Rate limits** — concurrency cap, backoff; blocks run ≤ 2 games in parallel.
-- **Library risk** — `corentings/chess/v2` verified against python-chess golden fixtures first.
+- **Library risk** — `chess.js` verified against python-chess golden fixtures first.
+- **Cloudflare limits** — free tier cannot run Stockfish (10 ms CPU, no Containers); phase 1 avoids it by running locally, phase 2 needs the paid plan or an external Stockfish host. Re-check limits before phase 2.
+- **Image arm confound** — Jev switches to a slower long-context mode for any image; the arm is reported separately and labelled.
 - **Catalog churn** — snapshot catalog row per series.
-- **Non-goals (v1)** — online deployment, auth, human play, training, per-model prompt tuning,
-  text-model spend, Compare tool.
+- **Non-goals (v1)** — hosted live runs (phase 2), auth, human play, training, per-model prompt
+  tuning, text-model spend, Compare tool, generated commentary.
 
 ## 11. References
 
