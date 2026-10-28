@@ -1,8 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** The repo-root `.env` regardless of the package directory a script runs from. */
+const REPO_ENV = fileURLToPath(new URL('../../../.env', import.meta.url));
 
 /** Minimal `.env` loader: no dependency, never overrides a real environment variable. */
-export function loadEnv(path = resolve(process.cwd(), '.env')): void {
+export function loadEnv(path = REPO_ENV): void {
   if (!existsSync(path)) return;
   for (const raw of readFileSync(path, 'utf8').split('\n')) {
     const line = raw.trim();

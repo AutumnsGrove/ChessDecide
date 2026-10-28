@@ -1,0 +1,1633 @@
+{
+  "id": "01M61RFX98RJV4HC5Z3V3RXNZV",
+  "status": "finished",
+  "status_reason": "checkmate",
+  "config": {
+    "white": {
+      "type": "model",
+      "model": "typesafe/jev-1.14",
+      "arm": "clean"
+    },
+    "black": {
+      "type": "ladder",
+      "level": "eps75"
+    },
+    "opening": {
+      "type": "startpos"
+    },
+    "pace_ms": 600,
+    "budget_usd": 0.05,
+    "judge_depth": 14,
+    "max_plies": 120,
+    "adjudicate": true,
+    "seed": 1198585408
+  },
+  "start_fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "adjudicated": false,
+  "result": "1-0",
+  "termination": "checkmate",
+  "cost_usd": 0.000544782,
+  "created_at": "2026-10-28T17:21:27.849Z",
+  "plies": [
+    {
+      "ply": 1,
+      "side": "white",
+      "by": "model",
+      "uci": "e2e4",
+      "san": "e4",
+      "fen_after": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "e2e4",
+        "p_pick": 0.86,
+        "confidence": 0.85,
+        "n_options": 20,
+        "top_options": [
+          {
+            "uci": "e2e4",
+            "san": "e4",
+            "p": 0.86,
+            "cp": 31,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "d2d4",
+            "san": "d4",
+            "p": 0.09,
+            "cp": 20,
+            "cpl": 11,
+            "win_loss": 1.2000000000000028
+          },
+          {
+            "uci": "b1c3",
+            "san": "Nc3",
+            "p": 0.02,
+            "cp": 0,
+            "cpl": 31,
+            "win_loss": 2.700000000000003
+          },
+          {
+            "uci": "g1f3",
+            "san": "Nf3",
+            "p": 0.02,
+            "cp": 25,
+            "cpl": 6,
+            "win_loss": 0.7000000000000028
+          },
+          {
+            "uci": "c2c4",
+            "san": "c4",
+            "p": 0.01,
+            "cp": 16,
+            "cpl": 15,
+            "win_loss": 1.5499999999999972
+          },
+          {
+            "uci": "a2a3",
+            "san": "a3",
+            "p": 0,
+            "cp": -5,
+            "cpl": 36,
+            "win_loss": 3.1499999999999986
+          },
+          {
+            "uci": "a2a4",
+            "san": "a4",
+            "p": 0,
+            "cp": -10,
+            "cpl": 41,
+            "win_loss": 3.5
+          },
+          {
+            "uci": "b1a3",
+            "san": "Na3",
+            "p": 0,
+            "cp": -68,
+            "cpl": 99,
+            "win_loss": 13.799999999999997
+          }
+        ],
+        "prob_sum": 1,
+        "latency_ms": 348,
+        "usage": {
+          "input_tokens": 769,
+          "output_tokens": 220,
+          "cost_usd": 0.000032298
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 1
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 31,
+        "wdl": [
+          60,
+          935,
+          5
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "e2e4",
+        "best_san": "e4",
+        "best_cp": 31,
+        "played_cp": 31,
+        "cpl": 0,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.98,
+        "e_win_loss": 0.19150000000000034
+      },
+      "created_at": "2026-10-28T17:21:28.427Z"
+    },
+    {
+      "ply": 2,
+      "side": "black",
+      "by": "engine",
+      "uci": "e7e5",
+      "san": "e5",
+      "fen_after": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 26,
+        "wdl": [
+          51,
+          943,
+          6
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:29.472Z"
+    },
+    {
+      "ply": 3,
+      "side": "white",
+      "by": "model",
+      "uci": "g1f3",
+      "san": "Nf3",
+      "fen_after": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "g1f3",
+        "p_pick": 0.45,
+        "confidence": 0.43,
+        "n_options": 29,
+        "top_options": [
+          {
+            "uci": "g1f3",
+            "san": "Nf3",
+            "p": 0.45,
+            "cp": 34,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "b1c3",
+            "san": "Nc3",
+            "p": 0.15,
+            "cp": 22,
+            "cpl": 12,
+            "win_loss": 1.2999999999999972
+          },
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.11,
+            "cp": -13,
+            "cpl": 47,
+            "win_loss": 4.049999999999997
+          },
+          {
+            "uci": "d1h5",
+            "san": "Qh5",
+            "p": 0.1,
+            "cp": -38,
+            "cpl": 72,
+            "win_loss": 6.75
+          },
+          {
+            "uci": "f1b5",
+            "san": "Bb5",
+            "p": 0.05,
+            "cp": -24,
+            "cpl": 58,
+            "win_loss": 5
+          },
+          {
+            "uci": "d1g4",
+            "san": "Qg4",
+            "p": 0.04,
+            "cp": -95,
+            "cpl": 129,
+            "win_loss": 25.699999999999996
+          },
+          {
+            "uci": "d2d4",
+            "san": "d4",
+            "p": 0.03,
+            "cp": -2,
+            "cpl": 36,
+            "win_loss": 3.1999999999999957
+          },
+          {
+            "uci": "c2c4",
+            "san": "c4",
+            "p": 0.02,
+            "cp": -46,
+            "cpl": 80,
+            "win_loss": 8.149999999999999
+          }
+        ],
+        "prob_sum": 1,
+        "latency_ms": 266,
+        "usage": {
+          "input_tokens": 973,
+          "output_tokens": 310,
+          "cost_usd": 0.000040866
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 2
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 34,
+        "wdl": [
+          66,
+          929,
+          5
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "g1f3",
+        "best_san": "Nf3",
+        "best_cp": 34,
+        "played_cp": 34,
+        "cpl": 0,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.6,
+        "e_win_loss": 3.1884999999999986
+      },
+      "created_at": "2026-10-28T17:21:30.382Z"
+    },
+    {
+      "ply": 4,
+      "side": "black",
+      "by": "engine",
+      "uci": "b8c6",
+      "san": "Nc6",
+      "fen_after": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "stockfish",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 50,
+        "random": false
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 35,
+        "wdl": [
+          69,
+          926,
+          5
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:34.851Z"
+    },
+    {
+      "ply": 5,
+      "side": "white",
+      "by": "model",
+      "uci": "b1c3",
+      "san": "Nc3",
+      "fen_after": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "b1c3",
+        "p_pick": 0.23999999999999996,
+        "confidence": 0.21,
+        "n_options": 27,
+        "top_options": [
+          {
+            "uci": "b1c3",
+            "san": "Nc3",
+            "p": 0.23999999999999996,
+            "cp": 10,
+            "cpl": 26,
+            "win_loss": 2.6499999999999986
+          },
+          {
+            "uci": "f1b5",
+            "san": "Bb5",
+            "p": 0.19999999999999996,
+            "cp": 36,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.15999999999999998,
+            "cp": 24,
+            "cpl": 12,
+            "win_loss": 1.3999999999999986
+          },
+          {
+            "uci": "f3e5",
+            "san": "Nxe5",
+            "p": 0.08999999999999998,
+            "cp": -409,
+            "cpl": 445,
+            "win_loss": 53.35
+          },
+          {
+            "uci": "d2d4",
+            "san": "d4",
+            "p": 0.07999999999999999,
+            "cp": 20,
+            "cpl": 16,
+            "win_loss": 1.75
+          },
+          {
+            "uci": "c2c4",
+            "san": "c4",
+            "p": 0.059999999999999984,
+            "cp": -44,
+            "cpl": 80,
+            "win_loss": 8
+          },
+          {
+            "uci": "f3d4",
+            "san": "Nd4",
+            "p": 0.04999999999999999,
+            "cp": -680,
+            "cpl": 716,
+            "win_loss": 53.35
+          },
+          {
+            "uci": "f3g5",
+            "san": "Ng5",
+            "p": 0.039999999999999994,
+            "cp": -722,
+            "cpl": 758,
+            "win_loss": 53.35
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 404,
+        "usage": {
+          "input_tokens": 950,
+          "output_tokens": 290,
+          "cost_usd": 0.0000399
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 3
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 10,
+        "wdl": [
+          27,
+          960,
+          13
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "f1b5",
+        "best_san": "Bb5",
+        "best_cp": 36,
+        "played_cp": 10,
+        "cpl": 26,
+        "win_loss": 2.6499999999999986,
+        "class": "ok",
+        "acceptable": false,
+        "p_acceptable": 0.4399999999999999,
+        "e_win_loss": 11.896999999999998
+      },
+      "created_at": "2026-10-28T17:21:35.792Z"
+    },
+    {
+      "ply": 6,
+      "side": "black",
+      "by": "engine",
+      "uci": "c6d4",
+      "san": "Nd4",
+      "fen_after": "r1bqkbnr/pppp1ppp/8/4p3/3nP3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 191,
+        "wdl": [
+          974,
+          26,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:39.321Z"
+    },
+    {
+      "ply": 7,
+      "side": "white",
+      "by": "model",
+      "uci": "f3d4",
+      "san": "Nxd4",
+      "fen_after": "r1bqkbnr/pppp1ppp/8/4p3/3NP3/2N5/PPPP1PPP/R1BQKB1R b KQkq - 0 4",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "f3d4",
+        "p_pick": 0.22999999999999995,
+        "confidence": 0.2,
+        "n_options": 27,
+        "top_options": [
+          {
+            "uci": "f3d4",
+            "san": "Nxd4",
+            "p": 0.22999999999999995,
+            "cp": 43,
+            "cpl": 132,
+            "win_loss": 43.6
+          },
+          {
+            "uci": "c3d5",
+            "san": "Nd5",
+            "p": 0.15999999999999998,
+            "cp": 0,
+            "cpl": 175,
+            "win_loss": 47.7
+          },
+          {
+            "uci": "f3e5",
+            "san": "Nxe5",
+            "p": 0.11999999999999997,
+            "cp": 175,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.10999999999999997,
+            "cp": 92,
+            "cpl": 83,
+            "win_loss": 26.799999999999997
+          },
+          {
+            "uci": "f1b5",
+            "san": "Bb5",
+            "p": 0.059999999999999984,
+            "cp": -5,
+            "cpl": 180,
+            "win_loss": 48.1
+          },
+          {
+            "uci": "c3b5",
+            "san": "Nb5",
+            "p": 0.039999999999999994,
+            "cp": -13,
+            "cpl": 188,
+            "win_loss": 48.7
+          },
+          {
+            "uci": "f3g5",
+            "san": "Ng5",
+            "p": 0.039999999999999994,
+            "cp": -702,
+            "cpl": 877,
+            "win_loss": 97.75
+          },
+          {
+            "uci": "d2d3",
+            "san": "d3",
+            "p": 0.029999999999999992,
+            "cp": 53,
+            "cpl": 122,
+            "win_loss": 41.2
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 517,
+        "usage": {
+          "input_tokens": 962,
+          "output_tokens": 290,
+          "cost_usd": 0.000040404
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 4
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 43,
+        "wdl": [
+          85,
+          913,
+          2
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "f3e5",
+        "best_san": "Nxe5",
+        "best_cp": 175,
+        "played_cp": 43,
+        "cpl": 132,
+        "win_loss": 43.6,
+        "class": "blunder",
+        "acceptable": false,
+        "p_acceptable": 0.11999999999999997,
+        "e_win_loss": 43.26249999999998
+      },
+      "created_at": "2026-10-28T17:21:40.484Z"
+    },
+    {
+      "ply": 8,
+      "side": "black",
+      "by": "engine",
+      "uci": "b7b5",
+      "san": "b5",
+      "fen_after": "r1bqkbnr/p1pp1ppp/8/1p2p3/3NP3/2N5/PPPP1PPP/R1BQKB1R w KQkq - 0 5",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 805,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:42.994Z"
+    },
+    {
+      "ply": 9,
+      "side": "white",
+      "by": "model",
+      "uci": "a2a4",
+      "san": "a4",
+      "fen_after": "r1bqkbnr/p1pp1ppp/8/1p2p3/P2NP3/2N5/1PPP1PPP/R1BQKB1R b KQkq - 0 5",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "a2a4",
+        "p_pick": 0.09999999999999996,
+        "confidence": 0.07,
+        "n_options": 34,
+        "top_options": [
+          {
+            "uci": "a2a4",
+            "san": "a4",
+            "p": 0.09999999999999996,
+            "cp": 259,
+            "cpl": 517,
+            "win_loss": 0.04999999999999716
+          },
+          {
+            "uci": "b2b4",
+            "san": "b4",
+            "p": 0.07999999999999999,
+            "cp": 207,
+            "cpl": 569,
+            "win_loss": 0.5499999999999972
+          },
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.07999999999999999,
+            "cp": 70,
+            "cpl": 706,
+            "win_loss": 38.95
+          },
+          {
+            "uci": "f1b5",
+            "san": "Bxb5",
+            "p": 0.06999999999999998,
+            "cp": 157,
+            "cpl": 619,
+            "win_loss": 4.049999999999997
+          },
+          {
+            "uci": "c3b5",
+            "san": "Ncxb5",
+            "p": 0.059999999999999984,
+            "cp": 420,
+            "cpl": 356,
+            "win_loss": 0
+          },
+          {
+            "uci": "c3a4",
+            "san": "Na4",
+            "p": 0.04999999999999999,
+            "cp": 63,
+            "cpl": 713,
+            "win_loss": 41.25
+          },
+          {
+            "uci": "d4b5",
+            "san": "Ndxb5",
+            "p": 0.04999999999999999,
+            "cp": 776,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c3d5",
+            "san": "Nd5",
+            "p": 0.039999999999999994,
+            "cp": 216,
+            "cpl": 560,
+            "win_loss": 0.4000000000000057
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 309,
+        "usage": {
+          "input_tokens": 1110,
+          "output_tokens": 360,
+          "cost_usd": 0.00004662
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 5
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 259,
+        "wdl": [
+          999,
+          1,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "d4b5",
+        "best_san": "Ndxb5",
+        "best_cp": 776,
+        "played_cp": 259,
+        "cpl": 517,
+        "win_loss": 0.04999999999999716,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.72,
+        "e_win_loss": 8.466
+      },
+      "created_at": "2026-10-28T17:21:43.981Z"
+    },
+    {
+      "ply": 10,
+      "side": "black",
+      "by": "engine",
+      "uci": "f8b4",
+      "san": "Bb4",
+      "fen_after": "r1bqk1nr/p1pp1ppp/8/1p2p3/Pb1NP3/2N5/1PPP1PPP/R1BQKB1R w KQkq - 1 6",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 828,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:49.916Z"
+    },
+    {
+      "ply": 11,
+      "side": "white",
+      "by": "model",
+      "uci": "a4b5",
+      "san": "axb5",
+      "fen_after": "r1bqk1nr/p1pp1ppp/8/1P2p3/1b1NP3/2N5/1PPP1PPP/R1BQKB1R b KQkq - 0 6",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "a4b5",
+        "p_pick": 0.11999999999999997,
+        "confidence": 0.09,
+        "n_options": 35,
+        "top_options": [
+          {
+            "uci": "a4b5",
+            "san": "axb5",
+            "p": 0.11999999999999997,
+            "cp": 320,
+            "cpl": 545,
+            "win_loss": 0
+          },
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.07999999999999999,
+            "cp": 73,
+            "cpl": 792,
+            "win_loss": 37.95
+          },
+          {
+            "uci": "c3b5",
+            "san": "Ncxb5",
+            "p": 0.059999999999999984,
+            "cp": 492,
+            "cpl": 373,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4b5",
+            "san": "Ndxb5",
+            "p": 0.059999999999999984,
+            "cp": 757,
+            "cpl": 108,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1h5",
+            "san": "Qh5",
+            "p": 0.04999999999999999,
+            "cp": 494,
+            "cpl": 371,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4c6",
+            "san": "Nc6",
+            "p": 0.04999999999999999,
+            "cp": 191,
+            "cpl": 674,
+            "win_loss": 1.0999999999999943
+          },
+          {
+            "uci": "f1b5",
+            "san": "Bxb5",
+            "p": 0.04999999999999999,
+            "cp": 309,
+            "cpl": 556,
+            "win_loss": 0
+          },
+          {
+            "uci": "f1d3",
+            "san": "Bd3",
+            "p": 0.04999999999999999,
+            "cp": 380,
+            "cpl": 485,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4f5",
+            "san": "Nf5",
+            "p": 0,
+            "cp": 865,
+            "cpl": 0,
+            "win_loss": 0
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 436,
+        "usage": {
+          "input_tokens": 1143,
+          "output_tokens": 370,
+          "cost_usd": 0.000048006
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 6
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 320,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "d4f5",
+        "best_san": "Nf5",
+        "best_cp": 865,
+        "played_cp": 320,
+        "cpl": 545,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.8500000000000001,
+        "e_win_loss": 7.118499999999998
+      },
+      "created_at": "2026-10-28T17:21:50.987Z"
+    },
+    {
+      "ply": 12,
+      "side": "black",
+      "by": "engine",
+      "uci": "b4e7",
+      "san": "Be7",
+      "fen_after": "r1bqk1nr/p1ppbppp/8/1P2p3/3NP3/2N5/1PPP1PPP/R1BQKB1R w KQkq - 1 7",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 911,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:21:58.556Z"
+    },
+    {
+      "ply": 13,
+      "side": "white",
+      "by": "model",
+      "uci": "f1c4",
+      "san": "Bc4",
+      "fen_after": "r1bqk1nr/p1ppbppp/8/1P2p3/2BNP3/2N5/1PPP1PPP/R1BQK2R b KQkq - 2 7",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "f1c4",
+        "p_pick": 0.11999999999999997,
+        "confidence": 0.1,
+        "n_options": 37,
+        "top_options": [
+          {
+            "uci": "f1c4",
+            "san": "Bc4",
+            "p": 0.11999999999999997,
+            "cp": 500,
+            "cpl": 402,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4c6",
+            "san": "Nc6",
+            "p": 0.07999999999999999,
+            "cp": 419,
+            "cpl": 483,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1g4",
+            "san": "Qg4",
+            "p": 0.059999999999999984,
+            "cp": 507,
+            "cpl": 395,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1h5",
+            "san": "Qh5",
+            "p": 0.059999999999999984,
+            "cp": 616,
+            "cpl": 286,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4e6",
+            "san": "Ne6",
+            "p": 0.059999999999999984,
+            "cp": 340,
+            "cpl": 562,
+            "win_loss": 0
+          },
+          {
+            "uci": "b5b6",
+            "san": "b6",
+            "p": 0.04999999999999999,
+            "cp": 370,
+            "cpl": 532,
+            "win_loss": 0
+          },
+          {
+            "uci": "c3d5",
+            "san": "Nd5",
+            "p": 0.04999999999999999,
+            "cp": 469,
+            "cpl": 433,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4b3",
+            "san": "Nb3",
+            "p": 0.04999999999999999,
+            "cp": 876,
+            "cpl": 26,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4f3",
+            "san": "Nf3",
+            "p": 0,
+            "cp": 902,
+            "cpl": 0,
+            "win_loss": 0
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 523,
+        "usage": {
+          "input_tokens": 1194,
+          "output_tokens": 390,
+          "cost_usd": 0.000050148
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 7
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 500,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "d4f3",
+        "best_san": "Nf3",
+        "best_cp": 902,
+        "played_cp": 500,
+        "cpl": 402,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.9299999999999999,
+        "e_win_loss": 1.5714999999999995
+      },
+      "created_at": "2026-10-28T17:21:59.737Z"
+    },
+    {
+      "ply": 14,
+      "side": "black",
+      "by": "engine",
+      "uci": "c7c6",
+      "san": "c6",
+      "fen_after": "r1bqk1nr/p2pbppp/2p5/1P2p3/2BNP3/2N5/1PPP1PPP/R1BQK2R w KQkq - 0 8",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 892,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:22:04.300Z"
+    },
+    {
+      "ply": 15,
+      "side": "white",
+      "by": "model",
+      "uci": "b5c6",
+      "san": "bxc6",
+      "fen_after": "r1bqk1nr/p2pbppp/2P5/4p3/2BNP3/2N5/1PPP1PPP/R1BQK2R b KQkq - 0 8",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "b5c6",
+        "p_pick": 0.09999999999999998,
+        "confidence": 0.08,
+        "n_options": 46,
+        "top_options": [
+          {
+            "uci": "b5c6",
+            "san": "bxc6",
+            "p": 0.09999999999999998,
+            "cp": 669,
+            "cpl": 246,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4c6",
+            "san": "Nxc6",
+            "p": 0.09999999999999998,
+            "cp": 723,
+            "cpl": 192,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4f7",
+            "san": "Bxf7+",
+            "p": 0.07999999999999999,
+            "cp": 733,
+            "cpl": 182,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1h5",
+            "san": "Qh5",
+            "p": 0.06999999999999999,
+            "cp": 826,
+            "cpl": 89,
+            "win_loss": 0
+          },
+          {
+            "uci": "c3d5",
+            "san": "Nd5",
+            "p": 0.059999999999999984,
+            "cp": 435,
+            "cpl": 480,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4d5",
+            "san": "Bd5",
+            "p": 0.059999999999999984,
+            "cp": 342,
+            "cpl": 573,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4e6",
+            "san": "Ne6",
+            "p": 0.04999999999999999,
+            "cp": 443,
+            "cpl": 472,
+            "win_loss": 0
+          },
+          {
+            "uci": "e1g1",
+            "san": "O-O",
+            "p": 0.04999999999999999,
+            "cp": 437,
+            "cpl": 478,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4b3",
+            "san": "Nb3",
+            "p": 0,
+            "cp": 915,
+            "cpl": 0,
+            "win_loss": 0
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 457,
+        "usage": {
+          "input_tokens": 1397,
+          "output_tokens": 480,
+          "cost_usd": 0.000058674
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 8
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 669,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "d4b3",
+        "best_san": "Nb3",
+        "best_cp": 915,
+        "played_cp": 669,
+        "cpl": 246,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.9400000000000002,
+        "e_win_loss": 3.7805
+      },
+      "created_at": "2026-10-28T17:22:05.383Z"
+    },
+    {
+      "ply": 16,
+      "side": "black",
+      "by": "engine",
+      "uci": "g8f6",
+      "san": "Nf6",
+      "fen_after": "r1bqk2r/p2pbppp/2P2n2/4p3/2BNP3/2N5/1PPP1PPP/R1BQK2R w KQkq - 1 9",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 925,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:22:12.338Z"
+    },
+    {
+      "ply": 17,
+      "side": "white",
+      "by": "model",
+      "uci": "e1g1",
+      "san": "O-O",
+      "fen_after": "r1bqk2r/p2pbppp/2P2n2/4p3/2BNP3/2N5/1PPP1PPP/R1BQ1RK1 b kq - 2 9",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "e1g1",
+        "p_pick": 0.10999999999999997,
+        "confidence": 0.09,
+        "n_options": 49,
+        "top_options": [
+          {
+            "uci": "e1g1",
+            "san": "O-O",
+            "p": 0.10999999999999997,
+            "cp": 622,
+            "cpl": 287,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4f7",
+            "san": "Bxf7+",
+            "p": 0.07999999999999999,
+            "cp": 694,
+            "cpl": 215,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1h5",
+            "san": "Qh5",
+            "p": 0.06999999999999999,
+            "cp": -524,
+            "cpl": 1433,
+            "win_loss": 100
+          },
+          {
+            "uci": "c4d5",
+            "san": "Bd5",
+            "p": 0.059999999999999984,
+            "cp": 629,
+            "cpl": 280,
+            "win_loss": 0
+          },
+          {
+            "uci": "c6d7",
+            "san": "cxd7+",
+            "p": 0.059999999999999984,
+            "cp": 909,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c6c7",
+            "san": "c7",
+            "p": 0.04999999999999999,
+            "cp": 634,
+            "cpl": 275,
+            "win_loss": 0
+          },
+          {
+            "uci": "c3d5",
+            "san": "Nd5",
+            "p": 0.039999999999999994,
+            "cp": 754,
+            "cpl": 155,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4e6",
+            "san": "Be6",
+            "p": 0.039999999999999994,
+            "cp": 194,
+            "cpl": 715,
+            "win_loss": 0.8499999999999943
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 441,
+        "usage": {
+          "input_tokens": 1473,
+          "output_tokens": 510,
+          "cost_usd": 0.000061866
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 9
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 622,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "c6d7",
+        "best_san": "cxd7+",
+        "best_cp": 909,
+        "played_cp": 622,
+        "cpl": 287,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.8700000000000001,
+        "e_win_loss": 11.728999999999997
+      },
+      "created_at": "2026-10-28T17:22:13.430Z"
+    },
+    {
+      "ply": 18,
+      "side": "black",
+      "by": "engine",
+      "uci": "f6h5",
+      "san": "Nh5",
+      "fen_after": "r1bqk2r/p2pbppp/2P5/4p2n/2BNP3/2N5/1PPP1PPP/R1BQ1RK1 w kq - 3 10",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 965,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:22:18.495Z"
+    },
+    {
+      "ply": 19,
+      "side": "white",
+      "by": "model",
+      "uci": "d1h5",
+      "san": "Qxh5",
+      "fen_after": "r1bqk2r/p2pbppp/2P5/4p2Q/2BNP3/2N5/1PPP1PPP/R1B2RK1 b kq - 0 10",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "d1h5",
+        "p_pick": 0.06999999999999998,
+        "confidence": 0.05,
+        "n_options": 46,
+        "top_options": [
+          {
+            "uci": "d1h5",
+            "san": "Qxh5",
+            "p": 0.06999999999999998,
+            "cp": 975,
+            "cpl": 25,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4e6",
+            "san": "Be6",
+            "p": 0.04999999999999998,
+            "cp": 607,
+            "cpl": 393,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4f5",
+            "san": "Nf5",
+            "p": 0.04999999999999998,
+            "cp": 973,
+            "cpl": 27,
+            "win_loss": 0
+          },
+          {
+            "uci": "h2h3",
+            "san": "h3",
+            "p": 0.04999999999999998,
+            "cp": 880,
+            "cpl": 120,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4d5",
+            "san": "Bd5",
+            "p": 0.049999999999999975,
+            "cp": 904,
+            "cpl": 96,
+            "win_loss": 0
+          },
+          {
+            "uci": "d1g4",
+            "san": "Qg4",
+            "p": 0.049999999999999975,
+            "cp": 816,
+            "cpl": 184,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4f7",
+            "san": "Bxf7+",
+            "p": 0.03999999999999998,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "d4e6",
+            "san": "Ne6",
+            "p": 0.03999999999999998,
+            "cp": 969,
+            "cpl": 31,
+            "win_loss": 0
+          }
+        ],
+        "prob_sum": 1.0000000000000004,
+        "latency_ms": 606,
+        "usage": {
+          "input_tokens": 1409,
+          "output_tokens": 480,
+          "cost_usd": 0.000059178
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 10
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 975,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "c4f7",
+        "best_san": "Bxf7+",
+        "best_cp": 1000,
+        "played_cp": 975,
+        "cpl": 25,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.9999999999999997,
+        "e_win_loss": 0
+      },
+      "created_at": "2026-10-28T17:22:19.784Z"
+    },
+    {
+      "ply": 20,
+      "side": "black",
+      "by": "engine",
+      "uci": "h7h6",
+      "san": "h6",
+      "fen_after": "r1bqk2r/p2pbpp1/2P4p/4p2Q/2BNP3/2N5/1PPP1PPP/R1B2RK1 w kq - 0 11",
+      "decision": null,
+      "engine_info": {
+        "engine_id": "eps",
+        "level_id": "eps75",
+        "elo": 560,
+        "time_ms": 0,
+        "random": true
+      },
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 1000,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": null,
+      "created_at": "2026-10-28T17:22:26.326Z"
+    },
+    {
+      "ply": 21,
+      "side": "white",
+      "by": "model",
+      "uci": "h5f7",
+      "san": "Qxf7#",
+      "fen_after": "r1bqk2r/p2pbQp1/2P4p/4p3/2BNP3/2N5/1PPP1PPP/R1B2RK1 b kq - 0 11",
+      "decision": {
+        "model_slug": "typesafe/jev-1.14",
+        "returned_model": "typesafe/jev-1.14-20261014",
+        "provider": "TypeSafe",
+        "arm": "clean",
+        "pick_uci": "h5f7",
+        "p_pick": 0.09,
+        "confidence": 0.07,
+        "n_options": 55,
+        "top_options": [
+          {
+            "uci": "h5f7",
+            "san": "Qxf7#",
+            "p": 0.09,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4f7",
+            "san": "Bxf7+",
+            "p": 0.05999999999999999,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c6d7",
+            "san": "cxd7+",
+            "p": 0.039999999999999994,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "h5g6",
+            "san": "Qg6",
+            "p": 0.039999999999999994,
+            "cp": 176,
+            "cpl": 824,
+            "win_loss": 1.5999999999999943
+          },
+          {
+            "uci": "a1a7",
+            "san": "Rxa7",
+            "p": 0.029999999999999992,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4d5",
+            "san": "Bd5",
+            "p": 0.029999999999999992,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "c4e6",
+            "san": "Be6",
+            "p": 0.029999999999999992,
+            "cp": 873,
+            "cpl": 127,
+            "win_loss": 0
+          },
+          {
+            "uci": "c6c7",
+            "san": "c7",
+            "p": 0.029999999999999992,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          },
+          {
+            "uci": "a1a4",
+            "san": "Ra4",
+            "p": 0,
+            "cp": 1000,
+            "cpl": 0,
+            "win_loss": 0
+          }
+        ],
+        "prob_sum": 1.0000000000000002,
+        "latency_ms": 423,
+        "usage": {
+          "input_tokens": 1591,
+          "output_tokens": 570,
+          "cost_usd": 0.000066822
+        },
+        "cache_hit": false,
+        "retries": 0,
+        "attempt_id": 11
+      },
+      "engine_info": null,
+      "eval": {
+        "depth": 14,
+        "white_eval_cp": 1000,
+        "wdl": [
+          1000,
+          0,
+          0
+        ]
+      },
+      "judge": {
+        "depth": 14,
+        "best_uci": "a1a4",
+        "best_san": "Ra4",
+        "best_cp": 1000,
+        "played_cp": 1000,
+        "cpl": 0,
+        "win_loss": 0,
+        "class": "ok",
+        "acceptable": true,
+        "p_acceptable": 0.9500000000000002,
+        "e_win_loss": 0.8924999999999997
+      },
+      "created_at": "2026-10-28T17:22:27.586Z"
+    }
+  ]
+}

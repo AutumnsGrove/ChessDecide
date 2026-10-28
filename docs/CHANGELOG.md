@@ -1,5 +1,20 @@
 # Changelog
 
+## T04 — First real game (checkpoint)
+
+- Fixed `loadEnv()` to resolve the repo-root `.env` (pnpm runs the CLI from `packages/runner`, so the
+  cwd default missed it); added `packages/runner/test/config.test.ts`.
+- Probe (`typesafe/jev-1.14`, clean, startpos): e4 at p 0.89, 704 ms, 769 in / 220 out tokens,
+  $0.000032, 778-byte request, 0 retries.
+- One real game via the New game dialog, Jev White vs `eps75`, Watch pace, cap $0.05, `max_plies` 120
+  for the checkpoint: **1-0 checkmate** (`Qxf7#`, ply 21), 11 model calls, 0 forced, 0 retries,
+  **$0.000544782**, ≈ 71 s wall clock, avg 430 ms and 1,179 input tokens per call.
+- Quality (depth 14): ACPL 198.2 cp, acceptable 81.8 %, 0 inaccuracies, 0 mistakes, 1 blunder
+  (ply 7 `Nxd4`, cpl 132; still winning). Large raw CPLs later are slower mates in a won position.
+- Estimate $0.00294 vs actual $0.000545 (440 % conservative); rolling mean will tighten it.
+- Report + 400 px start/mid/end screenshots + raw game JSON in `docs/build/reports/T04-*`.
+- No illegal moves, no `invalid_choice`, no 429s. Recommendation: continue to T05/T06.
+
 ## T03 — Viewer extras: decision panel, live controls, e2e
 
 - `viewer-model.ts`: `decisionRows(ply)` (up to 9 rows, sorted by P, pick and Stockfish best always
