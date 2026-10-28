@@ -117,7 +117,7 @@ export function createApi(deps: ApiDeps): Hono {
     const rows = await listGames(deps.db, limit);
     return c.json(rows.map((g) => ({
       id: g.id, status: g.status, result: g.result, termination: g.termination, white: JSON.parse(g.white_player), black: JSON.parse(g.black_player),
-      series_id: g.series_id, level_id: g.level_id, cost_usd: g.cost_usd, created_at: g.created_at,
+      series_id: g.series_id, level_id: g.level_id, cost_usd: g.cost_usd, created_at: g.created_at, plies: g.plies,
     })));
   });
 

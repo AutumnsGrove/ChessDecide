@@ -37,3 +37,8 @@ node_modules/
 .svelte-kit/
 .wrangler/
 *.log
+
+# playwright
+test-results/
+playwright-report/
+

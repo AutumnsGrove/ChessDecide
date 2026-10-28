@@ -17,6 +17,7 @@
     "db:generate": "pnpm --filter @chessdecide/db generate",
     "db:migrate": "pnpm --filter @chessdecide/web exec wrangler d1 migrations apply DB --local --persist-to ../../data/d1",
     "build": "pnpm -r --if-present build",
+    "e2e": "pnpm --filter @chessdecide/web exec playwright test",
     "verify": "pnpm lint:lockfiles && pnpm typecheck && pnpm check && pnpm test"
   },
   "pnpm": {

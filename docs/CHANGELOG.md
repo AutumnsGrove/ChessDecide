@@ -1,5 +1,34 @@
 # Changelog
 
+## T02 — Web: New game, spend chip, banners, Playwright
+
+- `apps/web/src/lib/api.ts`: typed fetch helpers (`getJson`, `postJson`) with `ApiClientError` from the
+  error envelope; wrappers for games, models, estimate, spend, health and ladder.
+- `stores.svelte.ts`: rune store for health, session spend, the New game dialog flag and global banners;
+  `refreshSpend()` is called from the Viewer's SSE handlers.
+- Header (`+layout.svelte`): nav, OpenRouter/Stockfish/ladder chips (amber when the ladder is
+  uncalibrated), session `SpendChip` (10 s poll + event refresh), New game button. All local-only
+  controls and chips are hidden when `health.control === false` (public read-only mode).
+- `NewGameDialog.svelte`: native `<dialog>`, roster-first model select with disabled reasons, arm /
+  opponent / colour / opening / pace / budget fields, debounced live estimate (red over cap), Start
+  posts the game, auto-starts it and navigates to the Viewer. 402/424/400 errors become banners.
+  Random colour and the seed use `crypto.getRandomValues`.
+- `Banner.svelte` (info/warn/error, dismissible, `role=status|alert`).
+- Games list: result chips, model/opponent, plies, cost, time ago, 5 s polling, empty state with a
+  New game button.
+- `GET /api/games` now includes `plies` (counted in `listGames`) for the list row.
+- Playwright: `playwright.config.ts` migrates a fresh temp D1, starts the mock daemon and Vite, and runs
+  the five specs at 400×800 and 1280×800. Root script `pnpm e2e`; not part of `pnpm verify`.
+  `apps/web/test-results/` is gitignored.
+- Fix found by e2e: the budget input used `min=0.001` with `step=0.01`, so the default `1` failed native
+  step validation and the form never submitted. Now `step="any"`.
+- Deviation: the "Mock model" checkbox is informational and shown checked+disabled, because mock mode is
+  a daemon-wide flag (`CHESSDECIDE_MOCK=1`), not a per-game setting. Specs rewrite the create body to
+  `max_plies 12`, `judge_depth 6`, `pace_ms 0` via route interception so games finish quickly.
+- `app.html` wraps `%sveltekit.body%` in a div (silences the SvelteKit 3 `app_body_unwrapped` warning).
+- Tests: `pnpm verify` green (api 13, providers 25, db 3, runner 3+1 skipped, web 5); `pnpm e2e` 10 passed
+  (5 specs × 2 viewports).
+
 ## T01 — Real model wiring, catalog, estimate, probe
 
 - `packages/providers/src/catalog.ts`: cached OpenRouter Decisions catalog (public, no key); roster-first sort,

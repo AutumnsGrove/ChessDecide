@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, getTableColumns, gte, sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import type { Game, GameStore, Ply } from '@chessdecide/core';
 import * as s from './schema.ts';
@@ -53,7 +53,10 @@ export async function loadGame(db: Db, id: string): Promise<Game | undefined> {
 export const d1GameStore = (db: Db): GameStore => ({ saveGame: (g) => saveGame(db, g), savePly: (id, ply) => savePly(db, id, ply) });
 
 export async function listGames(db: Db, limit = 50) {
-  return db.select().from(s.games).orderBy(desc(s.games.created_at)).limit(limit);
+  return db.select({
+    ...getTableColumns(s.games),
+    plies: sql<number>`(select count(*) from ${s.plies} where ${s.plies.game_id} = ${s.games.id})`,
+  }).from(s.games).orderBy(desc(s.games.created_at)).limit(limit);
 }
 
 /** Money spent on real (non-cached) calls since an ISO timestamp (or all time). */

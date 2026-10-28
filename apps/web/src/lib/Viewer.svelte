@@ -2,6 +2,7 @@
   import type { Game, Ply } from '@chessdecide/core';
   import { START_FEN } from '@chessdecide/core';
   import { board } from './chessground.ts';
+  import { refreshSpend } from './stores.svelte.ts';
   import { evalPct, graphPoints, mistakeCount, playerLabel, resultLabel, statusLine } from './viewer-model.ts';
 
   let { initial, live = false }: { initial: Game; live?: boolean } = $props();
@@ -51,9 +52,10 @@
     const es = new EventSource(`/api/games/${game.id}/events`);
     const on = (name: string, f: (d: any) => void) => es.addEventListener(name, (m) => f(JSON.parse((m as MessageEvent).data)));
     on('snapshot', (g: Game) => { game = g; if (attached) cur = g.plies.length; });
-    on('ply', (p: Ply) => { const i = game.plies.findIndex((x) => x.ply === p.ply); if (i >= 0) game.plies[i] = p; else game.plies.push(p); if (attached) cur = game.plies.length; });
-    on('judged', (d: { ply: number; eval: Ply['eval']; judge: Ply['judge'] }) => { const p = game.plies.find((x) => x.ply === d.ply); if (p) { p.eval = d.eval; p.judge = d.judge; } });
-    on('status', (d: { status: Game['status']; status_reason?: string }) => { game.status = d.status; game.status_reason = d.status_reason; });
+    on('ply', (p: Ply) => { const i = game.plies.findIndex((x) => x.ply === p.ply); if (i >= 0) game.plies[i] = p; else game.plies.push(p); if (attached) cur = game.plies.length; refreshSpend(); });
+    on('judged', (d: { ply: number; eval: Ply['eval']; judge: Ply['judge'] }) => { const p = game.plies.find((x) => x.ply === d.ply); if (p) { p.eval = d.eval; p.judge = d.judge; } refreshSpend(); });
+    on('status', (d: { status: Game['status']; status_reason?: string }) => { game.status = d.status; game.status_reason = d.status_reason; refreshSpend(); });
+    on('spend', () => refreshSpend());
     return () => es.close();
   });
   $effect(() => () => stop());
