@@ -1,5 +1,26 @@
 # Changelog
 
+## T07 — Series screens
+
+- `series-model.ts` (+14 web unit tests): targets/progress, `intervalLabel`, `precisionHint`, `overlap`,
+  ladder-axis scaling, Elo chart geometry, block rows, `METRIC_LABELS`, metric formatting and game chips.
+- `LadderAxis` (HTML/CSS interval bars + level ticks), `EloChart` (hand-written SVG mean line + 95 % band
+  with ladder ticks and the current opponent highlighted), `GameStrip` (W/D/L/running/aborted cells),
+  `SeriesCard` (status, progress, Elo interval, cost, "not separable yet"), and `MiniBoard` (live 1:1
+  board for up to two in-flight games, subscribed to the game SSE).
+- `/series`: ladder axis, overlap marking, cards, 5 s polling, uncalibrated notice, New series.
+  `/series/[id]`: rating card (number always with interval), Elo chart, strip, blocks, secondary metrics
+  with plain-language labels, games table (25 + show all), live SSE updates, Pause/Resume/Stop with confirm.
+- `NewSeriesDialog`: model/arm/size/ladder/budget, debounced typical + worst-case estimate (red over cap),
+  Start → create → start → detail. Header nav gained Series and a New series button.
+- API client wrappers for series; `SeriesSummary` now carries `size` (for the card target).
+- Found by the new e2e: two series games judging at once hit `NativeUciEngine is single-flight`.
+  `EngineJudge` now serializes `oracle`/`evalPosition` calls (and has a regression test).
+- Tests: `pnpm verify` green (web 14, engine 7); `pnpm e2e` 30 passed (15 tests × 2 viewports), including
+  the four series specs at 400 px and 1280 px.
+- Deviation: e2e series use a fixed `random` ladder level and custom 8 games to stay fast; the dialog is
+  still exercised via route interception.
+
 ## T06 — Series runner, store and API
 
 - `packages/core/src/series-events.ts`: `SeriesConfig`, `Series`, `SeriesGame`, `Block`, `EloPoint`,

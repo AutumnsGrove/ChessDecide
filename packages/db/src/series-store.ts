@@ -163,7 +163,7 @@ export async function seriesSummaries(db: Db): Promise<SeriesSummary[]> {
       : null;
     return {
       id: r.id, name: r.name ?? `${r.model_slug} · ${r.arm_id} · ${size.preset}`,
-      model: r.model_slug, arm: r.arm_id, status: r.status as SeriesStatus,
+      model: r.model_slug, arm: r.arm_id, status: r.status as SeriesStatus, size,
       games_done: done.get(r.id) ?? 0, elo, cost_usd: r.cost_usd ?? 0, created_at: r.created_at,
     };
   });

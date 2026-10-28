@@ -1,9 +1,10 @@
 <script lang="ts">
   import '../app.css';
   import { onMount } from 'svelte';
-  import { app, loadHealth, openNewGame } from '#lib/stores.svelte.ts';
+  import { app, loadHealth, openNewGame, openNewSeries } from '#lib/stores.svelte.ts';
   import Banner from '#lib/Banner.svelte';
   import NewGameDialog from '#lib/NewGameDialog.svelte';
+  import NewSeriesDialog from '#lib/NewSeriesDialog.svelte';
   import SpendChip from '#lib/SpendChip.svelte';
 
   let { children } = $props();
@@ -18,6 +19,7 @@
 <header class="top">
   <nav class="nav">
     <a class="brand" href="/games">♞ ChessDecide</a>
+    <a href="/series">Series</a>
     <a href="/games">Games</a>
   </nav>
   {#if app.health?.control}
@@ -33,6 +35,7 @@
       </span>
     </div>
     <SpendChip />
+    <button class="new" onclick={openNewSeries}>New series</button>
     <button class="new" onclick={openNewGame}>New game</button>
   {/if}
 </header>
@@ -47,6 +50,7 @@
 </div>
 
 {#if app.health?.control}<NewGameDialog />{/if}
+{#if app.health?.control}<NewSeriesDialog />{/if}
 
 <style>
   .top {

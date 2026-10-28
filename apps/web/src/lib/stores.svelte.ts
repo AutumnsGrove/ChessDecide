@@ -14,6 +14,7 @@ interface AppState {
   health: Health | null;
   spend: Spend | null;
   newGameOpen: boolean;
+  newSeriesOpen: boolean;
   banners: Banner[];
   spendPulse: number;
 }
@@ -22,6 +23,7 @@ export const app = $state<AppState>({
   health: null,
   spend: null,
   newGameOpen: false,
+  newSeriesOpen: false,
   banners: [],
   spendPulse: 0,
 });
@@ -40,6 +42,8 @@ export function dismissBanner(id: number): void {
 
 export function openNewGame(): void { app.newGameOpen = true; }
 export function closeNewGame(): void { app.newGameOpen = false; }
+export function openNewSeries(): void { app.newSeriesOpen = true; }
+export function closeNewSeries(): void { app.newSeriesOpen = false; }
 
 export async function loadHealth(): Promise<void> {
   try { app.health = await getHealth(); } catch { /* keep the last known health */ }

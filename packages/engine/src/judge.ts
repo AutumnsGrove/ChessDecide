@@ -15,7 +15,15 @@ const fenKey = (fen: string) => fen.split(' ').slice(0, 4).join(' ');   // place
 export class EngineJudge implements JudgePort {
   searches = 0;                                           // counts real engine searches (for tests)
   private rr = 0;
+  /** Native engines are single-flight; two series games can judge at once, so queue here. */
+  private chain: Promise<unknown> = Promise.resolve();
   constructor(private engines: Engine[], private sfVersion: string, private cache: OracleCache = new MemoryOracleCache()) {}
+
+  private run<T>(fn: () => Promise<T>): Promise<T> {
+    const p = this.chain.then(() => fn(), () => fn());
+    this.chain = p.then(() => undefined, () => undefined);
+    return p;
+  }
 
   static async create(engines: Engine[], cache?: OracleCache) {
     return new EngineJudge(engines, await engines[0]!.version(), cache);
@@ -30,12 +38,20 @@ export class EngineJudge implements JudgePort {
   }
 
   async evalPosition(fen: string, depth: number) {
+    return this.run(() => this.evalPositionOnce(fen, depth));
+  }
+
+  private async evalPositionOnce(fen: string, depth: number) {
     const e = this.engines[this.rr++ % this.engines.length]!;
     const l = await this.searchChild(fen, depth, e);
     return { cp_stm: lineCp(l), wdl_stm: (l.wdl ?? wdlFromCp(lineCp(l))) as [number, number, number] };
   }
 
   async oracle(fen: string, depth: number): Promise<Oracle> {
+    return this.run(() => this.oracleOnce(fen, depth));
+  }
+
+  private async oracleOnce(fen: string, depth: number): Promise<Oracle> {
     const key = await sha256Hex(`${fenKey(fen)}|${this.sfVersion}|${depth}|64|1`);
     const hit = await this.cache.get(key);
     if (hit) return hit;

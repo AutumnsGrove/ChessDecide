@@ -51,7 +51,7 @@ export interface Series {
 
 export interface SeriesSummary {
   id: string; name: string; model: string; arm: string;
-  status: SeriesStatus; games_done: number;
+  status: SeriesStatus; size: SeriesSize; games_done: number;
   elo: EloEstimate | null;
   cost_usd: number; created_at: string;
 }

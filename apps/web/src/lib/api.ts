@@ -1,6 +1,6 @@
 /** Typed fetch helpers for the ChessDecide HTTP API (docs/API.md). Errors carry the envelope fields. */
-import type { Game, GameConfig, LadderFile, PlayerDesc } from '@chessdecide/core';
-import type { GameEstimate, ModelInfo } from '@chessdecide/providers';
+import type { Game, GameConfig, LadderFile, PlayerDesc, Series, SeriesConfig, SeriesGame, SeriesSummary } from '@chessdecide/core';
+import type { GameEstimate, ModelInfo, SeriesEstimate } from '@chessdecide/providers';
 
 export class ApiClientError extends Error {
   constructor(
@@ -67,6 +67,14 @@ export const gameAction = (id: string, action: 'auto' | 'pause' | 'step' | 'stop
   postJson<{ id: string; status: Game['status']; status_reason?: string }>(`/api/games/${encodeURIComponent(id)}/${action}`, body);
 export const getModels = () => getJson<ModelInfo[]>('/api/models');
 export const estimate = (config: GameConfig) => postJson<GameEstimate>('/api/estimate', config);
+export const estimateSeriesConfig = (config: SeriesConfig) => postJson<SeriesEstimate>('/api/estimate', config);
 export const getSpend = (since: 'session' | 'today' | 'all' = 'session') => getJson<Spend>(`/api/spend?since=${since}`);
 export const getHealth = () => getJson<Health>('/api/health');
 export const getLadder = () => getJson<LadderFile>('/api/ladder');
+
+export const listSeries = () => getJson<SeriesSummary[]>('/api/series');
+export const getSeries = (id: string) => getJson<Series>(`/api/series/${encodeURIComponent(id)}`);
+export const getSeriesGames = (id: string) => getJson<SeriesGame[]>(`/api/series/${encodeURIComponent(id)}/games`);
+export const createSeries = (config: SeriesConfig) => postJson<Series>('/api/series', config);
+export const seriesAction = (id: string, action: 'start' | 'pause' | 'stop' | 'resume') =>
+  postJson<{ id: string; status: Series['status']; status_reason?: string }>(`/api/series/${encodeURIComponent(id)}/${action}`);

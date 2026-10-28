@@ -51,6 +51,13 @@ sf('native engine', () => {
     expect(judge.searches).toBe(n);                                  // cache hit: no engine use
     await e.close();
   }, 60_000);
+  it('serializes concurrent judge calls (two series games can judge at once)', async () => {
+    const e = await NativeUciEngine.start({ path: SF });
+    const judge = await EngineJudge.create([e]);
+    const [a, b] = await Promise.all([judge.evalPosition(START_FEN, 6), judge.evalPosition(MATE1, 6)]);
+    expect(typeof a.cp_stm).toBe('number'); expect(typeof b.cp_stm).toBe('number');
+    await e.close();
+  }, 30_000);
   it('Stockfish 1320 opponent returns a legal move; eps level mixes in random moves', async () => {
     const rng = mulberry32(3);
     const lvl = DEFAULT_LADDER.levels.find((l) => l.id === 'eps50')!;
