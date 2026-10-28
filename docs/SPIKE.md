@@ -321,3 +321,38 @@ Findings:
 5. Latency 190–570 ms per call; ~$0.00005 per call overall.
 6. Not yet tested: images vs FEN with a different piece set/orientation, higher resolution,
    repeats (pick stability), and the `hinted` arm.
+
+## 9. Ladder calibration v2 (2026-10-28)
+
+`pnpm cli ladder calibrate --games-per-pair 200 --workers 4` (CPU only, **$0**).
+21 pairs × 200 games = **4,200 games**, 50 ms/move, Stockfish 19, 100 seeded 4-ply openings,
+colours alternate, paired games share an opening. **2 h 6 m wall-clock, 1.81 s/game.**
+Output: `data/ladder/ladder-v2.json` (version 2), `ladder_levels` rows, anchor `uci1320 = 1320`.
+`ladderWarnings` produced **no warnings**.
+
+| level | nominal | pilot v1 (20/pair) | **v2 measured ± se** | games |
+| --- | ---: | ---: | ---: | ---: |
+| random | 250 | 0 | **160 ± 25.7** | 400 |
+| eps75 | 560 | 192 | **391 ± 19.2** | 600 |
+| eps50 | 790 | 468 | **614 ± 17.6** | 800 |
+| eps30 | 980 | 688 | **819 ± 17.8** | 800 |
+| eps15 | 1150 | 1029 | **1037 ± 18.9** | 800 |
+| uci1320 (anchor) | 1320 | 1320 | **1320 ± 0** | 800 |
+| uci1500 | 1500 | 1527 | **1583 ± 17.0** | 800 |
+| uci1700 | 1700 | 1682 | **1744 ± 15.4** | 800 |
+| uci1900 | 1900 | 1773 | **1879 ± 15.2** | 800 |
+| uci2100 | 2100 | 1944 | **2016 ± 16.7** | 800 |
+| uci2400 | 2400 | 2219 | **2250 ± 21.3** | 600 |
+| uci2800 | 2800 | 2766 | **2669 ± 39.3** | 400 |
+
+Findings:
+
+1. The nominal ladder was optimistic in the middle: `eps30` is really ~819 (not 980) and `uci1500`
+   is really ~1583 (not 1500). The top is compressed (`uci2800` ≈ 2669).
+2. Standard errors are **15–39 Elo**, roughly 3× tighter than the 20-game pilot (47–78).
+3. No adjacent `uci*` gap differs from nominal by > 100 Elo and measured Elo increases monotonically,
+   so the ladder is internally consistent at this resolution.
+4. T04 context: Jev beat `eps75` (now 391) and `eps30` (now 819), so its first series should start
+   near 1200 (nearest level `uci1320`) and adapt from there.
+5. The daemon now serves v2 through `loadLadder(dataDir())`; `GET /api/ladder` reports
+   `calibrated: true, version: 2`. E2E tests use an empty `CHESSDECIDE_DATA` so they stay deterministic.

@@ -1,5 +1,31 @@
 # Changelog
 
+## T06 — Series runner, store and API
+
+- `packages/core/src/series-events.ts`: `SeriesConfig`, `Series`, `SeriesGame`, `Block`, `EloPoint`,
+  `SeriesEvent` and `SeriesSummary` (API.md §3.3). `EventHub` is now generic; game and series feeds are
+  separate instances.
+- `packages/db/src/series-store.ts`: `saveSeries`, `loadSeriesRow`, `listSeriesRows`, `seriesGames`
+  (paused/ready count as in-flight), `setGameSeriesFields`, `buildSeries` (games, blocks, posterior
+  before/after, Elo history, `seriesStats`) and `seriesSummaries`. Migration `0002_harsh_tarantula.sql`
+  adds `series.concurrency` and `series.judge_depth`.
+- `packages/runner/src/series.ts`: `SeriesControlPlane` — create/start/pause/stop/idle; `nextAction`
+  loop with a per-series task pool (≤ concurrency, max 2), seeded openings cached by index (paired games
+  share a FEN), `game_started`/`block`/`game_finished`/`elo`/`spend`/`status` events, per-game budget =
+  remaining series cap, transport retries (3) then abort, budget stop + resume, `recoverSeries` at
+  startup, and immutable finished series. `serve.ts` wires the series plane and its hub.
+- `packages/providers/src/estimate-series.ts`: typical/worst-case series estimate; `POST /api/estimate`
+  now detects a `size` field and returns `{typical, worst_case, over_cap_typical, over_cap_worst}`.
+- `packages/api`: `POST /api/series` (validation, 402/424/400), `GET /api/series`, `GET /api/series/:id`,
+  `GET /api/series/:id/games`, `GET /api/series/:id/events` (SSE), and `start|pause|stop|resume` actions.
+  Public mode keeps the three GET routes and hides controls/events.
+- Tests: core 57, db 8 (+series store), api 18 (+5 series API), runner 18 (+8 control plane). Series
+  tests use a fake judge that is always +10 for White, so games adjudicate at ply 30 instead of 200.
+- `pnpm verify` and `pnpm e2e` (22) green. E2E now points `CHESSDECIDE_DATA` at a temp dir so the
+  calibrated ladder does not change the header assertion.
+- Deviations: `series.concurrency`/`judge_depth` were not in the original schema, so migration 0002 adds
+  them; `stop` also aborts a game that was launched while the stop was in flight.
+
 ## T05 — Ladder calibration job
 
 - `packages/core/src/ladder-warnings.ts`: warnings for uci gaps > 100 Elo off nominal and for measured
@@ -17,7 +43,12 @@
   through `loadLadder(dataDir())` instead of always returning `DEFAULT_LADDER`.
 - Tests: core 57 (+4 warnings), db 6 (+3 ladder store), runner 10 (+4 calibration, including a real
   Stockfish pair at 20 ms). `pnpm verify` green.
-- The full 200-games-per-pair run has **not** been started yet; it is the next step (hours of CPU, $0).
+- **Full run (2026-10-28):** 4,200 games in **2 h 6 m** (1.81 s/game), 50 ms, 4 workers, Stockfish 19.
+  Measured (nominal → measured ± se): random 250 → 160 ± 26; eps75 560 → 391 ± 19; eps50 790 → 614 ± 18;
+  eps30 980 → 819 ± 18; eps15 1150 → 1037 ± 19; uci1320 1320 (anchor); uci1500 1500 → 1583 ± 17;
+  uci1700 1700 → 1744 ± 15; uci1900 1900 → 1879 ± 15; uci2100 2100 → 2016 ± 17; uci2400 2400 → 2250 ± 21;
+  uci2800 2800 → 2669 ± 39. No `ladderWarnings`. Wrote `data/ladder/ladder-v2.json`; full table in
+  `docs/SPIKE.md` §9.
 
 ## T04 — First real game (checkpoint)
 
