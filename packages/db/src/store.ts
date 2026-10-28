@@ -67,6 +67,22 @@ export async function spendSince(db: Db, sinceIso?: string): Promise<{ usd: numb
   return { usd: r?.usd ?? 0, calls: r?.calls ?? 0, cache_hits: r?.hits ?? 0 };
 }
 
+/**
+ * Mean input tokens of the last 100 real (non-cached, ok) attempts for one model+arm.
+ * `undefined` until at least 20 exist, so the budget keeps using the conservative formula.
+ */
+export async function meanInputTokens(db: Db, model: string, armId: string): Promise<number | undefined> {
+  const rows = await db.select({ tokens: s.attempts.input_tokens }).from(s.attempts)
+    .where(and(
+      eq(s.attempts.model_slug, model), eq(s.attempts.arm_id, armId),
+      eq(s.attempts.cache_hit, 0), eq(s.attempts.status, 'ok'),
+    ))
+    .orderBy(desc(s.attempts.id)).limit(100);
+  const values = rows.map((r) => r.tokens).filter((v): v is number => typeof v === 'number');
+  if (values.length < 20) return undefined;
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
 // ---- attempts ----
 async function gzipB64(text: string): Promise<string> {
   const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));

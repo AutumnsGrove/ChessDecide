@@ -7,7 +7,7 @@ import { getPlatformProxy } from 'wrangler';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { START_FEN, type Game } from '@chessdecide/core';
 import * as schema from '../src/schema.ts';
-import { d1AttemptSink, d1GameStore, listGames, loadGame, spendSince, type Db } from '../src/store.ts';
+import { d1AttemptSink, d1GameStore, listGames, loadGame, meanInputTokens, spendSince, type Db } from '../src/store.ts';
 
 let db: Db; let dispose: () => Promise<void>;
 const migDir = fileURLToPath(new URL('../migrations/', import.meta.url));
@@ -54,5 +54,21 @@ describe('d1 store', () => {
     const sp = await spendSince(db);
     expect(sp.usd).toBeCloseTo(0.0002, 12); expect(sp.calls).toBe(1); expect(sp.cache_hits).toBe(1);
     expect((await spendSince(db, '2027-01-01T00:00:00Z')).usd).toBe(0);
+  });
+  it('rolling mean input tokens needs 20 real ok attempts', async () => {
+    const sink = d1AttemptSink(db, () => '2026-01-03T00:00:00Z');
+    const row = (i: number, over: Record<string, unknown> = {}) => ({
+      purpose: 'game', model_slug: 'rolling/model', arm_id: 'clean', request_hash: `r${i}`,
+      cache_hit: false, status: 'ok', latency_ms: 1, input_tokens: 1000, cost_usd: 0.0001, ...over,
+    });
+    for (let i = 0; i < 19; i++) await sink.record(row(i));
+    expect(await meanInputTokens(db, 'rolling/model', 'clean')).toBeUndefined();
+    await sink.record(row(19, { input_tokens: 1020 }));
+    expect(await meanInputTokens(db, 'rolling/model', 'clean')).toBeCloseTo(1001, 6);
+    // cached, failed and other-arm rows never move the mean
+    await sink.record(row(20, { cache_hit: true, input_tokens: 99999 }));
+    await sink.record(row(21, { status: 'error', input_tokens: 99999 }));
+    await sink.record(row(22, { arm_id: 'hinted', input_tokens: 99999 }));
+    expect(await meanInputTokens(db, 'rolling/model', 'clean')).toBeCloseTo(1001, 6);
   });
 });
