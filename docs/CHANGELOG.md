@@ -1,5 +1,24 @@
 # Changelog
 
+## T03 — Viewer extras: decision panel, live controls, e2e
+
+- `viewer-model.ts`: `decisionRows(ply)` (up to 9 rows, sorted by P, pick and Stockfish best always
+  included, best synthesized when the annotator did not append it) and `cplTone` (0 = best, ≤ 0.2 pawns
+  neutral, then inaccuracy/mistake/blunder). Unit tests for sorting, inclusion, tones and hidden states.
+- `DecisionPanel.svelte`: collapsed `<details>` below the status card; SAN · probability bar · P ·
+  Stockfish-loss chip, picked row outlined, ★ on the best move, footer with confidence, options, cost,
+  latency, model and `Cached`. Forced plies say "Only one legal move: no model call"; engine and unjudged
+  plies hide it.
+- `LiveControls.svelte`: Pause when running; Resume + Step when paused/ready; Stop with an inline
+  3 s "Confirm stop". Pending requests disable the buttons; failures become banners. Status follows the
+  SSE `status` events through the parent's reactive game object.
+- `Viewer.svelte`: shows a paused banner with the reason and a budget-stop hint, places the live controls
+  under the player bar, and renders the decision panel for the shown ply. Spend refresh already wired in T02.
+- `apps/web/e2e/viewer.spec.ts`: replay keys + Space autoplay, graph seek, live detach/pill/re-attach,
+  pause/resume/stop against the API, decision panel (rows, pick, ★, probabilities ≤ 100 %), and a 400 px
+  screenshot at `apps/web/e2e/__screens__/viewer-400.png` (committed for review, not asserted).
+- Tests: `pnpm verify` green (web unit 8); `pnpm e2e` 22 passed (11 tests × 2 viewports).
+
 ## T02 — Web: New game, spend chip, banners, Playwright
 
 - `apps/web/src/lib/api.ts`: typed fetch helpers (`getJson`, `postJson`) with `ApiClientError` from the

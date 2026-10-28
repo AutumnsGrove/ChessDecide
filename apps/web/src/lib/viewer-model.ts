@@ -41,6 +41,52 @@ export function graphPoints(plies: readonly Ply[], width = 300, height = 84): st
   return [`0,${height / 2}`, ...plies.map((p, i) => `${(((i + 1) / n) * width).toFixed(1)},${y(p.eval?.white_eval_cp ?? 0).toFixed(1)}`)].join(' ');
 }
 export const mistakeCount = (g: Game) => g.plies.filter((p) => p.by === 'model' && (p.judge?.class === 'mistake' || p.judge?.class === 'blunder')).length;
+
+export type DecisionTone = 'best' | 'neutral' | 'inaccuracy' | 'mistake' | 'blunder';
+export interface DecisionRow {
+  san: string; uci: string; p: number; cpl: number;
+  isPick: boolean; isBest: boolean; tone: DecisionTone;
+}
+
+/** Tone for the Stockfish-loss chip. 0 cp is `best`; <= 0.2 pawns is neutral. */
+export function cplTone(cpl: number): DecisionTone {
+  if (cpl <= 0) return 'best';
+  if (cpl <= 20) return 'neutral';
+  if (cpl < 100) return 'inaccuracy';
+  if (cpl < 200) return 'mistake';
+  return 'blunder';
+}
+
+/**
+ * Rows for the DecisionPanel: up to `limit`, sorted by P descending, always including the pick and
+ * Stockfish's best. Empty for engine plies, forced plies and plies without a decision.
+ */
+export function decisionRows(ply: Ply, limit = 9): DecisionRow[] {
+  const d = ply.decision;
+  if (ply.by !== 'model' || ply.forced || !d) return [];
+  const options = [...(d.top_options ?? [])];
+  if (options.length === 0) return [];
+  if (ply.judge && !options.some((o) => o.uci === ply.judge!.best_uci))
+    options.push({ uci: ply.judge.best_uci, san: ply.judge.best_san, p: 0, cpl: 0 });
+  const byP = (a: { p: number; cpl?: number; uci: string }, b: { p: number; cpl?: number; uci: string }) =>
+    b.p - a.p || (a.cpl ?? 0) - (b.cpl ?? 0) || (a.uci < b.uci ? -1 : 1);
+  const bestUci = ply.judge?.best_uci
+    ?? [...options].sort((a, b) => (a.cpl ?? Infinity) - (b.cpl ?? Infinity) || b.p - a.p)[0]!.uci;
+  const must = new Set([d.pick_uci, bestUci]);
+  const sorted = [...options].sort(byP);
+  const chosen = sorted.filter((o) => must.has(o.uci));
+  for (const o of sorted) {
+    if (chosen.length >= limit) break;
+    if (!chosen.includes(o)) chosen.push(o);
+  }
+  return chosen.slice(0, limit).map((o) => {
+    const cpl = o.cpl ?? 0;
+    return {
+      san: o.san, uci: o.uci, p: o.p, cpl,
+      isPick: o.uci === d.pick_uci, isBest: o.uci === bestUci, tone: cplTone(cpl),
+    };
+  }).sort((a, b) => b.p - a.p || a.cpl - b.cpl || (a.uci < b.uci ? -1 : 1));
+}
 export function resultLabel(g: Game): string {
   if (g.result === '*') return g.status === 'finished' ? '—' : 'In progress';
   if (g.result === '1/2-1/2') return 'Draw';

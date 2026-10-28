@@ -3,6 +3,8 @@
   import { START_FEN } from '@chessdecide/core';
   import { board } from './chessground.ts';
   import { refreshSpend } from './stores.svelte.ts';
+  import DecisionPanel from './DecisionPanel.svelte';
+  import LiveControls from './LiveControls.svelte';
   import { evalPct, graphPoints, mistakeCount, playerLabel, resultLabel, statusLine } from './viewer-model.ts';
 
   let { initial, live = false }: { initial: Game; live?: boolean } = $props();
@@ -21,6 +23,7 @@
   const evCp = $derived(ply?.eval?.white_eval_cp ?? 0);
   const behind = $derived(Math.max(0, plies.length - cur));
   const lastMove = $derived<[string, string] | undefined>(ply ? [ply.uci.slice(0, 2), ply.uci.slice(2, 4)] : undefined);
+  const modelLabel = $derived(ply ? playerLabel(ply.side === 'white' ? game.config.white : game.config.black) : '');
 
   function show(i: number) { cur = Math.max(0, Math.min(plies.length, i)); if (cur === plies.length) { if (!attached) attached = live && game.status !== 'finished'; stop(); } }
   function stop() { if (timer) clearInterval(timer); timer = null; playing = false; }
@@ -71,12 +74,21 @@
   </div>
   <div class="who"><b>{playerLabel(game.config.white)}</b><span>White</span></div>
 
+  {#if game.status === 'paused'}
+    <div class="state warn" role="status">Paused{game.status_reason ? `: ${game.status_reason}` : ''}</div>
+  {:else if game.status === 'stopped_budget'}
+    <div class="state error" role="alert">Stopped at the budget cap. Start a new game with a higher cap to continue.</div>
+  {/if}
+  <LiveControls {game} {live} />
+
   <div class="caption" aria-live="polite">
     <span class="mv mono">{status.title}</span>
     {#if status.tag}<span class="tag {status.tag.kind}">{status.tag.text}</span>{/if}
     <p>{status.body}</p>
     {#if status.lead}<small>{status.lead}</small>{/if}
   </div>
+
+  {#if ply}<DecisionPanel {ply} modelLabel={modelLabel} />{/if}
 
   <div class="controls">
     <button onclick={() => go(0)} aria-label="Start">⏮</button>
@@ -113,6 +125,8 @@
   .evalbar { width: 14px; border-radius: 3px; overflow: hidden; background: #111; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); }
   .evalbar i { display: block; background: #f2f0ea; transition: height 0.3s; }
   .caption { background: var(--panel); border-radius: 8px; padding: 12px 14px; min-height: 96px; }
+  .state { border-radius: 8px; padding: 9px 12px; font-size: 13px; border-left: 3px solid var(--warn); background: var(--panel); }
+  .state.error { border-left-color: var(--bad); }
   .mv { font-weight: 600; font-size: 17px; }
   .caption p { margin: 6px 0 0; } .caption small { color: var(--mute); }
   .tag { display: inline-block; font: 600 11px var(--sans); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; margin-left: 8px; vertical-align: 2px; }
