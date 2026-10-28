@@ -1,123 +1,109 @@
-# Handoff — where we left off (2026-10-27, session 2)
+# Handoff — where we left off (2026-10-28, session 3)
 
-For the next Claude Code session (possibly remote). Read this first, then `README.md`,
-`docs/PLAN.md` and `docs/ARCHITECTURE.md`. Autumn uses **she/her** pronouns. She often works by
-voice on a walk: **keep replies short and conversational**, no walls of text, expect transcription errors.
+Autumn uses **she/her** pronouns. She often works by voice: keep replies short and conversational.
 
-## 1. State of the project
+## 1. State
 
-**Design locked at v4; there is still no application code.** This session re-planned the stack and
-rewrote the docs. Nothing has been run against the live API since M0.
+The app is real now: daemon + web run locally, real decision models play, the ladder is calibrated,
+series run live. **T00–T07 are done and committed; T08 is paused mid-series.**
 
-| Done | Where |
+| Task | State |
 | --- | --- |
-| M0 protocol spikes (Decisions API, Stockfish, text models) | `spikes/`, `docs/SPIKE.md` |
-| Plan v4: stack, phases, arms, viewer-first order | `docs/PLAN.md`, `docs/ARCHITECTURE.md` |
-| Elo posterior, ladder calibration, stop rules, per-move metrics | `docs/METRICS.md` |
-| Request builders: clean / hinted / image arms | `docs/PROMPTS.md` |
-| HTTP + SSE contract, TS types, SQLite/D1 schema | `docs/API.md` |
-| UI spec | `docs/UI.md` |
-| Build guide (TypeScript, viewer-first) | `docs/IMPLEMENTATION.md` |
-| **Simple phone-friendly mockup** (real chessground board, simulated moves) | `docs/mockups/simple.html`, published as an Artifact |
-| Older dense mockups (still valid for later screens) | `docs/mockups/index.html` and pages |
+| T00 foundation | done |
+| T01 real models, catalog, estimate, probe | done |
+| T02 New game dialog, spend chip, banners, Playwright | done |
+| T03 decision panel, live controls, viewer e2e | done |
+| T04 first real game (Jev vs eps75; extra vs eps30) | done, report in `docs/build/reports/` |
+| T05 ladder calibration + full v2 run | done |
+| T06 series runner, store, API | done |
+| T07 series screens | done |
+| **T08 first real series** | **PAUSED at 5/25 finished** |
+| T09–T12 | not started |
 
-Artifact link for the simple mockup (private to Autumn): https://claude.ai/artifact/VLGNvGEUkvB8p8mf7D3eww
+Commits on `main` (pushed at end of session): `Add series screens`, `Add series runner, store and API`,
+`Record ladder calibration v2`, `Add ladder calibration job`, `Record second real game vs eps30`,
+`Record first real game results`, `Add decision panel…`, `Add new game dialog…`,
+`Add real model players…`.
 
-## 1b. Curriculum for the implementing model (added later in session 2)
+`pnpm verify` is green. `pnpm e2e` is green (30 tests: 15 specs × 2 viewports). `pnpm install
+--frozen-lockfile` is clean.
 
-`docs/build/` is the brief for DeepSeek (or any smaller model): `README.md` (workflow), `DECISIONS.md` (every decision pre-made, versions pinned, gotchas),
-`CONTRACTS.md`, `tasks/T00–T12`, `fixtures/`, and `reference/` = a **working, tested foundation** (80+ tests; verified from a fresh copy with
-`pnpm install --frozen-lockfile && pnpm db:migrate && pnpm verify`). T00 installs it; T01–T03 add real models/web/viewer; **T04 and T08 are STOP-and-ask checkpoints**
-(first real game, first real series). Key findings while building it: SvelteKit 3 needs TypeScript 6.0.3 (7.x breaks it), `$lib` is gone (`#lib`), `getPlatformProxy`
-state path vs wrangler CLI (`…/v3`), Workers cannot spawn Stockfish so games run in a Node **daemon** with a Hono API (the same API is mounted read-only in the deployed site),
-and the FK order game-before-ply. Publishing = generate idempotent SQL and run it with `wrangler d1 execute --remote` (no tokens in the repo).
+## 2. Resume T08 (first thing next session)
 
-## 2. What changed this session (v3 → v4)
+Series id: **`01M625J2GZ003DBZWK012ERQQ8`** (Jev clean, Quick 25, adaptive, cap $0.50, ladder v2).
 
-- **Why chess works for her:** she liked the Pokémon run because the model was dropped into an
-  environment it was never trained for and had to adapt. Chess is the same kind of test: a generalist
-  decision model against a specialist engine. Cheap runs matter (the Pokémon run cost about $2).
-- **Scope reset:** v1 starts from "did it win" plus a move-by-move replay; **Elo remains the way to
-  compare models** (she wants Jev vs Clef vs D1 etc.) but is built after the viewer and one real game.
-  Elo was explained to her in plain terms; keep UI language simple.
-- **Weakened Stockfish:** full-strength Stockfish is pointless; the ladder (weak levels below 1320)
-  covers it.
-- **Stack: TypeScript, not Go.** SvelteKit, raw CSS (**no Tailwind**, she is firm), Drizzle + SQLite →
-  Cloudflare D1, `chess.js`, Durable Objects later. Reason: she wants to publish it on Cloudflare
-  (free tier today; she could pay for Workers later).
-- **Phases:** (1) run locally, publish results to a read-only public site; (2) live runs on Cloudflare
-  (Durable Objects, Stockfish in a Container or on a server); (3) many models × hundreds of games.
-  "It should be as easy as swapping something out": hence ports/adapters and a one-ply `stepGame`.
-- **Engine adapter:** Stockfish first, other UCI engines later (she wants that extensibility).
-- **Cloudflare facts (checked 2026-10-27):** free Workers = 10 ms CPU and 50 subrequests per
-  invocation; Containers need the paid plan; Durable Objects (SQLite) work on free. Stockfish cannot
-  run inside a free Worker. Re-check before phase 2 (`ARCHITECTURE.md` §5).
-- **Arms:** `clean` is now **fully bare** (`Knight g1 to f3`, no capture/check/mate hints, no
-  `in_check`); `hinted` is opt-in; new optional **`image` arm** (rendered board PNG + the same bare
-  options; no FEN). Jev uses a slower long-context mode for any image; the arm is reported separately.
-- **No generated commentary** (costs money). The one-line status in the mockup uses templates over
-  Stockfish numbers only.
-- **Legality:** options come from the rules library (`chess.js`), never from the model, so illegal
-  moves are impossible. Stockfish is not used for legality.
-
-## 3. Locked decisions (carried over)
-
-- Goal #1: test decision models. Goal #2: keep cost down. Text models are out of v1.
-- Roster: `typesafe/jev-1.14`, `liquid/d1-ultra`; expand only if testing goes well.
-- Scoring: Elo via an adaptive ladder (blocks of 5), Quick 25 / Standard 50 / To completion.
-- Series use seeded random 4-ply openings, colours alternate; single games may start from startpos.
-- Budget: hard cap per run, default $1.00, estimate-first.
-- Compare (same position, many models) dropped from v1. Model-vs-model wanted later (M8).
-- UI: dark, lichess-like, nice board, a playback mode she can watch, **phone-readable**.
-
-## 4. Open items
-
-1. **Spike S1** (`ARCHITECTURE.md` §9): local D1 via `getPlatformProxy()` + Drizzle from Node, else
-   `better-sqlite3`.
-2. **Spike S2:** how the Decisions API accepts an image; do Jev/D1 Ultra pick sensibly from it (≈ $0.01).
-3. Spike S3 (optional): single-thread WASM Stockfish in a Worker on the paid plan.
-4. M0 results are N = 1–2 positions; claims about determinism, order invariance and calibration are
-   hypotheses (`SPIKE.md` banner). Ladder numbers in the docs are placeholders until calibrated.
-5. Unverified until M1: `slim` vs `full` state equivalence, whether `GET /api/v1/key` shows credit,
-   oracle seconds per position, how strong these models really are.
-6. Does she want the Ratings tab in `simple.html` simplified further? (Asked; no answer yet.)
-
-## 5. Suggested next session
-
-1. Confirm the docs read right to her (short summary, not the files).
-2. Run spikes S1 and S2, then start `IMPLEMENTATION.md` M1 (T1.0–T1.7) and M2 (viewer + mock),
-   then the **one real game and go/no-go (T2.6)**. Ask her before continuing to Series.
-3. Mockup caveat: probabilities, model moves and all ratings in `simple.html` are simulated; board
-   positions and evals are real Stockfish 19 (depth 11).
-
-## 6. Facts and caveats
-
-- Environment (her machine): Stockfish 19 (Homebrew), Node 26 (needed by pnpm), `uv`. Package manager: **pnpm only** (Autumn's rule; no npm, yarn or Bun). No browser automation in the
-  CLI sandbox; Chromium + Playwright exist in the cloud sandbox and were used to screenshot the mockup.
-- Chessground 9.2.1 is vendored in `docs/mockups/vendor/` (min.js patched to `window.Chessground`;
-  GPL-3 licence included). `simple.html` inlines it plus the piece/board images, so it works as a
-  self-contained Artifact. Its script is wrapped in an IIFE because chessground declares globals.
-- Repo: `origin` = `github.com/AutumnsGrove/ChessDecide`. Work branch this session:
-  `claude/decision-model-chess-bench-lj0106`. Parent `CLAUDE.md`: `uv run` for Python, Black, commit
-  messages in present tense, first line < 50 chars.
-- Never commit an API key. `spikes/out/` and `data/` are gitignored.
-
-## 7. File map
-
+```bash
+pnpm dev            # daemon 8731 + vite 5273
+# open http://127.0.0.1:5273/series/01M625J2GZ003DBZWK012ERQQ8 and press Resume
+# or: curl -X POST localhost:8731/api/series/01M625J2GZ003DBZWK012ERQQ8/start
 ```
-README.md                      overview + doc index
-docs/PLAN.md                   decisions, scoring, cost, risks, milestones
-docs/ARCHITECTURE.md           TS stack, ports/adapters, phases, Cloudflare limits, spikes
-docs/METRICS.md                Part A per-move oracle; Part B Elo/series/ladder (headline)
-docs/PROMPTS.md                request builders, parsing, retry, cache, estimator, image arm
-docs/API.md                    endpoints, SSE events, TS types, SQLite/D1 DDL, env config
-docs/UI.md                     tokens, screens, components, Viewer state machine, states
-docs/IMPLEMENTATION.md         ordered tasks + acceptance checks for the implementer
-docs/TEXT_ARM.md               deferred text-model arm
-docs/SPIKE.md  RESEARCH.md     M0 findings; API/toolchain facts (RESEARCH Go notes are history)
-docs/HANDOFF.md                this file
-docs/mockups/simple.html       v1 target mockup (self-contained)
-docs/mockups/                  index.html, play.html, series.html, series-list.html, games.html, app.css,
-                               common.js, newgame.js, sample_game.js, tools/gen_sample_game.py, vendor/
-spikes/                        M0 scripts (throwaway)
-```
+
+It is paused with 5 finished (all losses vs `uci1320`), 2 in-flight `eps50` games (plies 62/54),
+0 aborts, provisional Elo **668 ± 553**, cost so far **$0.0029** (all attempts $0.0053).
+Report skeleton: `docs/build/reports/T08-first-series.md`. Finish all 25, update the report, take the
+final screenshot, then ask the T08 STOP question (D1 Ultra next / hinted arm / T09 / pause).
+
+## 3. Calibrated ladder v2 (this is the ruler)
+
+`data/ladder/ladder-v2.json` (gitignored data dir), 4,200 games, 2 h 6 m, $0, Stockfish 19,
+50 ms/move, 4 workers. No warnings. Full table in `docs/SPIKE.md` §9.
+
+| rung | nominal | measured ± se |
+| --- | ---: | ---: |
+| random | 250 | 160 ± 26 |
+| eps75 | 560 | 391 ± 19 |
+| eps50 | 790 | 614 ± 18 |
+| eps30 | 980 | 819 ± 18 |
+| eps15 | 1150 | 1037 ± 19 |
+| uci1320 | 1320 | 1320 (anchor) |
+| uci1500 | 1500 | 1583 ± 17 |
+| uci1700 | 1700 | 1744 ± 15 |
+| uci1900 | 1900 | 1879 ± 15 |
+| uci2100 | 2100 | 2016 ± 17 |
+| uci2400 | 2400 | 2250 ± 21 |
+| uci2800 | 2800 | 2669 ± 39 |
+
+The daemon loads the highest valid `data/ladder/ladder-vN.json`; `GET /api/ladder` reports
+`calibrated: true, version: 2`. E2E uses an empty `CHESSDECIDE_DATA` so it gets the nominal ladder.
+
+## 4. Real-run numbers so far
+
+- **T04a** Jev clean (White) vs eps75: 1-0 checkmate in 21 plies, 11 calls, **$0.000545**, ~71 s,
+  ACPL 198, acceptable 82 %, 1 blunder, 0 errors.
+- **T04b** Jev vs eps30: 1-0 adjudicated in 35 plies, 16 calls + 2 cache hits, **$0.000711**, ~62 s,
+  ACPL 198, acceptable 89 %, 2 blunders.
+- **T08 (partial)** Jev vs uci1320: 0-5, games ~30 plies, provisional 668 ± 553, **$0.00058/game**.
+  Estimate was $0.073 for 25 games; actual is ~5× lower. Jev is below uci1320; likely ~600–820.
+
+## 5. What was built (quick map)
+
+- `packages/core`: types, rules, prompts, Elo, ladder fit/warnings, series scheduler/events,
+  `decisionRows` lives in the web package.
+- `packages/engine`: native UCI, Stockfish/ε/random opponents, `EngineJudge` (now **serializes**
+  `oracle`/`evalPosition` so two series games can judge at once — fixed the single-flight crash).
+- `packages/providers`: Decisions client, ModelPlayer, mock, catalog, game/series estimates.
+- `packages/db`: Drizzle schema/migrations, game/ladder/series stores, spend, rolling mean tokens.
+- `packages/api`: Hono API (games, models, estimate, spend, ladder, series + SSE, health).
+- `packages/runner`: local D1, runtime/ports, game daemon, ladder calibration, series control plane.
+- `apps/web`: SvelteKit viewer, New game/New series dialogs, games/series lists and detail, decision
+  panel, live controls, mini boards, hand-written SVG Elo chart and ladder axis.
+
+## 6. Environment / gotchas added this session
+
+- `.env` exists at the repo root with `OPENROUTER_API_KEY` (gitignored). `loadEnv()` resolves the repo
+  root even when pnpm runs a CLI from `packages/runner`.
+- Daemon `127.0.0.1:8731`, Vite `5273` (`strictPort`). `pnpm dev` runs both.
+- `EngineJudge` is serialized internally; do not call native engines concurrently from two games.
+- Series tests use a fake judge that is always +10 for White so adjudication ends games at ply 30;
+  without that they hit 200 plies and local D1 writes make the suite very slow.
+- E2E: `apps/web/playwright.config.ts` migrates a temp D1 and points `CHESSDECIDE_DATA` at a temp
+  dir. `pnpm e2e` is not part of `pnpm verify`.
+- Migration `0002_harsh_tarantula.sql` adds `series.concurrency` and `series.judge_depth`.
+- `pnpm verify` runs ~1–2 min when the machine is free; do not run it during a calibration run
+  (core perft/completion tests can time out under 4 Stockfish workers).
+
+## 7. Next steps
+
+1. **Finish T08** (resume series, update report, STOP question).
+2. Then T09 leaderboard, T10 publish/read-only deploy, T11 exports, T12 image arm.
+3. Phase 2 (live Cloudflare) is out of this curriculum.

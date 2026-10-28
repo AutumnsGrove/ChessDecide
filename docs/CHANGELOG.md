@@ -1,5 +1,19 @@
 # Changelog
 
+## T08 — First real series (PAUSED, resume next session)
+
+- Started Jev `clean`, Quick 25, adaptive, cap $0.50, ladder v2, judge depth 14, from the New series
+  dialog. Estimate $0.073 typical / $0.184 worst.
+- Paused at **5 finished / 25** (2 `eps50` games in flight, paused): **0 W – 0 D – 5 L** vs `uci1320`,
+  provisional Elo **668 ± 553**, **$0.0029** for finished games ($0.0053 all attempts), ~6.5 min.
+- Adaptive worked: after 0-5 vs `uci1320` it dropped block 2 to `eps50` (614), 54 Elo from the
+  provisional mean. 0 aborts, 0 illegal moves, 0 × 429; 9 transient network retries all recovered.
+- Secondary: ACPL 97.9, acceptable 81.1 %, mistakes 14.9 %, blunders 9.5 %, avg 30.2 plies,
+  80 % adjudicated, p50 531 ms, p95 1,787 ms, 928 input tokens, **$0.00058/game** (≈5× below estimate).
+- Resume id `01M625J2GZ003DBZWK012ERQQ8`; report/screenshots in `docs/build/reports/T08-*`.
+- `EngineJudge` now serializes judge calls; two series games judging at once used to crash with
+  `NativeUciEngine is single-flight`. Regression test added.
+
 ## T07 — Series screens
 
 - `series-model.ts` (+14 web unit tests): targets/progress, `intervalLabel`, `precisionHint`, `overlap`,
