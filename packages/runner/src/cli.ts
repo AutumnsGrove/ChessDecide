@@ -1,14 +1,17 @@
 #!/usr/bin/env -S pnpm exec tsx
 import { parseArgs } from 'node:util';
+import { eq } from 'drizzle-orm';
 import {
   ARM_PRESETS, START_FEN, legalMoves, playToEnd, sideToMove,
   type ArmName, type Game, type GameConfig, type MoveContext,
 } from '@chessdecide/core';
-import { loadGame } from '@chessdecide/db';
+import { games, loadGame } from '@chessdecide/db';
+import { NativeUciEngine } from '@chessdecide/engine';
 import { DecisionsClient, ModelPlayer, type AttemptRow, type AttemptSink } from '@chessdecide/providers';
 import { openLocalDb } from './d1.ts';
 import { buildPorts, createRuntime, newGame } from './runtime.ts';
-import { isMock, loadEnv, openRouterKey } from './config.ts';
+import { calibrate } from './ladder.ts';
+import { dataDir, findStockfish, isMock, loadEnv, openRouterKey } from './config.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
 loadEnv();
@@ -77,7 +80,43 @@ async function probe() {
   console.log(`request  ${lastOk?.request_bytes ?? '?'} bytes  attempts ${rows.length}`);
 }
 
+/** CPU-only ladder calibration. No model calls, no spend. */
+async function ladder() {
+  if (rest[0] !== 'calibrate') {
+    console.error('usage: chessdecide ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume]');
+    process.exit(2);
+  }
+  const { values: v } = parseArgs({ args: rest.slice(1), options: {
+    'games-per-pair': { type: 'string', default: '200' },
+    workers: { type: 'string', default: '4' },
+    movetime: { type: 'string', default: '50' },
+    seed: { type: 'string', default: '1' },
+    resume: { type: 'boolean', default: false },
+    version: { type: 'string' },
+  } });
+  const { db, close } = await openLocalDb();
+  try {
+    const running = await db.select({ id: games.id }).from(games).where(eq(games.status, 'running')).limit(1);
+    if (running.length) {
+      console.error('refusing to calibrate while a game is running (pause or stop it first)');
+      process.exitCode = 2;
+      return;
+    }
+    const path = findStockfish();
+    const res = await calibrate({
+      db, dataDir: dataDir(),
+      gamesPerPair: Number(v['games-per-pair']), workers: Number(v.workers), movetimeMs: Number(v.movetime), seed: Number(v.seed),
+      resume: v.resume, ...(v.version ? { version: Number(v.version) } : {}),
+      makeEngine: () => NativeUciEngine.start({ path }),
+    });
+    console.log(`calibrated ladder v${res.file.version}: ${res.path} · ${res.games} games · ${(res.wallMs / 1000).toFixed(0)}s`);
+  } finally {
+    await close();
+  }
+}
+
 if (cmd === 'game') await game();
 else if (cmd === 'probe') await probe();
+else if (cmd === 'ladder') await ladder();
 else if (cmd === 'serve') { loadEnv(); const { startDaemon } = await import('./serve.ts'); await startDaemon({ mock: isMock() }); }
-else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"]'); process.exit(2); }
+else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume]'); process.exit(2); }

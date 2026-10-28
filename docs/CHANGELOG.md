@@ -1,5 +1,24 @@
 # Changelog
 
+## T05 — Ladder calibration job
+
+- `packages/core/src/ladder-warnings.ts`: warnings for uci gaps > 100 Elo off nominal and for measured
+  Elo that is not strictly increasing in nominal order (+ table tests).
+- `packages/db/src/ladder-store.ts`: `saveLadderLevels`, `loadLadderLevels`, `addLadderGame`,
+  `ladderGameCount`, `ladderGameIndexes`, `clearLadderGames`, `scoreFor`, `loadCalibrationGames`.
+  Migration `0001_same_umar.sql` adds `ladder_games.game_index` (needed for exact resume).
+- `packages/runner/src/ladder.ts`: `loadLadder` (highest valid `data/ladder/ladder-vN.json`, corrupt files
+  warned and skipped), `nextLadderVersion`, and `calibrate`: 100 seeded depth-10 openings, all
+  `calibrationPairs`, `--workers` game pool, per-game engines closed after the game, rows written as
+  games finish, ETA after the first 20, exact `--resume` by `game_index`, `fitLadder` with the `uci1320`
+  anchor, JSON file + `ladder_levels` rows, printed table and warnings.
+- `pnpm cli ladder calibrate [--games-per-pair 200] [--workers 4] [--movetime 50] [--seed 1] [--resume]`;
+  refuses while a game is `running`. `GET /api/ladder` and `/api/health` now read the calibrated file
+  through `loadLadder(dataDir())` instead of always returning `DEFAULT_LADDER`.
+- Tests: core 57 (+4 warnings), db 6 (+3 ladder store), runner 10 (+4 calibration, including a real
+  Stockfish pair at 20 ms). `pnpm verify` green.
+- The full 200-games-per-pair run has **not** been started yet; it is the next step (hours of CPU, $0).
+
 ## T04 — First real game (checkpoint)
 
 - Fixed `loadEnv()` to resolve the repo-root `.env` (pnpm runs the CLI from `packages/runner`, so the

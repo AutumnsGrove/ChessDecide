@@ -97,6 +97,7 @@ export const ladder_games = sqliteTable('ladder_games', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   ladder_version: integer('ladder_version').notNull(),
   level_a: text('level_a').notNull(), level_b: text('level_b').notNull(),
+  game_index: integer('game_index'),
   opening_seed: integer('opening_seed'), a_color: text('a_color'), result: text('result'), plies: integer('plies'),
 });
 

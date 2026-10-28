@@ -1,0 +1,1 @@
+ALTER TABLE `ladder_games` ADD `game_index` integer;

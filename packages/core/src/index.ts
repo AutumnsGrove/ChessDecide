@@ -12,4 +12,5 @@ export * from './game.ts';
 export * from './series.ts';
 export * from './openings.ts';
 export * from './ladder-fit.ts';
+export * from './ladder-warnings.ts';
 export * from './metrics.ts';

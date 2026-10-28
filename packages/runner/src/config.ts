@@ -34,3 +34,6 @@ export function findStockfish(): string {
 }
 
 export const judgeWorkers = () => Number(process.env.CHESSDECIDE_JUDGE_WORKERS ?? Math.max(1, Math.min(4, (navigator.hardwareConcurrency ?? 4) - 2)));
+
+/** Local data directory (DB, ladder files, exports); `CHESSDECIDE_DATA` overrides. */
+export const dataDir = (): string => process.env.CHESSDECIDE_DATA ?? fileURLToPath(new URL('../../../data', import.meta.url));

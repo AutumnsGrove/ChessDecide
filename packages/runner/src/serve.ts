@@ -1,11 +1,11 @@
 import { serve } from '@hono/node-server';
-import { DEFAULT_LADDER } from '@chessdecide/core';
 import { createApi, EventHub } from '@chessdecide/api';
 import { spendSince } from '@chessdecide/db';
 import { LocalControlPlane, recoverGames } from './control.ts';
 import { openLocalDb } from './d1.ts';
 import { createRuntime, getCatalog } from './runtime.ts';
-import { isMock, loadEnv, openRouterKey } from './config.ts';
+import { loadLadder } from './ladder.ts';
+import { dataDir, isMock, loadEnv, openRouterKey } from './config.ts';
 
 export async function startDaemon(opts: { port?: number; host?: string; mock?: boolean } = {}) {
   loadEnv();
@@ -24,7 +24,7 @@ export async function startDaemon(opts: { port?: number; host?: string; mock?: b
   const app = createApi({
     db, mode: 'local', control, hub,
     catalog: getCatalog(),
-    ladder: () => DEFAULT_LADDER,
+    ladder: () => loadLadder(dataDir()),
     spend: (since) => spendSince(db, since),
     hasKey: () => !!openRouterKey(),
     mock, sessionStart,
