@@ -59,7 +59,7 @@ Numbers are exact unless a task says otherwise.
 | --- | --- |
 | D31 | One API implementation (`packages/api`), two hosts: the Node daemon (local) and a SvelteKit route (deployed, read-only). Error envelope `{error:{code,message,retryable,detail}}`; codes in `API.md` §1. Control routes exist only when a `ControlPlane` is passed. |
 | D32 | SSE: on connect send `snapshot`, then hub events; clients reconnect and get a fresh snapshot (no `Last-Event-ID` replay). Heartbeat `: ping` every 15 s. |
-| D33 | The daemon binds `127.0.0.1:8787` and refuses other addresses unless `CHESSDECIDE_ALLOW_REMOTE=1`. `vite dev` proxies `/api` to it; `CHESSDECIDE_MODE=public` disables the proxy and uses the in-app read-only route. |
+| D33 | The daemon binds `127.0.0.1:8731` and refuses other addresses unless `CHESSDECIDE_ALLOW_REMOTE=1`. `vite dev` proxies `/api` to it; `CHESSDECIDE_MODE=public` disables the proxy and uses the in-app read-only route. |
 | D34 | UI: dark lichess-like tokens from `app.css`; **works at 400 px width first**; Svelte 5 runes; client-rendered (`ssr = false`); chessground view-only board; no animation beyond chessground's. **No generated commentary**: text beside a move comes from fixed templates over Stockfish numbers (`viewer-model.ts`). Every rating shows its interval; overlapping arms are never ranked. |
 | D35 | Number formats: Elo rounded to integers with ± half-width; money 3–6 decimals (`$0.003`); pawns with 1 decimal. |
 

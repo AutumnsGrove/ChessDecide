@@ -19,7 +19,7 @@
 5. Smoke-run the stack in mock mode (no key, no spend):
    ```bash
    pnpm cli game --white mock --black random --max-plies 20 --depth 10
-   CHESSDECIDE_MOCK=1 pnpm dev        # daemon on 127.0.0.1:8787, web on the Vite port
+   CHESSDECIDE_MOCK=1 pnpm dev        # daemon on 127.0.0.1:8731, web on 127.0.0.1:5273
    ```
    Open the printed Vite URL at `/games` and click the game you just played; step with ←/→.
 6. Create `docs/CHANGELOG.md` (heading `# Changelog`) and `docs/QUESTIONS.md` (heading `# Questions and decisions`).

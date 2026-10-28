@@ -1,7 +1,7 @@
 # ChessDecide — API, types and schema
 
 HTTP surface implemented once in `packages/api` (Hono, `createApi`) and hosted by (a) the Node
-runner daemon on `127.0.0.1:8787` (local mode; `vite dev` proxies `/api` to it), (b) a SvelteKit
+runner daemon on `127.0.0.1:8731` (local mode; `vite dev` proxies `/api` to it), (b) a SvelteKit
 route in the deployed read-only site, and (c) in phase 2 the `apps/live` Worker. JSON
 everywhere, UTF-8. Times are ISO 8601 UTC strings; durations are integer milliseconds; money is
 USD as a JSON number (6 decimals shown in UI). Move ids are **UCI**; SAN is display-only. Field

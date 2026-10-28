@@ -14,7 +14,7 @@ export async function startDaemon(opts: { port?: number; host?: string; mock?: b
   const hub = new EventHub();
   const control = new LocalControlPlane(rt, db, hub, opts.mock ?? process.env.CHESSDECIDE_MOCK === '1');
   const app = createApi({ db, mode: 'local', control, hub });
-  const server = serve({ fetch: app.fetch, hostname: host, port: opts.port ?? 8787 });
-  console.log(`chessdecide daemon on http://${host}:${opts.port ?? 8787} (recovered ${recovered} paused games)`);
+  const server = serve({ fetch: app.fetch, hostname: host, port: opts.port ?? 8731 });
+  console.log(`chessdecide daemon on http://${host}:${opts.port ?? 8731} (recovered ${recovered} paused games)`);
   return { control, db, hub, close: async () => { server.close(); await rt.close(); await closeDb(); } };
 }

@@ -81,7 +81,7 @@ docs/  data/  tools/          docs, local data (gitignored), python golden-fixtu
 - The deployed site is **read-only**: leaderboard, series pages, game viewer. It runs on the
   free tier (reads only, no engine, no model calls).
 - **Why a daemon:** SvelteKit/Wrangler run inside `workerd`, which cannot spawn Stockfish. So
-  games run in a **Node runner daemon** (`chessdecide serve`, `127.0.0.1:8787`) that owns the
+  games run in a **Node runner daemon** (`chessdecide serve`, `127.0.0.1:8731`) that owns the
   engine processes and the game loops, and serves the API with **Hono**. `vite dev` proxies
   `/api` to it. The same `createApi()` (`packages/api`) is mounted by the deployed SvelteKit app
   as a **read-only** route (`src/routes/api/[...path]/+server.ts`, no `ControlPlane`), so the UI

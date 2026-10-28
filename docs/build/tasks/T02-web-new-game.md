@@ -54,7 +54,7 @@ Empty state: "No games yet" with the New game button. Polls `GET /api/games` eve
 ## 6. Playwright
 
 `pnpm --filter @chessdecide/web add -D @playwright/test@1.64.1`; `pnpm --filter @chessdecide/web exec playwright install chromium`.
-`playwright.config.ts`: `webServer` array starting the daemon (`CHESSDECIDE_MOCK=1 pnpm --filter @chessdecide/runner dev`, port 8787,
+`playwright.config.ts`: `webServer` array starting the daemon (`CHESSDECIDE_MOCK=1 pnpm --filter @chessdecide/runner dev`, port 8731,
 wait on `/api/health`) and Vite (`pnpm --filter @chessdecide/web dev`); projects: Chromium at 400×800 and 1280×800.
 Isolate state: set `CHESSDECIDE_D1_PATH` (already honoured by `openLocalDb` and `vite.config.ts`; default `data/d1/v3`) to a temp dir per run and apply the migrations there first (`wrangler d1 migrations apply DB --local --persist-to <dir without /v3>`).
 
