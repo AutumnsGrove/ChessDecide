@@ -14,6 +14,9 @@
 - Estimate $0.00294 vs actual $0.000545 (440 % conservative); rolling mean will tighten it.
 - Report + 400 px start/mid/end screenshots + raw game JSON in `docs/build/reports/T04-*`.
 - No illegal moves, no `invalid_choice`, no 429s. Recommendation: continue to T05/T06.
+- Extra game before calibration (requested): Jev vs `eps30` — 1-0 adjudicated, 35 plies, 16 real calls
+  + 2 cache hits, $0.000711, ≈ 62 s, ACPL 198.2, acceptable 88.9 %, 2 blunders, 0 errors. Combined T04
+  spend $0.001288; raw data and screenshots in `docs/build/reports/T04b-*`.
 
 ## T03 — Viewer extras: decision panel, live controls, e2e
 

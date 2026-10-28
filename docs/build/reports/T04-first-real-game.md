@@ -87,3 +87,30 @@ Confidence is low in the opening/middlegame (p_pick 0.07–0.24) yet the chosen 
 real model: UI → API → model call → Stockfish judging → D1 → live viewer. Cost is ~$0.00055 per game
 (≈ 1 % of the cap), so a 25-game Quick series should cost well under $0.05 rather than the $0.10–0.15
 budgeted. `eps75` was too weak for Jev — the adaptive ladder is the right next step to find its level.
+
+## 7. Extra game before calibration (eps30)
+
+Requested after the first result: same setup, opponent one rung up (`eps30`, nominal 980).
+Game `01M61RTAG7TFTR8HQEPBXBRYRC`, raw data `T04b-game.json`, screenshots `T04b-*`.
+
+| Metric | Value |
+| --- | --- |
+| Result | **1-0, adjudicated** (Jev ahead ≥ 900 cp for 6 plies from ply 30) |
+| Plies | 35 (18 model plies) |
+| Wall clock | ≈ 62 s |
+| Cost | **$0.00071064** |
+| Model calls | 16 real + **2 cache hits** (0 cost) |
+| Avg cost / call | $0.0000444 |
+| Avg latency | 302 ms |
+| Avg input tokens | 1,058 |
+| Forced / retries / errors | 0 / 0 / 0 |
+| ACPL | 198.2 cp |
+| Acceptable | 88.9 % (16 / 18) |
+| Inaccuracies / mistakes / blunders | 0 / 0 / 2 |
+
+The two cache hits are repeated requests inside the game (same position + history + arm), served
+from `attempts` at zero cost. The estimator again over-predicted ($0.00294 vs $0.000711).
+
+Jev also beat the nominal 980 level, so the interesting next question is where it sits relative to
+`uci1320` (the ladder anchor). That is exactly what T05 calibration + the adaptive series are for.
+Combined T04 spend: probe $0.000032 + game 1 $0.000545 + game 2 $0.000711 = **$0.001288**.
