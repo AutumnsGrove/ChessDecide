@@ -31,3 +31,9 @@ web/.env.*
 # python
 __pycache__/
 *.pyc
+
+# reference foundation
+node_modules/
+.svelte-kit/
+.wrangler/
+*.log
