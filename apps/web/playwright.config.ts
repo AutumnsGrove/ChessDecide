@@ -6,10 +6,12 @@ import { defineConfig, devices } from '@playwright/test';
 // Isolated D1 per run: migrate a fresh temp directory, then point the daemon and Vite at it.
 const d1Dir = mkdtempSync(join(tmpdir(), 'chessdecide-e2e-'));
 const d1Path = join(d1Dir, 'v3');
+// Keep e2e independent of the real calibrated ladder: an empty data dir means DEFAULT_LADDER.
+const dataDir = mkdtempSync(join(tmpdir(), 'chessdecide-e2e-data-'));
 const daemonUrl = 'http://127.0.0.1:8731';
 const webUrl = 'http://127.0.0.1:5273';
 const migrate = `pnpm --filter @chessdecide/web exec wrangler d1 migrations apply DB --local --persist-to ${d1Dir}`;
-const env = { ...process.env, CHESSDECIDE_MOCK: '1', CHESSDECIDE_D1_PATH: d1Path } as Record<string, string>;
+const env = { ...process.env, CHESSDECIDE_MOCK: '1', CHESSDECIDE_D1_PATH: d1Path, CHESSDECIDE_DATA: dataDir } as Record<string, string>;
 
 export default defineConfig({
   testDir: './e2e',

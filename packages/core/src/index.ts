@@ -10,6 +10,7 @@ export * from './adjudication.ts';
 export * from './ports.ts';
 export * from './game.ts';
 export * from './series.ts';
+export * from './series-events.ts';
 export * from './openings.ts';
 export * from './ladder-fit.ts';
 export * from './ladder-warnings.ts';

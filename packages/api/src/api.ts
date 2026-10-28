@@ -1,8 +1,11 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
-import { DEFAULT_LADDER, type Game, type GameConfig, type LadderFile } from '@chessdecide/core';
-import { estimateGame, type ModelInfo } from '@chessdecide/providers';
-import { listGames, loadGame, type Db } from '@chessdecide/db';
+import {
+  ARM_PRESETS, DEFAULT_LADDER, type Game, type GameConfig, type GameEvent, type LadderFile,
+  type Series, type SeriesConfig, type SeriesEvent,
+} from '@chessdecide/core';
+import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
+import { buildSeries, listGames, loadGame, seriesSummaries, type Db } from '@chessdecide/db';
 import type { EventHub } from './hub.ts';
 import { ApiError } from './errors.ts';
 
@@ -17,8 +20,17 @@ export interface ControlPlane {
   stop(id: string): Promise<void>;
 }
 
+/** Present only where series can actually run (local daemon). */
+export interface SeriesPlane {
+  create(config: SeriesConfig): Promise<Series>;
+  start(id: string): Promise<void>;
+  pause(id: string): Promise<void>;
+  stop(id: string): Promise<void>;
+}
+
 export interface ApiDeps {
-  db: Db; mode: Mode; control?: ControlPlane; hub?: EventHub; version?: string;
+  db: Db; mode: Mode; control?: ControlPlane; hub?: EventHub<GameEvent>; version?: string;
+  series?: SeriesPlane; seriesHub?: EventHub<SeriesEvent>;
   /** Local-only capabilities; absent in `public` mode (the routes then answer 404 `not_available`). */
   catalog?: { list(): Promise<ModelInfo[]> };
   ladder?: () => LadderFile;
@@ -88,10 +100,11 @@ export function createApi(deps: ApiDeps): Hono {
 
   app.post('/estimate', async (c) => {
     if (!deps.catalog) return notAvailable(c);
-    const config = (await c.req.json().catch(() => { throw new ApiError('bad_request', 'invalid JSON body'); })) as GameConfig;
+    const config = (await c.req.json().catch(() => { throw new ApiError('bad_request', 'invalid JSON body'); })) as GameConfig | SeriesConfig;
     const models = await catalogList();
-    try { return c.json(estimateGame(config, models)); }
-    catch (e) {
+    try {
+      return c.json('size' in config ? estimateSeries(config as SeriesConfig, models) : estimateGame(config as GameConfig, models));
+    } catch (e) {
       if (e instanceof Error && e.message === 'unknown model') throw new ApiError('invalid_config', 'unknown model');
       throw e;
     }
@@ -110,6 +123,93 @@ export function createApi(deps: ApiDeps): Hono {
   app.get('/ladder', (c) => {
     if (!deps.ladder) return notAvailable(c);
     return c.json(deps.ladder());
+  });
+
+  // ---- series ----
+  const needSeries = (c: any) => (deps.series ? null : c.json(err('not_available', 'this deployment is read-only'), 404));
+
+  function validateSeriesConfig(config: unknown, ladder: LadderFile): asserts config is SeriesConfig {
+    const c = config as Record<string, any>;
+    if (!c || typeof c !== 'object' || Array.isArray(c)) throw new ApiError('invalid_config', 'body must be a series config');
+    if (typeof c.model !== 'string' || !c.model) throw new ApiError('invalid_config', 'model is required');
+    if (!c.arm || (typeof c.arm !== 'string' && typeof c.arm !== 'object')) throw new ApiError('invalid_config', 'arm is required');
+    if (typeof c.arm === 'string' && !(c.arm in ARM_PRESETS)) throw new ApiError('invalid_config', `unknown arm ${c.arm}`);
+    const size = c.size;
+    if (!size || typeof size !== 'object' || !['quick', 'standard', 'custom', 'completion'].includes(size.preset)) throw new ApiError('invalid_config', 'size is missing or invalid');
+    if (size.preset === 'custom' && (!Number.isInteger(size.games) || size.games < 1 || size.games > 400)) throw new ApiError('invalid_config', 'custom size.games must be 1..400');
+    if (size.preset === 'completion') {
+      for (const k of ['target_half_width', 'min_games', 'max_games'] as const)
+        if (size[k] !== undefined && (typeof size[k] !== 'number' || size[k] <= 0)) throw new ApiError('invalid_config', `size.${k} must be positive`);
+    }
+    const l = c.ladder;
+    if (!l || typeof l !== 'object' || (l.mode !== 'adaptive' && l.mode !== 'fixed')) throw new ApiError('invalid_config', 'ladder mode must be adaptive or fixed');
+    if (l.mode === 'fixed' && !ladder.levels.some((x) => x.id === l.level)) throw new ApiError('invalid_config', `unknown ladder level ${String(l.level)}`);
+    if (typeof c.budget_usd !== 'number' || !(c.budget_usd >= 0.01 && c.budget_usd <= 50)) throw new ApiError('invalid_config', 'budget_usd must be in 0.01..50');
+    if (c.concurrency !== undefined && c.concurrency !== 1 && c.concurrency !== 2) throw new ApiError('invalid_config', 'concurrency must be 1 or 2');
+    if (c.judge_depth !== undefined && (!Number.isInteger(c.judge_depth) || c.judge_depth < 6 || c.judge_depth > 20)) throw new ApiError('invalid_config', 'judge_depth must be an integer in 6..20');
+    if (c.seed !== undefined && !Number.isInteger(c.seed)) throw new ApiError('invalid_config', 'seed must be an integer');
+  }
+
+  app.get('/series', async (c) => c.json(await seriesSummaries(deps.db)));
+
+  app.get('/series/:id', async (c) => {
+    const s = await buildSeries(deps.db, c.req.param('id'));
+    return s ? c.json(s) : c.json(err('not_found', 'series not found'), 404);
+  });
+
+  app.get('/series/:id/games', async (c) => {
+    const s = await buildSeries(deps.db, c.req.param('id'));
+    return s ? c.json(s.games) : c.json(err('not_found', 'series not found'), 404);
+  });
+
+  app.get('/series/:id/events', async (c) => {
+    if (!deps.seriesHub) return c.json(err('not_available', 'live events are not available in this mode'), 404);
+    const id = c.req.param('id');
+    const s = await buildSeries(deps.db, id);
+    if (!s) return c.json(err('not_found', 'series not found'), 404);
+    return streamSSE(c, async (stream) => {
+      let seq = 0;
+      const send = (event: string, data: unknown) => stream.writeSSE({ id: String(++seq), event, data: JSON.stringify(data) });
+      const off = deps.seriesHub!.subscribe(id, (e) => { void send(e.event, e.data); });
+      stream.onAbort(off);
+      await send('snapshot', s);
+      while (!stream.aborted) { await stream.sleep(15_000); await stream.write(': ping\n\n'); }
+      off();
+    });
+  });
+
+  app.post('/series', async (c) => {
+    const no = needSeries(c); if (no) return no;
+    const config = await c.req.json().catch(() => { throw new ApiError('bad_request', 'invalid JSON body'); });
+    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    validateSeriesConfig(config, ladder);
+    if (deps.catalog) {
+      const models = await catalogList();
+      if (!models.some((m) => m.slug === config.model)) throw new ApiError('invalid_config', `unknown model ${config.model}`);
+      if (!deps.mock && !(deps.hasKey?.() ?? false)) throw new ApiError('no_api_key', 'OPENROUTER_API_KEY is not set', 424);
+      const est = estimateSeries(config, models);
+      if (est.over_cap_typical) throw new ApiError('budget_exceeded', `Estimated $${est.typical.est_cost_usd.toFixed(4)} exceeds cap $${config.budget_usd}`, 402, { est_cost_usd: est.typical.est_cost_usd, worst_case_usd: est.worst_case.est_cost_usd });
+    }
+    return c.json(await deps.series!.create(config), 201);
+  });
+
+  for (const action of ['start', 'pause', 'stop'] as const) {
+    app.post(`/series/:id/${action}`, async (c) => {
+      const no = needSeries(c); if (no) return no;
+      const id = c.req.param('id');
+      if (!(await buildSeries(deps.db, id))) return c.json(err('not_found', 'series not found'), 404);
+      await deps.series![action](id);
+      const s = (await buildSeries(deps.db, id))!;
+      return c.json({ id, status: s.status, status_reason: s.status_reason });
+    });
+  }
+  app.post('/series/:id/resume', async (c) => {
+    const no = needSeries(c); if (no) return no;
+    const id = c.req.param('id');
+    if (!(await buildSeries(deps.db, id))) return c.json(err('not_found', 'series not found'), 404);
+    await deps.series!.start(id);
+    const s = (await buildSeries(deps.db, id))!;
+    return c.json({ id, status: s.status, status_reason: s.status_reason });
   });
 
   app.get('/games', async (c) => {

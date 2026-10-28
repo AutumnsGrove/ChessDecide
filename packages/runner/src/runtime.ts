@@ -1,7 +1,7 @@
 import { ulid } from 'ulid';
 import {
   ARM_PRESETS, DEFAULT_LADDER, START_FEN, legalMoves, lastFen, mulberry32,
-  type BudgetPort, type Color, type Game, type GameConfig, type Player, type Ports, type PlayerDesc,
+  type BudgetPort, type Color, type Game, type GameConfig, type JudgePort, type LadderLevel, type Player, type Ports, type PlayerDesc,
 } from '@chessdecide/core';
 import { EngineJudge, NativeUciEngine, makeOpponent, type Opponent } from '@chessdecide/engine';
 import {
@@ -12,7 +12,7 @@ import { d1AttemptSink, d1GameStore, meanInputTokens, type Db } from '@chessdeci
 import { ApiError } from '@chessdecide/api';
 import { findStockfish, judgeWorkers, openRouterKey } from './config.ts';
 
-export interface Runtime { judge: EngineJudge; close(): Promise<void>; engines: NativeUciEngine[] }
+export interface Runtime { judge: JudgePort; close(): Promise<void>; engines: NativeUciEngine[] }
 
 export async function createRuntime(): Promise<Runtime> {
   const path = findStockfish();
@@ -36,7 +36,11 @@ export function newGame(config: GameConfig, startFen = START_FEN): Game {
   return { id: ulid(), status: 'ready', config, start_fen: startFen, adjudicated: false, plies: [], result: '*', termination: '', cost_usd: 0, created_at: new Date().toISOString() };
 }
 
-export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: { mock: boolean; events?: Ports['events'] }): Promise<Ports & { closePlayers(): Promise<void> }> {
+export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
+  mock: boolean; events?: Ports['events'];
+  judge?: JudgePort;                                            // tests / series fake judge
+  makeOpponentFor?: (level: LadderLevel, rng: () => number) => Promise<Opponent>;  // tests
+}): Promise<Ports & { closePlayers(): Promise<void> }> {
   const players = new Map<Color, Player>();
   const opponents: Opponent[] = [];
   const rng = mulberry32(game.config.seed);
@@ -59,7 +63,9 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: { mock: 
       return new ModelPlayer({ client: clientFor(key), sink: d1AttemptSink(db), model: desc.model, arm: desc.arm, seed });
     }
     const level = DEFAULT_LADDER.levels.find((l) => l.id === (desc.type === 'ladder' ? desc.level : 'uci1500'))!;
-    const opp = await makeOpponent(level, () => NativeUciEngine.start({ path: findStockfish() }), rng, 50);
+    const opp = opts.makeOpponentFor
+      ? await opts.makeOpponentFor(level, rng)
+      : await makeOpponent(level, () => NativeUciEngine.start({ path: findStockfish() }), rng, 50);
     opponents.push(opp);
     return engineAsPlayer(opp);
   };
@@ -77,7 +83,7 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: { mock: 
 
   return {
     player: (side) => players.get(side)!,
-    judge: rt.judge, store: d1GameStore(db), events: opts.events ?? { emit() {} },
+    judge: opts.judge ?? rt.judge, store: d1GameStore(db), events: opts.events ?? { emit() {} },
     budget, now: () => new Date().toISOString(),
     closePlayers: async () => { await Promise.all(opponents.map((o) => o.close())); },
   };

@@ -1,4 +1,4 @@
-import { isTerminal, stepGame, playToEnd, type Game, type GameConfig } from '@chessdecide/core';
+import { isTerminal, stepGame, playToEnd, type Game, type GameConfig, type GameEvent } from '@chessdecide/core';
 import type { ControlPlane, EventHub } from '@chessdecide/api';
 import { loadGame, saveGame, type Db } from '@chessdecide/db';
 import { buildPorts, newGame, type Runtime } from './runtime.ts';
@@ -10,7 +10,7 @@ interface Running { ac: AbortController; pause: boolean; done: Promise<void> }
 /** Runs games inside this Node process. One instance per daemon. */
 export class LocalControlPlane implements ControlPlane {
   private running = new Map<string, Running>();
-  constructor(private rt: Runtime, private db: Db, private hub: EventHub, private mock: boolean) {}
+  constructor(private rt: Runtime, private db: Db, private hub: EventHub<GameEvent>, private mock: boolean) {}
 
   async createGame(config: GameConfig): Promise<Game> {
     const g = newGame(config);

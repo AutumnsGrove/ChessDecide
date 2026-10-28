@@ -15,6 +15,8 @@ export const series = sqliteTable('series', {
   ladder_version: integer('ladder_version').notNull(),
   seed: integer('seed'),
   budget_usd: real('budget_usd'),
+  concurrency: integer('concurrency').default(2),
+  judge_depth: integer('judge_depth').default(14),
   cost_usd: real('cost_usd').default(0),
   elo_mean: real('elo_mean'), elo_lo: real('elo_lo'), elo_hi: real('elo_hi'),
   w: integer('w').default(0), d: integer('d').default(0), l: integer('l').default(0),

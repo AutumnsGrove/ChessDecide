@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/d1';
 import { getPlatformProxy } from 'wrangler';
 import { describe, expect, it } from 'vitest';
-import type { GameConfig } from '@chessdecide/core';
+import type { GameConfig, GameEvent } from '@chessdecide/core';
 import * as schema from '@chessdecide/db/schema';
 import { loadGame } from '@chessdecide/db';
 import { EventHub } from '@chessdecide/api';
@@ -22,7 +22,7 @@ describe.skipIf(!haveSf)('LocalControlPlane (real Stockfish judge, mock model)',
     const dir = fileURLToPath(new URL('../../db/migrations/', import.meta.url));
     for (const f of readdirSync(dir).filter((x) => x.endsWith('.sql')).sort())
       for (const st of readFileSync(dir + f, 'utf8').split('--> statement-breakpoint')) if (st.trim()) await proxy.env.DB.exec(st.trim().replace(/\s+/g, ' '));
-    const db = drizzle(proxy.env.DB, { schema }); const rt = await createRuntime(); const hub = new EventHub();
+    const db = drizzle(proxy.env.DB, { schema }); const rt = await createRuntime(); const hub = new EventHub<GameEvent>();
     return { db, rt, hub, cp: new LocalControlPlane(rt, db, hub, true), done: async () => { await rt.close(); await proxy.dispose(); } };
   }
   it('auto plays to max_plies and persists; events arrive in order', async () => {

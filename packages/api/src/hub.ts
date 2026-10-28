@@ -1,12 +1,10 @@
-import type { GameEvent } from '@chessdecide/core';
-
-/** In-memory fan-out of game events to SSE subscribers. One instance per process. */
-export class EventHub {
-  private subs = new Map<string, Set<(e: GameEvent) => void>>();
-  emit(gameId: string, e: GameEvent) { this.subs.get(gameId)?.forEach((f) => f(e)); }
-  subscribe(gameId: string, f: (e: GameEvent) => void): () => void {
-    let s = this.subs.get(gameId); if (!s) this.subs.set(gameId, (s = new Set()));
+/** In-memory fan-out of live events to SSE subscribers. One instance per event kind per process. */
+export class EventHub<E extends { event: string; data: unknown }> {
+  private subs = new Map<string, Set<(e: E) => void>>();
+  emit(id: string, e: E) { this.subs.get(id)?.forEach((f) => f(e)); }
+  subscribe(id: string, f: (e: E) => void): () => void {
+    let s = this.subs.get(id); if (!s) this.subs.set(id, (s = new Set()));
     s.add(f);
-    return () => { s!.delete(f); if (s!.size === 0) this.subs.delete(gameId); };
+    return () => { s!.delete(f); if (s!.size === 0) this.subs.delete(id); };
   }
 }

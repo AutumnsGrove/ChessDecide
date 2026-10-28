@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/d1';
 import { getPlatformProxy } from 'wrangler';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { START_FEN, DEFAULT_LADDER, type Game, type GameConfig } from '@chessdecide/core';
+import { START_FEN, DEFAULT_LADDER, type Game, type GameConfig, type GameEvent } from '@chessdecide/core';
 import type { ModelInfo } from '@chessdecide/providers';
 import * as schema from '@chessdecide/db/schema';
 import { saveGame, savePly, type Db } from '@chessdecide/db';
@@ -50,7 +50,7 @@ describe('api (read-only)', () => {
 
 describe('api (control + SSE)', () => {
   it('delegates control calls and streams snapshot then hub events', async () => {
-    const hub = new EventHub(); const calls: string[] = [];
+    const hub = new EventHub<GameEvent>(); const calls: string[] = [];
     const app = createApi({ db, mode: 'local', hub, control: {
       async createGame(c) { calls.push('create'); return { id: 'new', status: 'ready', config: c, start_fen: START_FEN, adjudicated: false, plies: [], result: '*', termination: '', cost_usd: 0, created_at: '' }; },
       async auto(id, pace) { calls.push(`auto:${id}:${pace}`); }, async pause(id) { calls.push('pause:' + id); }, async step(id) { calls.push('step:' + id); }, async stop(id) { calls.push('stop:' + id); },

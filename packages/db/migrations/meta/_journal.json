@@ -15,6 +15,13 @@
       "when": 1793208588624,
       "tag": "0001_same_umar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793212271829,
+      "tag": "0002_harsh_tarantula",
+      "breakpoints": true
     }
   ]
 }
