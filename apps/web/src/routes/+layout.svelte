@@ -18,7 +18,8 @@
 
 <header class="top">
   <nav class="nav">
-    <a class="brand" href="/games">♞ ChessDecide</a>
+    <a class="brand" href="/">♞ ChessDecide</a>
+    <a href="/">Leaderboard</a>
     <a href="/series">Series</a>
     <a href="/games">Games</a>
   </nav>

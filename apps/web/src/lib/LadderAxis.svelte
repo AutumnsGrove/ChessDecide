@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { EloEstimate, LadderLevel } from '@chessdecide/core';
+  import type { EloEstimate } from '@chessdecide/core';
   import { intervalLabel } from './series-model.ts';
 
   let { series, levels }: {
     series: Array<{ id: string; label: string; elo: EloEstimate }>;
-    levels: LadderLevel[];
+    levels: Array<{ id: string; label: string; elo: number }>;
   } = $props();
 </script>
 

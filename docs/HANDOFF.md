@@ -1,109 +1,62 @@
-# Handoff — where we left off (2026-10-28, session 3)
+# Handoff — where we left off (2026-10-29, session 4)
 
 Autumn uses **she/her** pronouns. She often works by voice: keep replies short and conversational.
 
 ## 1. State
 
-The app is real now: daemon + web run locally, real decision models play, the ladder is calibrated,
-series run live. **T00–T07 are done and committed; T08 is paused mid-series.**
+T08 is **finished** (first real series) and T08b added three more series so four arms share one ruler.
+**T09 leaderboard is built; `pnpm verify` is green, `pnpm e2e` has not passed yet (see §2).**
 
 | Task | State |
 | --- | --- |
-| T00 foundation | done |
-| T01 real models, catalog, estimate, probe | done |
-| T02 New game dialog, spend chip, banners, Playwright | done |
-| T03 decision panel, live controls, viewer e2e | done |
-| T04 first real game (Jev vs eps75; extra vs eps30) | done, report in `docs/build/reports/` |
-| T05 ladder calibration + full v2 run | done |
-| T06 series runner, store, API | done |
-| T07 series screens | done |
-| **T08 first real series** | **PAUSED at 5/25 finished** |
-| T09–T12 | not started |
+| T00–T07 | done |
+| T08 first real series | done (Jev·clean 532 ± 160, $0.0299) |
+| T08b three more series | done (see `docs/build/reports/T08b-arms-and-models.md`) |
+| **T09 leaderboard** | **code complete; e2e needs a fix run** |
+| T10–T12 | not started |
 
-Commits on `main` (pushed at end of session): `Add series screens`, `Add series runner, store and API`,
-`Record ladder calibration v2`, `Add ladder calibration job`, `Record second real game vs eps30`,
-`Record first real game results`, `Add decision panel…`, `Add new game dialog…`,
-`Add real model players…`.
+## 2. First thing next session: finish T09's e2e
 
-`pnpm verify` is green. `pnpm e2e` is green (30 tests: 15 specs × 2 viewports). `pnpm install
---frozen-lockfile` is clean.
+`pnpm verify` is green (typecheck + svelte-check + all unit tests, including the new leaderboard
+core/db/api/web suites). `pnpm e2e` was last run mid-edit; the failures were all in
+`apps/web/e2e/leaderboard.spec.ts` and the fixes below are already applied but unverified:
 
-## 2. Resume T08 (first thing next session)
+- Locator destructuring is not iterable → use `.nth(0)` / `.nth(1)` (done).
+- The uncalibrated text matched 3 elements → assert on `.notice` (done).
+- Data from earlier specs leaks into later projects (same temp D1), so assertions are now
+  `hasText`-scoped instead of assuming row order/count (done).
+- `buildLeaderboard` now drops arms with 0 rated games (a just-created series used to show
+  `1345 ± 9633`), so a leftover series no longer appears as a rated row.
 
-Series id: **`01M625J2GZ003DBZWK012ERQQ8`** (Jev clean, Quick 25, adaptive, cap $0.50, ladder v2).
+Run `pnpm e2e` (kill anything on 8731/5273 first — the config uses `reuseExistingServer: false`).
+Then commit `Add leaderboard` if it was not already part of the T08b/T09 commit, and move to T10.
 
-```bash
-pnpm dev            # daemon 8731 + vite 5273
-# open http://127.0.0.1:5273/series/01M625J2GZ003DBZWK012ERQQ8 and press Resume
-# or: curl -X POST localhost:8731/api/series/01M625J2GZ003DBZWK012ERQQ8/start
-```
+## 3. Catches worth remembering
 
-It is paused with 5 finished (all losses vs `uci1320`), 2 in-flight `eps50` games (plies 62/54),
-0 aborts, provisional Elo **668 ± 553**, cost so far **$0.0029** (all attempts $0.0053).
-Report skeleton: `docs/build/reports/T08-first-series.md`. Finish all 25, update the report, take the
-final screenshot, then ask the T08 STOP question (D1 Ultra next / hinted arm / T09 / pause).
+- `ApiError(code, message, **status**)` — the third argument is the HTTP status, not `retryable`.
+  `new ApiError('not_found', …)` silently yields 400; pass 404 explicitly.
+- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`): `series.arm_id` alone is only the
+  preset, so two models with `clean` would otherwise collapse into one row.
+- Elo is only comparable within one `ladder_version`; the API filters on it and the UI falls back to
+  the nominal ladder when `/api/ladder` is absent (public mode).
+- Do not run `pnpm verify` while a series or calibration is running: core perft/completion tests
+  time out under 4 Stockfish workers.
+- Mock mode (`CHESSDECIDE_MOCK=1`) is what the e2e suite uses; series there finish in seconds with no
+  spend.
 
-## 3. Calibrated ladder v2 (this is the ruler)
+## 4. Real-run numbers (all on ladder v2, Quick 25, cap $0.50)
 
-`data/ladder/ladder-v2.json` (gitignored data dir), 4,200 games, 2 h 6 m, $0, Stockfish 19,
-50 ms/move, 4 workers. No warnings. Full table in `docs/SPIKE.md` §9.
+| Model · arm | Elo (95 %) | W-D-L | ACPL | Cost | Series |
+| --- | ---: | --- | ---: | ---: | --- |
+| D1 Ultra · hinted | **895 ± 162** | 11-2-12 | 140.8 | $0.0091 | `01M64EK96XRMJWEAQXA97CFXYY` |
+| Jev · hinted | **775 ± 159** | 11-1-13 | 154.3 | $0.0210 | `01M64BJR3QV9KBBT2NQY2ETB0M` |
+| D1 Ultra · clean | **733 ± 158** | 8-2-15 | 177.6 | $0.0099 | `01M64D1GEA348WMA5H8WGPBRFX` |
+| Jev · clean | **532 ± 160** | 8-2-15 | 231.5 | $0.0299 | `01M625J2GZ003DBZWK012ERQQ8` |
 
-| rung | nominal | measured ± se |
-| --- | ---: | ---: |
-| random | 250 | 160 ± 26 |
-| eps75 | 560 | 391 ± 19 |
-| eps50 | 790 | 614 ± 18 |
-| eps30 | 980 | 819 ± 18 |
-| eps15 | 1150 | 1037 ± 19 |
-| uci1320 | 1320 | 1320 (anchor) |
-| uci1500 | 1500 | 1583 ± 17 |
-| uci1700 | 1700 | 1744 ± 15 |
-| uci1900 | 1900 | 1879 ± 15 |
-| uci2100 | 2100 | 2016 ± 17 |
-| uci2400 | 2400 | 2250 ± 21 |
-| uci2800 | 2800 | 2669 ± 39 |
+Only two of six pairs are separated at 25 games (Jev clean < Jev hinted; Jev clean < D1U hinted).
+Session 3's $0.0299 estimate of "$0.10–0.15 for a Quick series" is ~4× high; real cost is $0.01–0.03.
 
-The daemon loads the highest valid `data/ladder/ladder-vN.json`; `GET /api/ladder` reports
-`calibrated: true, version: 2`. E2E uses an empty `CHESSDECIDE_DATA` so it gets the nominal ladder.
+## 5. Next steps
 
-## 4. Real-run numbers so far
-
-- **T04a** Jev clean (White) vs eps75: 1-0 checkmate in 21 plies, 11 calls, **$0.000545**, ~71 s,
-  ACPL 198, acceptable 82 %, 1 blunder, 0 errors.
-- **T04b** Jev vs eps30: 1-0 adjudicated in 35 plies, 16 calls + 2 cache hits, **$0.000711**, ~62 s,
-  ACPL 198, acceptable 89 %, 2 blunders.
-- **T08 (partial)** Jev vs uci1320: 0-5, games ~30 plies, provisional 668 ± 553, **$0.00058/game**.
-  Estimate was $0.073 for 25 games; actual is ~5× lower. Jev is below uci1320; likely ~600–820.
-
-## 5. What was built (quick map)
-
-- `packages/core`: types, rules, prompts, Elo, ladder fit/warnings, series scheduler/events,
-  `decisionRows` lives in the web package.
-- `packages/engine`: native UCI, Stockfish/ε/random opponents, `EngineJudge` (now **serializes**
-  `oracle`/`evalPosition` so two series games can judge at once — fixed the single-flight crash).
-- `packages/providers`: Decisions client, ModelPlayer, mock, catalog, game/series estimates.
-- `packages/db`: Drizzle schema/migrations, game/ladder/series stores, spend, rolling mean tokens.
-- `packages/api`: Hono API (games, models, estimate, spend, ladder, series + SSE, health).
-- `packages/runner`: local D1, runtime/ports, game daemon, ladder calibration, series control plane.
-- `apps/web`: SvelteKit viewer, New game/New series dialogs, games/series lists and detail, decision
-  panel, live controls, mini boards, hand-written SVG Elo chart and ladder axis.
-
-## 6. Environment / gotchas added this session
-
-- `.env` exists at the repo root with `OPENROUTER_API_KEY` (gitignored). `loadEnv()` resolves the repo
-  root even when pnpm runs a CLI from `packages/runner`.
-- Daemon `127.0.0.1:8731`, Vite `5273` (`strictPort`). `pnpm dev` runs both.
-- `EngineJudge` is serialized internally; do not call native engines concurrently from two games.
-- Series tests use a fake judge that is always +10 for White so adjudication ends games at ply 30;
-  without that they hit 200 plies and local D1 writes make the suite very slow.
-- E2E: `apps/web/playwright.config.ts` migrates a temp D1 and points `CHESSDECIDE_DATA` at a temp
-  dir. `pnpm e2e` is not part of `pnpm verify`.
-- Migration `0002_harsh_tarantula.sql` adds `series.concurrency` and `series.judge_depth`.
-- `pnpm verify` runs ~1–2 min when the machine is free; do not run it during a calibration run
-  (core perft/completion tests can time out under 4 Stockfish workers).
-
-## 7. Next steps
-
-1. **Finish T08** (resume series, update report, STOP question).
-2. Then T09 leaderboard, T10 publish/read-only deploy, T11 exports, T12 image arm.
-3. Phase 2 (live Cloudflare) is out of this curriculum.
+1. Green `pnpm e2e` for T09, then T10 publish/read-only deploy, T11 exports, T12 image arm.
+2. Phase 2 (live Cloudflare) is out of this curriculum.

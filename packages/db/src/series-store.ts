@@ -1,8 +1,8 @@
 /** Series persistence and the API `Series` projection. Spec: docs/API.md §3.3. */
 import { and, asc, count, eq, inArray, isNotNull } from 'drizzle-orm';
 import {
-  BLOCK_SIZE, PRIOR_START_ELO, estimate, seriesStats,
-  type Block, type Color, type EloEstimate, type EloPoint, type Ply, type Series, type SeriesGame,
+  BLOCK_SIZE, PRIOR_START_ELO, estimate, pickLeaderSeriesIds, seriesStats,
+  type ArmSeries, type Block, type Color, type EloEstimate, type EloPoint, type Ply, type Series, type SeriesGame,
   type SeriesGameRec, type SeriesSize, type SeriesStatus, type SeriesSummary,
 } from '@chessdecide/core';
 import * as s from './schema.ts';
@@ -167,4 +167,42 @@ export async function seriesSummaries(db: Db): Promise<SeriesSummary[]> {
       games_done: done.get(r.id) ?? 0, elo, cost_usd: r.cost_usd ?? 0, created_at: r.created_at,
     };
   });
+}
+
+/**
+ * Leaderboard input: one series per arm on `ladderVersion`, with its rated games and secondary stats.
+ * A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`): the same arm preset on two models is
+ * two different rows. Picks with the metadata-only rule first so untouched series cost no plies.
+ */
+export async function leaderboardInput(db: Db, ladderVersion: number): Promise<ArmSeries[]> {
+  const rows = await listSeriesRows(db);
+  if (rows.length === 0) return [];
+  const counts = await db.select({ id: s.games.series_id, n: count() }).from(s.games)
+    .where(and(eq(s.games.status, 'finished'), isNotNull(s.games.series_id)))
+    .groupBy(s.games.series_id);
+  const done = new Map(counts.map((c) => [c.id!, Number(c.n)]));
+  const armKey = (r: SeriesRow) => `${r.model_slug}#${r.arm_id}`;
+  const ids = new Set(pickLeaderSeriesIds(rows.map((r) => ({
+    arm_id: armKey(r), series_id: r.id, status: r.status as SeriesStatus,
+    ladder_version: r.ladder_version, finished_games: done.get(r.id) ?? 0,
+  })), ladderVersion));
+  const out: ArmSeries[] = [];
+  for (const row of rows) {
+    if (!ids.has(row.id)) continue;
+    const series = await buildSeries(db, row.id);
+    if (!series) continue;
+    const rated = series.games.filter((g) => g.status === 'finished' && g.model_score !== undefined)
+      .map((g) => ({ opponentElo: g.level_elo, score: g.model_score! }));
+    out.push({
+      arm_id: armKey(row), model: row.model_slug, arm: row.arm_id,
+      series_id: row.id, status: series.status, ladder_version: row.ladder_version,
+      games: rated,
+      w: rated.filter((g) => g.score === 1).length,
+      d: rated.filter((g) => g.score === 0.5).length,
+      l: rated.filter((g) => g.score === 0).length,
+      cost_usd: series.cost_usd,
+      stats: series.secondary,
+    });
+  }
+  return out;
 }

@@ -15,3 +15,4 @@ export * from './openings.ts';
 export * from './ladder-fit.ts';
 export * from './ladder-warnings.ts';
 export * from './metrics.ts';
+export * from './leaderboard.ts';

@@ -320,11 +320,14 @@ files, a new calibration writes `ladder-v{N+1}.json`.
 
 ### 3.5 Leaderboard
 
-`GET /api/leaderboard?ladder_version=1` → one row per arm (its latest finished or longest
-series): `{ arm_id, model, arm, series_id, status, games, elo{mean,lo,hi}, w,d,l, score_pct,
-acpl, acceptable_rate, blunder_rate, cost_usd, cost_per_game, separated_from: [arm_id…] }`
-plus `reference` rows (random mover, ladder levels). `separated_from` lists arms whose 95 %
-intervals do not overlap this one's; the UI never ranks arms that overlap.
+`GET /api/leaderboard?ladder_version=1` → `{ ladder: {version, calibrated}, rows, reference }`.
+One row per arm (its latest finished, else longest, series on that ladder version):
+`{ arm_id, model, arm, series_id, status, games, elo{mean,lo,hi,half_width}, w,d,l, score_pct,
+acpl, acceptable_rate, blunder_rate, cost_usd, cost_per_game, separated_from: [arm_id…] }`.
+An `arm_id` is **model + arm** (`liquid/d1-ultra#hinted`), so the same preset on two models is two
+rows. `reference` rows are the ladder levels (random mover, ε levels, Stockfish levels) with the
+Elo of the loaded ladder file. `separated_from` lists arms whose 95 % intervals do not overlap this
+one's; the UI never ranks arms that overlap.
 
 `GET /api/leaderboard/compare?a=<arm_id>&b=<arm_id>` → `{ p_a_gt_b, diff_mean, diff_lo, diff_hi }`.
 

@@ -1,5 +1,5 @@
 /** Typed fetch helpers for the ChessDecide HTTP API (docs/API.md). Errors carry the envelope fields. */
-import type { Game, GameConfig, LadderFile, PlayerDesc, Series, SeriesConfig, SeriesGame, SeriesSummary } from '@chessdecide/core';
+import type { EloEstimate, Game, GameConfig, LadderFile, PlayerDesc, Series, SeriesConfig, SeriesGame, SeriesSummary } from '@chessdecide/core';
 import type { GameEstimate, ModelInfo, SeriesEstimate } from '@chessdecide/providers';
 
 export class ApiClientError extends Error {
@@ -78,3 +78,27 @@ export const getSeriesGames = (id: string) => getJson<SeriesGame[]>(`/api/series
 export const createSeries = (config: SeriesConfig) => postJson<Series>('/api/series', config);
 export const seriesAction = (id: string, action: 'start' | 'pause' | 'stop' | 'resume') =>
   postJson<{ id: string; status: Series['status']; status_reason?: string }>(`/api/series/${encodeURIComponent(id)}/${action}`);
+
+/** `GET /api/leaderboard` (docs/API.md §3.5). One row per arm on one ladder version. */
+export interface LeaderRow {
+  arm_id: string; model: string; arm: string; series_id: string; status: Series['status'];
+  games: number; elo: EloEstimate; w: number; d: number; l: number; score_pct: number;
+  acpl: number | null; acceptable_rate: number | null; blunder_rate: number | null;
+  cost_usd: number; cost_per_game: number | null; separated_from: string[];
+}
+export interface LeaderReference { id: string; label: string; elo: number }
+export interface Leaderboard {
+  ladder: { version: number; calibrated: boolean };
+  rows: LeaderRow[];
+  reference: LeaderReference[];
+}
+export interface CompareResult {
+  a: { arm_id: string; model: string; arm: string; series_id: string; games: number };
+  b: { arm_id: string; model: string; arm: string; series_id: string; games: number };
+  p_a_gt_b: number; diff_mean: number; diff_lo: number; diff_hi: number;
+}
+
+export const getLeaderboard = (version?: number) =>
+  getJson<Leaderboard>(`/api/leaderboard${version === undefined ? '' : `?ladder_version=${version}`}`);
+export const compareLeaderArms = (a: string, b: string) =>
+  getJson<CompareResult>(`/api/leaderboard/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);

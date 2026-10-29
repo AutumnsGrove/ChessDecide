@@ -1,5 +1,33 @@
 # Changelog
 
+## T08b — Four arms on one ladder
+
+- Ran three more Quick 25 series after the first one: Jev `hinted` (**775 ± 159**, 11-1-13, $0.0210),
+  D1 Ultra `clean` (**733 ± 158**, 8-2-15, $0.0099), D1 Ultra `hinted` (**895 ± 162**, 11-2-12, $0.0091).
+  All on ladder v2, cap $0.50, 0 aborts, 0 illegal moves, 0 × 429. Total for the four: $0.0709, ~67 min.
+- The hinted arm moves both models up (Jev +243 Elo, separated; D1 Ultra +162, not separated yet).
+  D1 Ultra is 2–3× cheaper per game ($0.00037) and ~2× lighter on input tokens than Jev.
+- Report `docs/build/reports/T08b-arms-and-models.md` + three series screenshots.
+
+## T09 — Leaderboard
+
+- `packages/core/src/leaderboard.ts` (+14 unit tests): `buildLeaderboard` (one row per arm = **model +
+  arm**, latest finished else longest series, one ladder version), `separated_from` from non-overlapping
+  95 % intervals, sorted by mean for display only, `reference` ticks from the loaded ladder, and
+  `compareArms` (difference posterior by grid convolution → `P(A>B)`, gap mean and 2.5/97.5 %).
+  Arms with no rated game are left out: an empty series is not evidence.
+- `packages/db`: `leaderboardInput` picks per arm with a metadata-only rule first (no plies for series
+  it will not show), then loads the chosen series' games and secondary stats. `arm_id` is
+  `model#arm` so the same preset on two models is two rows (+4 db tests, +6 API tests).
+- `packages/api`: `GET /api/leaderboard?ladder_version=N` and `GET /api/leaderboard/compare?a&b`;
+  read-only, available in public mode, `ladder_version` validated (400) and unknown arms 404.
+- `apps/web`: `/` is the leaderboard (was a redirect to `/games`); ladder axis + arms table (Elo ± ,
+  W-D-L, score, cost, ACPL/accept/blunder, "not separable yet" with `≈` and the overlapping pairs
+  listed), `CompareBox` (two selects → `P(A stronger)` + Elo gap), empty state, uncalibrated notice,
+  10 s refresh; nav gained Leaderboard and links home.
+- `apps/web/e2e/leaderboard.spec.ts`: real finished arms on `/`, the compare box in both directions,
+  `≈` + overlap copy, separated rows, empty state, 400 px no horizontal scroll.
+
 ## T08 — First real series (DONE)
 
 - Started Jev `clean`, Quick 25, adaptive, cap $0.50, ladder v2, judge depth 14, from the New series

@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import {
-  ARM_PRESETS, DEFAULT_LADDER, type Game, type GameConfig, type GameEvent, type LadderFile,
+  ARM_PRESETS, DEFAULT_LADDER, buildLeaderboard, compareArms, type Game, type GameConfig, type GameEvent, type LadderFile,
   type Series, type SeriesConfig, type SeriesEvent,
 } from '@chessdecide/core';
 import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
-import { buildSeries, listGames, loadGame, seriesSummaries, type Db } from '@chessdecide/db';
+import { buildSeries, leaderboardInput, listGames, loadGame, seriesSummaries, type Db } from '@chessdecide/db';
 import type { EventHub } from './hub.ts';
 import { ApiError } from './errors.ts';
 
@@ -123,6 +123,34 @@ export function createApi(deps: ApiDeps): Hono {
   app.get('/ladder', (c) => {
     if (!deps.ladder) return notAvailable(c);
     return c.json(deps.ladder());
+  });
+
+  // ---- leaderboard (read-only; exists in public mode) ----
+  const ladderVersion = (c: any, ladder: LadderFile): number => {
+    const raw = c.req.query('ladder_version');
+    if (raw === undefined) return ladder.version;
+    const v = Number(raw);
+    if (!Number.isInteger(v) || v < 0) throw new ApiError('bad_request', 'ladder_version must be a non-negative integer');
+    return v;
+  };
+
+  app.get('/leaderboard', async (c) => {
+    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    const version = ladderVersion(c, ladder);
+    const input = await leaderboardInput(deps.db, version);
+    const { rows, reference } = buildLeaderboard(input, version, ladder.levels);
+    return c.json({ ladder: { version: ladder.version, calibrated: ladder.calibrated }, rows, reference });
+  });
+
+  app.get('/leaderboard/compare', async (c) => {
+    const a = c.req.query('a'), b = c.req.query('b');
+    if (!a || !b) throw new ApiError('bad_request', 'a and b are required');
+    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    const input = await leaderboardInput(deps.db, ladder.version);
+    const sa = input.find((s) => s.arm_id === a), sb = input.find((s) => s.arm_id === b);
+    if (!sa || !sb) throw new ApiError('not_found', 'arm not found', 404);
+    const brief = (s: typeof sa) => ({ arm_id: s.arm_id, model: s.model, arm: s.arm, series_id: s.series_id, games: s.games.length });
+    return c.json({ a: brief(sa), b: brief(sb), ...compareArms(sa.games, sb.games) });
   });
 
   // ---- series ----
