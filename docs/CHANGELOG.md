@@ -1,6 +1,6 @@
 # Changelog
 
-## T08 — First real series (PAUSED, resume next session)
+## T08 — First real series (DONE)
 
 - Started Jev `clean`, Quick 25, adaptive, cap $0.50, ladder v2, judge depth 14, from the New series
   dialog. Estimate $0.073 typical / $0.184 worst.
@@ -13,6 +13,15 @@
 - Resume id `01M625J2GZ003DBZWK012ERQQ8`; report/screenshots in `docs/build/reports/T08-*`.
 - `EngineJudge` now serializes judge calls; two series games judging at once used to crash with
   `NativeUciEngine is single-flight`. Regression test added.
+- **Resumed and finished** (next session): the two paused `eps50` games continued from their saved
+  plies (no replay, no double spend), then all 25 finished under the cap.
+- Final: **Jev·clean = 532 ± 160 Elo** (370–690), **8 W – 2 D – 15 L** (36 %), **$0.029934**
+  ($0.00120 / game), **$0.0247** of it in the resumed session, ~18 min total at concurrency 2.
+  25 games / 5 adaptive blocks: `uci1320` 0 %, `eps50` 30 %, `eps75` 80 %, `eps50` 30 %, `eps50` 40 %.
+- 812 ok calls (32.5 / game), 0 cache hits, 10 forced plies / 1,647, p50 393 ms, p95 963 ms.
+  20 adjudicated, 3 checkmate, 1 stalemate, 1 max-plies; 0 aborts, 0 illegal moves, 0 × 429.
+  Interval closed to ±160 vs the documented ±136 at 25 games; estimate was 2.4× conservative.
+- Last block's level (`eps50`, 614) is 82 Elo from the final estimate; never reached the ladder floor.
 
 ## T07 — Series screens
 
