@@ -166,6 +166,55 @@ describe('bench runner (mock, in-process)', () => {
     expect(await rowsByName('smoke/')).toHaveLength(0);
   }, 60_000);
 
+  describe('parallel_models', () => {
+    /** Peak number of games in flight at once, with a short pause per move so overlap is observable. */
+    function counting() {
+      const peak = { open: 0, max: 0 };
+      const makeOpponentFor = async (level: LadderLevel, rng: () => number) => {
+        peak.open++; peak.max = Math.max(peak.max, peak.open);
+        const inner = new RandomOpponent(rng, { levelId: level.id, levelElo: level.elo });
+        return { move: async (fen: string) => { await new Promise((r) => setTimeout(r, 2)); return inner.move(fen); }, close: async () => { peak.open--; } };
+      };
+      return { peak, makeOpponentFor };
+    }
+    const plan = (over: Record<string, unknown>) => planFile({ concurrency: 1, size: { preset: 'custom', games: 2 }, ...over });
+
+    it('defaults to one cell at a time', async () => {
+      const c = counting();
+      const res = await runBench(opts({ planPath: plan({ models: ['m/one', 'm/two'] }), makeOpponentFor: c.makeOpponentFor }));
+      expect(res.cells.map((x) => x.state)).toEqual(['finished', 'finished']);
+      expect(c.peak.max).toBe(1);
+    }, 120_000);
+
+    it('runs different models at the same time', async () => {
+      const c = counting();
+      const res = await runBench(opts({ planPath: plan({ models: ['m/one', 'm/two'], parallel_models: 2 }), makeOpponentFor: c.makeOpponentFor }));
+      expect(res.stopReason).toBe('completed');
+      expect(res.cells.map((x) => x.state)).toEqual(['finished', 'finished']);
+      expect(res.cells.map((x) => x.games)).toEqual([2, 2]);
+      expect(c.peak.max).toBe(2);
+    }, 120_000);
+
+    it('never runs two cells of the same model together', async () => {
+      const c = counting();
+      const res = await runBench(opts({ planPath: plan({ arms: ['clean', 'hinted'], parallel_models: 2 }), makeOpponentFor: c.makeOpponentFor }));
+      expect(res.cells.map((x) => x.state)).toEqual(['finished', 'finished']);
+      expect(c.peak.max).toBe(1);
+    }, 120_000);
+
+    it('reserves a running cell\'s unspent allowance, so parallel cells wait instead of overshooting the run cap', async () => {
+      // 0.06 cap, 0.05 per cell: the second model cannot start until the first hands its allowance back.
+      const c = counting();
+      const res = await runBench(opts({ planPath: plan({ models: ['m/one', 'm/two'], parallel_models: 2, series_cap_usd: 0.05, run_cap_usd: 0.06 }), makeOpponentFor: c.makeOpponentFor }));
+      expect(res.cells.map((x) => x.state)).toEqual(['finished', 'finished']);
+      expect(c.peak.max).toBe(1);
+    }, 120_000);
+
+    it('rejects an out-of-range value', async () => {
+      await expect(runBench(opts({ planPath: plan({ parallel_models: 5 }) }))).rejects.toThrow(/parallel_models/);
+    });
+  });
+
   it('reports status from the DB', async () => {
     const o = opts();
     const res = await runBench(o);

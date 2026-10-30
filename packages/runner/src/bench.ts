@@ -55,6 +55,8 @@ export interface BenchRunOptions {
   dataDir?: string;
   judge?: JudgePort;
   makeOpponentFor?: (level: LadderLevel, rng: () => number) => Promise<Opponent>;
+  /** Series ids whose cell hit `cell_timeout_min` in this process (filled by `runBench`, read by the report). */
+  timedOut?: Set<string>;
 }
 
 export interface BenchRunResult {
@@ -133,8 +135,9 @@ const seriesByName = async (db: Db, name: string): Promise<SeriesRow | undefined
     .orderBy(desc(schema.series.created_at)).limit(1);
   return rows[0];
 };
+/** `_` and `%` are LIKE wildcards, so the SQL match is only a prefilter; `startsWith` is the real test. */
 const seriesByPrefix = async (db: Db, prefix: string): Promise<SeriesRow[]> =>
-  db.select().from(schema.series).where(like(schema.series.name, `${prefix}%`));
+  (await db.select().from(schema.series).where(like(schema.series.name, `${prefix}%`))).filter((r) => r.name?.startsWith(prefix));
 const spentFor = (rows: readonly SeriesRow[]) => rows.reduce((n, r) => n + (r.cost_usd ?? 0), 0);
 
 // ---- preflight ----
@@ -337,7 +340,7 @@ async function readCells(ctx: Ctx, manifest: Manifest): Promise<CellsAndPairs> {
     const s = await buildSeries(ctx.db, row.id);
     const finished = (s?.games ?? []).filter((g) => g.status === 'finished');
     const rated = finished.filter((g) => g.model_score !== undefined).length;
-    const timeout = (ctx.o as { timedOut?: Set<string> }).timedOut?.has(row.id) ?? false;
+    const timeout = ctx.o.timedOut?.has(row.id) ?? false;
     cells.push({
       cell, seriesId: row.id,
       state: timeout ? 'timeout' : (stateOf(row, finished.length) ?? 'pending'),
@@ -485,82 +488,133 @@ export async function runBench(o: BenchRunOptions): Promise<BenchRunResult> {
       ...(o.judge ? { judge: o.judge } : {}), ...(o.makeOpponentFor ? { makeOpponentFor: o.makeOpponentFor } : {}),
     });
 
-    const timedOut = new Set<string>();
-    (o as { timedOut?: Set<string> }).timedOut = timedOut;
-    let stopRequested = false, currentId: string | undefined;
-    const onSignal = async () => { stopRequested = true; if (currentId) await series.pause(currentId); };
+    const timedOut = (o.timedOut ??= new Set<string>());
+    let stopRequested = false;
+    const running = new Set<string>();                         // series ids in flight
+    const onSignal = async () => { stopRequested = true; await Promise.all([...running].map((id) => series.pause(id))); };
     process.once('SIGINT', onSignal);
     process.once('SIGTERM', onSignal);
 
     let stopReason: BenchStopReason = 'completed';
     const t0 = Date.parse(startedAt);
-    say(`run ${runId} · prefix ${prefix} · seed ${seed}`);
+    say(`run ${runId} · prefix ${prefix} · seed ${seed}${ctx.plan.parallel_models > 1 ? ` · ${ctx.plan.parallel_models} models at once` : ''}`);
 
-    try {
-      for (const cell of cells) {
-        if (stopRequested) { stopReason = 'interrupted'; break; }
-        const rowsNow = await seriesByPrefix(ctx.db, prefix);
-        const spent = spentFor(rowsNow);
-        if (spent >= ctx.plan.run_cap_usd) { stopReason = 'stopped_budget'; say(`run cap reached ($${spent.toFixed(4)} of $${ctx.plan.run_cap_usd.toFixed(2)})`); break; }
-        if ((Date.now() - t0) / 3_600_000 >= ctx.plan.max_hours) { stopReason = 'stopped_time'; say(`max_hours reached (${ctx.plan.max_hours} h)`); break; }
-        const cap = seriesCapFor(ctx.plan, spent);
-        if (cap < 0.05) { stopReason = 'stopped_budget'; say(`no room left for cell ${cell.index} (cap $${cap.toFixed(4)})`); break; }
+    // Cells run `parallel_models` at a time, never two of the same model (per-model rate limits).
+    const queue = [...cells];
+    const active = new Map<number, Promise<void>>();
+    const activeModels = new Set<string>();
+    const grants = new Map<string, number>();                   // series id → cap it was granted
+    let halted = false;
+    const halt = (reason: BenchStopReason) => { if (!halted) { halted = true; stopReason = reason; } };
+    let commitChain: Promise<void> = Promise.resolve();         // git allows one writer at a time
 
-        let row = await seriesByName(ctx.db, cell.seriesName);
-        if (row && ['finished', 'aborted', 'stopped_error'].includes(row.status)) {
-          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → ${row.status}, skipped`);
-          continue;
-        }
-        if (row) {
-          await saveSeries(ctx.db, { ...row, budget_usd: cap });
-          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → series ${row.id} (resume, cap $${cap.toFixed(2)})`);
-        } else {
-          const cfg = cellConfig(ctx, cell, cap);
-          const created = await series.create({ ...cfg, seed });
-          row = await loadSeriesRow(ctx.db, created.id);
-          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → series ${created.id} (cap $${cap.toFixed(2)})`);
-        }
-        if (!row) throw new Error(`series ${cell.seriesName} vanished after create`);
+    /** Allowance already handed to running cells but not yet spent: it still counts against the run cap. */
+    const reserved = async (): Promise<number> => {
+      let r = 0;
+      for (const [id, cap] of grants) r += Math.max(0, cap - ((await loadSeriesRow(ctx.db, id))?.cost_usd ?? 0));
+      return r;
+    };
 
-        currentId = row.id;
-        const gamesSeen = { n: 0 };
-        const off = hub.subscribe(row.id, (e) => {
-          if (e.event !== 'game_finished') return;
-          const g = e.data as { index: number; result: string; termination: string; level_id: string; cost_usd: number };
-          gamesSeen.n++;
-          say(`${new Date().toISOString()} cell ${cell.index + 1} game ${gamesSeen.n} ${g.result} vs ${g.level_id} $${(g.cost_usd ?? 0).toFixed(4)}`);
-          void writeStatus(ctx, runId, prefix, null).catch(() => {});
-        });
+    const runCell = async (cell: BenchCell, row: SeriesRow): Promise<void> => {
+      const gamesSeen = { n: 0 };
+      const off = hub.subscribe(row.id, (e) => {
+        if (e.event !== 'game_finished') return;
+        const g = e.data as { index: number; result: string; termination: string; level_id: string; cost_usd: number };
+        gamesSeen.n++;
+        say(`${new Date().toISOString()} cell ${cell.index + 1} game ${gamesSeen.n} ${g.result} vs ${g.level_id} $${(g.cost_usd ?? 0).toFixed(4)}`);
+        void writeStatus(ctx, runId, prefix, null).catch(() => {});
+      });
+      const timer = setTimeout(() => { timedOut.add(row.id); void series.pause(row.id); }, ctx.plan.cell_timeout_min * 60_000);
+      try {
+        await series.start(row.id);
+        await series.idle(row.id);
+      } finally {
+        clearTimeout(timer);
+        off();
+      }
+      if (timedOut.has(row.id)) {
+        await series.pause(row.id);
+        say(`cell ${cell.index + 1} timed out after ${ctx.plan.cell_timeout_min} min; paused`);
+      }
 
-        const timer = setTimeout(() => { timedOut.add(row!.id); void series.pause(row!.id); }, ctx.plan.cell_timeout_min * 60_000);
-        try {
-          await series.start(row.id);
-          await series.idle(row.id);
-        } finally {
-          clearTimeout(timer);
-          off();
-          currentId = undefined;
-        }
-        if (timedOut.has(row.id)) {
-          await series.pause(row.id);
-          say(`cell ${cell.index + 1} timed out after ${ctx.plan.cell_timeout_min} min; paused`);
-        }
-
-        const after = await loadSeriesRow(ctx.db, row.id);
-        const state = timedOut.has(row.id) ? 'timeout' : (stateOf(after, 0) ?? 'pending');
-        if (o.commitEachCell) {
+      const after = await loadSeriesRow(ctx.db, row.id);
+      const state = timedOut.has(row.id) ? 'timeout' : (stateOf(after, 0) ?? 'pending');
+      if (o.commitEachCell) {
+        commitChain = commitChain.then(async () => {
           try {
             const art = await writeBenchArtifacts(o, runId);
             execFileSync('git', ['add', art.dir], { stdio: 'ignore' });
             execFileSync('git', ['commit', '-m', `Record bench cell ${cell.index + 1} ${cell.model}#${cell.arm}`], { stdio: 'ignore' });
             say(`committed ${art.dir}`);
           } catch (e) { say(`commit failed: ${e instanceof Error ? e.message : String(e)}`); }
-        }
-        if (state === 'failed' && o.stopOnError) { stopReason = 'stopped_error'; say(`stopping on error (--stop-on-error)`); break; }
+        });
+        await commitChain;
       }
+      if (state === 'failed' && o.stopOnError) { halt('stopped_error'); say(`stopping on error (--stop-on-error)`); }
+    };
+
+    /** Start the first queued cell that may run now. False: nothing can start (yet, or at all if `halted`). */
+    const launchNext = async (): Promise<boolean> => {
+      for (let i = 0; i < queue.length; i++) {
+        const cell = queue[i]!;
+        let row = await seriesByName(ctx.db, cell.seriesName);
+        if (row && ['finished', 'aborted', 'stopped_error'].includes(row.status)) {
+          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → ${row.status}, skipped`);
+          queue.splice(i--, 1);
+          continue;
+        }
+        if (activeModels.has(cell.model)) continue;
+        if (stopRequested) { halt('interrupted'); return false; }
+        const spent = spentFor(await seriesByPrefix(ctx.db, prefix));
+        if (spent >= ctx.plan.run_cap_usd) { halt('stopped_budget'); say(`run cap reached ($${spent.toFixed(4)} of $${ctx.plan.run_cap_usd.toFixed(2)})`); return false; }
+        if ((Date.now() - t0) / 3_600_000 >= ctx.plan.max_hours) { halt('stopped_time'); say(`max_hours reached (${ctx.plan.max_hours} h)`); return false; }
+        const cap = seriesCapFor(ctx.plan, spent + await reserved());
+        if (cap < 0.05) {
+          if (active.size > 0) return false;                     // running cells may still hand allowance back
+          halt('stopped_budget'); say(`no room left for cell ${cell.index} (cap $${cap.toFixed(4)})`); return false;
+        }
+
+        if (row) {
+          await saveSeries(ctx.db, { ...row, budget_usd: cap });
+          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → series ${row.id} (resume, cap $${cap.toFixed(2)})`);
+        } else {
+          const created = await series.create({ ...cellConfig(ctx, cell, cap), seed });
+          row = await loadSeriesRow(ctx.db, created.id);
+          say(`cell ${cell.index + 1}/${cells.length} ${cell.seriesName} → series ${created.id} (cap $${cap.toFixed(2)})`);
+        }
+        if (!row) throw new Error(`series ${cell.seriesName} vanished after create`);
+
+        queue.splice(i, 1);
+        const started = row;
+        running.add(started.id); grants.set(started.id, cap); activeModels.add(cell.model);
+        active.set(cell.index, runCell(cell, started).catch((e) => {
+          say(`cell ${cell.index + 1} failed: ${e instanceof Error ? e.message : String(e)}`);
+          halt('stopped_error');
+        }).finally(() => {
+          running.delete(started.id); grants.delete(started.id); activeModels.delete(cell.model); active.delete(cell.index);
+        }));
+        return true;
+      }
+      return false;
+    };
+
+    try {
+      while (!halted) {
+        while (!halted && active.size < ctx.plan.parallel_models && queue.length > 0 && await launchNext()) { /* fill the pool */ }
+        if (active.size === 0) break;
+        await Promise.race(active.values());
+      }
+      await Promise.allSettled([...active.values()]);            // a halt lets running cells finish within their caps
     } finally {
       process.removeListener('SIGINT', onSignal);
       process.removeListener('SIGTERM', onSignal);
+    }
+
+    // A run is only `completed` when every cell actually finished; anything else must stay resumable.
+    if (stopReason === 'completed') {
+      if (stopRequested) stopReason = 'interrupted';
+      else if (timedOut.size > 0) stopReason = 'stopped_time';
+      else if ((await seriesByPrefix(ctx.db, prefix)).some((r) => r.status === 'stopped_budget')) stopReason = 'stopped_budget';
     }
 
     m.finished_at = new Date().toISOString();
