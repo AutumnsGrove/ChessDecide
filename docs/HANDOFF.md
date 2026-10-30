@@ -1,77 +1,82 @@
-# Handoff — where we left off (2026-10-30, session 5)
+# Handoff — where we left off (2026-10-30, session 6)
 
 Autumn uses **she/her** pronouns. She often works by voice: keep replies short and conversational.
 
 ## 1. State
 
-**The curriculum is finished: T00–T12 are all done.** T11 and T12 are deployed to the live site at
-**https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide` `394e0101-b338-4bee-9375-bc9f96b5480c`,
-ENAM). Next work is not a build task: run the model roster as series and watch the leaderboard grow
-(see §5).
+**The core buildout is finished (T00–T13) and the public site is live.** A real `core-v1` bench run
+is **in progress right now** (started 14:31 local / 18:31 UTC), writing results that auto-commit when
+it ends.
 
 | Task | State |
 | --- | --- |
-| T00–T12 | **done** (phase-1 curriculum complete, 2026-10-30) |
-| Next | run real series for the remaining models; T12 image has one game so far |
+| T00–T12 | done; T10–T12 deployed |
+| **T13 headless bench** | **code done + committed; real `core-v1` run in progress** |
+| Live site | https://chessdecide-web.m7jv4v7npb.workers.dev (4 arms, 100 games, ladder v2) |
 
-## 2. Where the deploy lives
+Current numbers on the public site (Quick 25 series): D1U hinted 895 ± 162, Jev hinted 775 ± 159,
+D1U clean 733 ± 158, Jev clean 532 ± 160.
 
-- D1: `chessdecide` / `394e0101-b338-4bee-9375-bc9f96b5480c`; production config
-  `apps/web/wrangler.production.jsonc`; local dev stays `wrangler.jsonc` (`local-dev`).
-- Worker: `chessdecide-web`, `https://chessdecide-web.m7jv4v7npb.workers.dev`,
-  `CHESSDECIDE_MODE=public` (no control routes, no key, no spend).
-- Remote data: 4 series, 100 games, 5088 plies, 12 ladder levels. Deployed leaderboard: D1U hinted
-  895 ± 162, Jev hinted 775 ± 159, D1U clean 733 ± 158, Jev clean 532 ± 160, all on ladder v2.
-- Refresh after new series: `pnpm cli publish --remote --config wrangler.production.jsonc` (build and
-  deploy only if code changed). `docs/DEPLOY.md` is the full runbook.
+## 2. The run in progress
 
-## 3. First thing next session: run the roster
+- Command: `pnpm cli bench run --plan bench/plans/core-v1.json` (detached; log `/tmp/bench-core-v1.out`).
+- 4 cells × standard 50 = 200 games, caps $0.50/series and $2.00/run. Measured pace ≈ 1.7 min/game,
+  so **ETA ≈ 5–6 h**, spend ≈ $0.10–0.25 (the per-game logs say $0.0007–$0.0025).
+- Watch: `pnpm cli bench status` (or `--json`), `tail -f /tmp/bench-core-v1.out`,
+  `pnpm cli bench status --run core-v1-20261030-1831`.
+- A detached watcher (`/tmp/commit-bench.sh`, pid in `/tmp/commit-bench.pid`) commits
+  `docs/build/reports/bench-core-v1-*/` as **`Record core-v1 bench results`** once `report.md` appears.
+  It does **not** push; push when you are happy with the report.
+- The run's SQL lives in that bundle: `docs/build/reports/bench-core-v1-*/sql/part-*.sql`. Publish later
+  with `wrangler d1 execute DB --remote --config wrangler.production.jsonc --file …` per file
+  (`docs/DEPLOY.md` §7), then check `/api/leaderboard` shows ladder v2 and the 50-game intervals.
+- Do **not** run `pnpm verify` or `pnpm e2e` while it runs (Stockfish contention).
 
-No build task left. The point now is data:
+## 3. After the run
 
-- one Quick series per model × arm you care about (25 games, $0.01–0.03 each, 15–25 min);
-- the daemon handles them locally; the public site only updates after
-  `pnpm cli publish --remote --config wrangler.production.jsonc` (and a deploy only if code changed);
-- image is a separate arm on purpose (T12): one game so far, ~22 % more per game, no visible gain.
+1. Read `docs/build/reports/bench-core-v1-*/report.md`; the leaderboard should keep one series per arm
+   (T09 picks the latest finished), so the 50-game intervals replace the 25-game ones.
+2. Commit (the watcher does it) and push.
+3. Publish the bundle's SQL to the production D1, then open the site and confirm the new intervals.
+4. Optional next experiment: add models to `bench/plans/core-v1.json` (or a new plan, e.g. `core-v2`)
+   and `pnpm cli bench run --plan …`; image is its own arm (`arms: ["image"]`).
 
 ## 4. Catches worth remembering
 
-- **PGN move numbers follow the starting FEN.** Random-opening games begin at move 3; numbering from
-  ply 1 would label `3. e4` as `1. e4`. `gameToPgn` tracks the FEN's side/fullmove; a Black-to-move start
-  emits `1... e5`.
-- **`playerLabel` lives in core** (`packages/core/src/labels.ts`); the web re-exports it. Use it for any
-  tag/label so PGN, CSV and the Viewer agree.
-- **Public mode derives the ladder from the published rows.** With no ladder file, the API would
-  default to nominal v0 and show an empty leaderboard (it did, on the first deploy).
-  `publishedLadderVersion`/`loadPublishedLadder` fix that; `GET /api/ladder` now serves the published
-  ladder in public mode. If series ever move to a newer ladder, republish and the default follows.
-- **`pnpm build` needed a new dependency.** SvelteKit 3 externalises `cookie`; the emitted chunk
-  imported it bare and resolved to a stray CJS `~/node_modules/cookie`. `apps/web` now depends on
-  `cookie@2.0.1`. `pnpm verify` alone does not catch a broken build — run `pnpm build` after web changes.
-- `ApiError(code, message, **status**)` — the third argument is the HTTP status, not `retryable`.
-- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`), never `arm_id` alone.
-- `/api/leaderboard/compare` ignores `ladder_version`; it compares on `currentLadder().version`.
-- `buildSeries` is now `assembleSeries` (pure) + batched reads in `leaderboardInput`: the leaderboard
-  is a fixed 6 D1 queries regardless of arm count.
-- Real publish sizes: 4 series → 100 games, 5088 plies, 5.5 MB in three files (just under the 2 MB
-  chunk limit). `--dry-run` is the quick way to check.
-- Do not run `pnpm verify` while a series or calibration is running (core perft timeouts under
-  Stockfish workers). Mock mode (`CHESSDECIDE_MOCK=1`) is what e2e uses; it spends nothing.
+- **Bench plan paths resolve from where you invoked the CLI** (`INIT_CWD`), not `packages/runner`;
+  artifacts default to `<repo>/docs/build/reports`, scratch to `data/bench/<run>/`.
+- **`--mock`/`CHESSDECIDE_MOCK=1`** runs the identical code path with zero spend. Preflight still
+  checks git identity, Stockfish, the ladder file and the DB.
+- **Resume:** re-running the same command continues an unfinished manifest. A finished run says
+  "already complete". Changing the plan is an error (`--new`) except after a budget stop (raising
+  `run_cap_usd` is the documented resume).
+- **`attempts.request_gz` was always null until T12** — `ModelPlayer` never recorded the request.
+  It now stores `request_json` (local-only), so the raw pair D13 promises exists.
+- **Image arm** (`@chessdecide/render`): first real game was 0-1 adjudicated, 40 plies, $0.001467,
+  ~22 % more per game than clean, no visible gain. `docs/SPIKE.md` §10.
+- **PGN move numbers follow the start FEN**: random-opening games start at move 3, so the export says
+  `3. e4`, and a Black-to-move start emits `1... e5`.
+- **Public mode derives the ladder from published rows** (`loadPublishedLadder`) and serves
+  `/api/ladder` read-only; otherwise the public leaderboard filters on nominal v0 and is empty.
+- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`). Never merge the preset alone.
+- `ApiError(code, message, status)` — the third argument is the HTTP status.
+- `pnpm build` needs `apps/web` to depend on `cookie@2.0.1` (SvelteKit externalises it); a stray CJS
+  copy outside the repo broke the route analysis.
+- `outputPaths` in `publish.ts` now always numbers files (`part-001.sql`) so a single-file run matches
+  the DEPLOY runbook.
 
-## 4. Real-run numbers (all on ladder v2, Quick 25, cap $0.50)
+## 5. Real-run numbers so far (Quick 25, ladder v2, cap $0.50)
 
-| Model · arm | Elo (95 %) | W-D-L | ACPL | Cost | Series |
-| --- | ---: | --- | ---: | ---: | --- |
-| D1 Ultra · hinted | **895 ± 162** | 11-2-12 | 140.8 | $0.0091 | `01M64EK96XRMJWEAQXA97CFXYY` |
-| Jev · hinted | **775 ± 159** | 11-1-13 | 154.3 | $0.0210 | `01M64BJR3QV9KBBT2NQY2ETB0M` |
-| D1 Ultra · clean | **733 ± 158** | 8-2-15 | 177.6 | $0.0099 | `01M64D1GEA348WMA5H8WGPBRFX` |
-| Jev · clean | **532 ± 160** | 8-2-15 | 231.5 | $0.0299 | `01M625J2GZ003DBZWK012ERQQ8` |
+| Model · arm | Elo (95 %) | W-D-L | ACPL | Cost |
+| --- | ---: | --- | ---: | ---: |
+| D1 Ultra · hinted | **895 ± 162** | 11-2-12 | 140.8 | $0.0091 |
+| Jev · hinted | **775 ± 159** | 11-1-13 | 154.3 | $0.0210 |
+| D1 Ultra · clean | **733 ± 158** | 8-2-15 | 177.6 | $0.0099 |
+| Jev · clean | **532 ± 160** | 8-2-15 | 231.5 | $0.0299 |
 
-Only two of six pairs are separated at 25 games (Jev clean < Jev hinted; Jev clean < D1U hinted).
+The `core-v1` run replaces these with 50-game series (same arms) unless it stops early.
 
-## 5. Next steps
+## 6. Not planned
 
-1. Run series for the rest of the roster (`docs/build/reports/T08b-arms-and-models.md` has the four arms
-   done), republish, and let the leaderboard separate the arms. A 25-game series is 15–25 min and
-   $0.01–0.03; 10 in one go is ~3 h and under $0.25.
-2. Phase 2 (live Cloudflare: Durable Objects + hosted Stockfish) is out of this curriculum.
+Phase 2 (live Cloudflare: Durable Objects + hosted Stockfish), scale-out, and model-vs-model are out
+of this curriculum.
