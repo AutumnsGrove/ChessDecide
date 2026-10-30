@@ -120,6 +120,25 @@ If a page is empty, the likely cause is step 5 not having run (or running agains
 config). `wrangler d1 execute DB --remote --config wrangler.production.jsonc --command
 "select count(*) from games"` should match the dry-run number.
 
+## 7. Publishing a bench run made on another machine
+
+A headless bench run (`docs/build/tasks/T13-headless-bench.md`) commits its own publish SQL, so a run
+made on a remote box can be published from here without its local D1:
+
+```bash
+git pull
+ls docs/build/reports/bench-<run>/sql/             # part-001.sql, part-002.sql, … in order
+pnpm --filter @chessdecide/web exec wrangler d1 execute DB --remote \
+  --config wrangler.production.jsonc --file ../../docs/build/reports/bench-<run>/sql/part-001.sql
+# … repeat per file, in filename order
+```
+
+Wrangler resolves `--file` from `apps/web/`, hence the `../../`. The files include the
+`ladder_levels` rows for the run's ladder version, so the published ruler follows automatically.
+Check the result like step 6: `/api/leaderboard`, `/api/ladder` (version must match
+`summary.json`), and the row counts against `docs/build/reports/bench-<run>/summary.json`.
+Re-running a file is safe (`INSERT OR REPLACE`); a second run's SQL does not disturb the first.
+
 ## Free-tier notes
 
 The public site only reads D1. The free plan allows 500 MB storage and 50 queries per request:

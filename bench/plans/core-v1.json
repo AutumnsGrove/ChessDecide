@@ -1,0 +1,16 @@
+{
+  "name": "core-v1",
+  "models": ["typesafe/jev-1.14", "liquid/d1-ultra"],
+  "arms": ["clean", "hinted"],
+  "size": { "preset": "standard" },
+  "ladder": { "mode": "adaptive" },
+  "ladder_version": 2,
+  "series_cap_usd": 0.5,
+  "run_cap_usd": 2.0,
+  "repeat": 1,
+  "concurrency": 2,
+  "judge_depth": 14,
+  "max_hours": 8,
+  "cell_timeout_min": 90,
+  "artifacts": { "sql": true }
+}

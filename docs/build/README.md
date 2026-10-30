@@ -39,6 +39,7 @@ T09 leaderboard
 T10 publish + read-only deploy
 T11 exports
 T12 image arm
+T13 headless bench (batch plan → committed results)
 ```
 
 Phase 2/3 (live on Cloudflare, scale-out) are **not** in this curriculum.

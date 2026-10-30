@@ -1,0 +1,15 @@
+{
+  "name": "smoke",
+  "models": ["typesafe/jev-1.14"],
+  "arms": ["clean"],
+  "size": { "preset": "custom", "games": 3 },
+  "ladder": { "mode": "fixed", "level": "eps50" },
+  "ladder_version": 2,
+  "series_cap_usd": 0.05,
+  "run_cap_usd": 0.1,
+  "repeat": 1,
+  "concurrency": 2,
+  "judge_depth": 6,
+  "max_hours": 1,
+  "artifacts": { "sql": false }
+}
