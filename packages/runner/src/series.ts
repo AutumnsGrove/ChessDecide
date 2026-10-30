@@ -271,7 +271,7 @@ export class SeriesControlPlane implements SeriesPlane {
     let retries = 0;
     for (;;) {
       const ports = await buildPorts(this.deps.rt, this.deps.db, game, {
-        mock: this.deps.mock, events: this.deps.gameHub,
+        mock: this.deps.mock, events: this.deps.gameHub, ladder: this.deps.ladder(),
         ...(this.deps.judge ? { judge: this.deps.judge } : {}),
         ...(this.deps.makeOpponentFor ? { makeOpponentFor: this.deps.makeOpponentFor } : {}),
       });

@@ -104,6 +104,19 @@ describe('SeriesControlPlane', () => {
     expect(max).toBeGreaterThan(0);
   }, 120_000);
 
+  it('builds opponents from the ladder in force, not the nominal default', async () => {
+    const calibrated = { ...DEFAULT_LADDER, version: 99, calibrated: true, levels: DEFAULT_LADDER.levels.map((l) => ({ ...l, elo: l.elo + 7 })) };
+    const seen: number[] = [];
+    const cp = makeCp({
+      ladder: () => calibrated,
+      makeOpponentFor: async (level, rng) => { seen.push(level.elo); return randomOpponent(level, rng); },
+    });
+    const s = await run(cp, cfg({ size: { preset: 'custom', games: 2 } }));
+    expect(s.status).toBe('finished');
+    expect(seen.length).toBeGreaterThan(0);
+    for (const elo of seen) expect(calibrated.levels.map((l) => l.elo)).toContain(elo);
+  }, 120_000);
+
   it('honours custom and fixed sizes', async () => {
     const custom = await run(makeCp(), cfg({ size: { preset: 'custom', games: 7 } }));
     expect(custom.games.filter((g) => g.status === 'finished')).toHaveLength(7);
