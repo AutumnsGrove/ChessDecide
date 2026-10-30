@@ -1,0 +1,124 @@
+{
+  "version": 2,
+  "calibrated": true,
+  "movetime_ms": 50,
+  "sf_version": "Stockfish 19",
+  "calibrated_at": "2026-10-28T20:40:53.901Z",
+  "anchor": {
+    "level": "uci1320",
+    "elo": 1320
+  },
+  "levels": [
+    {
+      "id": "random",
+      "kind": "random",
+      "label": "Random mover",
+      "elo": 160,
+      "se": 25.7,
+      "games": 400
+    },
+    {
+      "id": "eps75",
+      "kind": "eps",
+      "label": "Stockfish 1320, 75% random",
+      "elo": 391,
+      "eps": 0.75,
+      "uci_elo": 1320,
+      "se": 19.2,
+      "games": 600
+    },
+    {
+      "id": "eps50",
+      "kind": "eps",
+      "label": "Stockfish 1320, 50% random",
+      "elo": 614,
+      "eps": 0.5,
+      "uci_elo": 1320,
+      "se": 17.6,
+      "games": 800
+    },
+    {
+      "id": "eps30",
+      "kind": "eps",
+      "label": "Stockfish 1320, 30% random",
+      "elo": 819,
+      "eps": 0.3,
+      "uci_elo": 1320,
+      "se": 17.8,
+      "games": 800
+    },
+    {
+      "id": "eps15",
+      "kind": "eps",
+      "label": "Stockfish 1320, 15% random",
+      "elo": 1037,
+      "eps": 0.15,
+      "uci_elo": 1320,
+      "se": 18.9,
+      "games": 800
+    },
+    {
+      "id": "uci1320",
+      "kind": "uci",
+      "label": "Stockfish 1320",
+      "elo": 1320,
+      "uci_elo": 1320,
+      "se": 0,
+      "games": 800
+    },
+    {
+      "id": "uci1500",
+      "kind": "uci",
+      "label": "Stockfish 1500",
+      "elo": 1583,
+      "uci_elo": 1500,
+      "se": 17,
+      "games": 800
+    },
+    {
+      "id": "uci1700",
+      "kind": "uci",
+      "label": "Stockfish 1700",
+      "elo": 1744,
+      "uci_elo": 1700,
+      "se": 15.4,
+      "games": 800
+    },
+    {
+      "id": "uci1900",
+      "kind": "uci",
+      "label": "Stockfish 1900",
+      "elo": 1879,
+      "uci_elo": 1900,
+      "se": 15.2,
+      "games": 800
+    },
+    {
+      "id": "uci2100",
+      "kind": "uci",
+      "label": "Stockfish 2100",
+      "elo": 2016,
+      "uci_elo": 2100,
+      "se": 16.7,
+      "games": 800
+    },
+    {
+      "id": "uci2400",
+      "kind": "uci",
+      "label": "Stockfish 2400",
+      "elo": 2250,
+      "uci_elo": 2400,
+      "se": 21.3,
+      "games": 600
+    },
+    {
+      "id": "uci2800",
+      "kind": "uci",
+      "label": "Stockfish 2800",
+      "elo": 2669,
+      "uci_elo": 2800,
+      "se": 39.3,
+      "games": 400
+    }
+  ]
+}
