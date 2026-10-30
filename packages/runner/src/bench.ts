@@ -57,11 +57,18 @@ export interface BenchRunOptions {
   makeOpponentFor?: (level: LadderLevel, rng: () => number) => Promise<Opponent>;
   /** Series ids whose cell hit `cell_timeout_min` in this process (filled by `runBench`, read by the report). */
   timedOut?: Set<string>;
+  /**
+   * Attached mode: work for at most this many minutes, then pause cleanly (series stay resumable) and
+   * return `sliced` / exit 75. Lets an agent drive a long sweep as a chain of ordinary tool calls.
+   */
+  sliceMinutes?: number;
+  /** Print a one-line progress summary this often (seconds) so an attached terminal never goes silent. */
+  heartbeatSeconds?: number;
 }
 
 export interface BenchRunResult {
   runId: string; stopReason: BenchStopReason; artifactsDir: string;
-  cells: BenchCellResult[]; exitCode: 0 | 2 | 3 | 130;
+  cells: BenchCellResult[]; exitCode: 0 | 2 | 3 | 75 | 130;
 }
 
 export class BenchPreflightError extends Error {
@@ -491,9 +498,23 @@ export async function runBench(o: BenchRunOptions): Promise<BenchRunResult> {
     const timedOut = (o.timedOut ??= new Set<string>());
     let stopRequested = false;
     const running = new Set<string>();                         // series ids in flight
+    let sliced = false;
+    const stopWhy = (): BenchStopReason => (sliced ? 'sliced' : 'interrupted');
     const onSignal = async () => { stopRequested = true; await Promise.all([...running].map((id) => series.pause(id))); };
     process.once('SIGINT', onSignal);
     process.once('SIGTERM', onSignal);
+    const sliceTimer = o.sliceMinutes ? setTimeout(() => {
+      sliced = true;
+      say(`time slice of ${o.sliceMinutes} min is up; pausing running cells (re-run the same command to continue)`);
+      void onSignal();
+    }, o.sliceMinutes * 60_000) : undefined;
+    const beat = o.heartbeatSeconds ? setInterval(() => {
+      void buildStatus(ctx, runId, prefix, null).then((st) => {
+        const live = st.cells.filter((c) => c.series_id && c.state !== 'finished' && c.state !== 'failed');
+        log(`[${new Date().toISOString().slice(11, 19)}] ${st.totals.finished}/${st.totals.cells} cells · ${st.totals.games} games · $${st.totals.cost_usd.toFixed(4)}`
+          + (live.length ? ` · ${live.map((c) => `${c.name.slice(c.name.indexOf('/') + 1)} ${c.games}/${c.target ?? '?'}`).join(', ')}` : ''));
+      }).catch(() => {});
+    }, o.heartbeatSeconds * 1000) : undefined;
 
     let stopReason: BenchStopReason = 'completed';
     const t0 = Date.parse(startedAt);
@@ -564,7 +585,7 @@ export async function runBench(o: BenchRunOptions): Promise<BenchRunResult> {
           continue;
         }
         if (activeModels.has(cell.model)) continue;
-        if (stopRequested) { halt('interrupted'); return false; }
+        if (stopRequested) { halt(stopWhy()); return false; }
         const spent = spentFor(await seriesByPrefix(ctx.db, prefix));
         if (spent >= ctx.plan.run_cap_usd) { halt('stopped_budget'); say(`run cap reached ($${spent.toFixed(4)} of $${ctx.plan.run_cap_usd.toFixed(2)})`); return false; }
         if ((Date.now() - t0) / 3_600_000 >= ctx.plan.max_hours) { halt('stopped_time'); say(`max_hours reached (${ctx.plan.max_hours} h)`); return false; }
@@ -606,13 +627,14 @@ export async function runBench(o: BenchRunOptions): Promise<BenchRunResult> {
       }
       await Promise.allSettled([...active.values()]);            // a halt lets running cells finish within their caps
     } finally {
+      clearTimeout(sliceTimer); clearInterval(beat);
       process.removeListener('SIGINT', onSignal);
       process.removeListener('SIGTERM', onSignal);
     }
 
     // A run is only `completed` when every cell actually finished; anything else must stay resumable.
     if (stopReason === 'completed') {
-      if (stopRequested) stopReason = 'interrupted';
+      if (stopRequested) stopReason = stopWhy();
       else if (timedOut.size > 0) stopReason = 'stopped_time';
       else if ((await seriesByPrefix(ctx.db, prefix)).some((r) => r.status === 'stopped_budget')) stopReason = 'stopped_budget';
     }
@@ -625,7 +647,7 @@ export async function runBench(o: BenchRunOptions): Promise<BenchRunResult> {
     say(`artifacts: ${artifacts.dir}`);
     const cellsOut = artifacts.cells;
     const failed = cellsOut.some((c) => c.state === 'failed');
-    const exitCode = stopReason === 'interrupted' ? 130 : (stopReason !== 'completed' || failed) ? 3 : 0;
+    const exitCode = stopReason === 'interrupted' ? 130 : stopReason === 'sliced' ? 75 : (stopReason !== 'completed' || failed) ? 3 : 0;
     return { runId, stopReason, artifactsDir: artifacts.dir, cells: cellsOut, exitCode };
   } finally {
     await close();

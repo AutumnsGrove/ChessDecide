@@ -33,7 +33,7 @@ export interface BenchPlan {
 
 export interface BenchCell { index: number; model: string; arm: ArmName; repeat: number; seriesName: string }
 export type CellState = 'pending' | 'running' | 'finished' | 'budget' | 'failed' | 'timeout';
-export type BenchStopReason = 'completed' | 'stopped_budget' | 'stopped_time' | 'stopped_error' | 'interrupted';
+export type BenchStopReason = 'completed' | 'stopped_budget' | 'stopped_time' | 'stopped_error' | 'interrupted' | 'sliced';
 
 const PLAN_KEYS = new Set([
   'name', 'models', 'arms', 'size', 'ladder', 'ladder_version', 'series_cap_usd', 'run_cap_usd',

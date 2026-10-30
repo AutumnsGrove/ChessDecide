@@ -215,6 +215,32 @@ describe('bench runner (mock, in-process)', () => {
     });
   });
 
+  describe('attached time slice', () => {
+    const slowOpponent = async (level: LadderLevel, rng: () => number) => {
+      const inner = new RandomOpponent(rng, { levelId: level.id, levelElo: level.elo });
+      return { move: async (fen: string) => { await new Promise((r) => setTimeout(r, 5)); return inner.move(fen); }, close: async () => {} };
+    };
+    it('pauses cleanly when the slice is up and a second call finishes the job without duplicates', async () => {
+      const lines: string[] = [];
+      const o = opts({
+        planPath: planFile({ models: ['m/one', 'm/two'], size: { preset: 'custom', games: 3 } }),
+        makeOpponentFor: slowOpponent, sliceMinutes: 0.01, heartbeatSeconds: 0.1, log: (l) => lines.push(l),
+      });
+      const first = await runBench(o);
+      expect(first.stopReason).toBe('sliced');
+      expect(first.exitCode).toBe(75);
+      expect(lines.some((l) => /time slice/.test(l))).toBe(true);
+      expect(lines.some((l) => /cells ·.*games · \$/.test(l))).toBe(true);
+
+      const { sliceMinutes: _s, heartbeatSeconds: _h, ...rest } = o;
+      const second = await runBench(rest);
+      expect(second.exitCode).toBe(0);
+      expect(second.cells.map((c) => c.state)).toEqual(['finished', 'finished']);
+      expect(second.cells.map((c) => c.games)).toEqual([3, 3]);
+      expect(await db.select().from(schema.series)).toHaveLength(2);
+    }, 180_000);
+  });
+
   it('reports status from the DB', async () => {
     const o = opts();
     const res = await runBench(o);
