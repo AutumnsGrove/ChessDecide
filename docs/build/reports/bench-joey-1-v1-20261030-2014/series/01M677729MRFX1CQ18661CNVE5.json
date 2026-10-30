@@ -212,13 +212,13 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "white",
-      "status": "running",
+      "status": "paused",
       "result": "*",
       "termination": "",
       "adjudicated": false,
       "plies": 89,
-      "acpl_model": 361.7906976744186,
-      "cost_usd": 0.00028043000000000013
+      "acpl_model": 363.90909090909093,
+      "cost_usd": 0.00028787000000000013
     },
     {
       "game_id": "01M6788BHMECGMTGQR5AHCQ221",
