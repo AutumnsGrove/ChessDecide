@@ -12,6 +12,7 @@ import { openLocalDb } from './d1.ts';
 import { buildPorts, createRuntime, newGame } from './runtime.ts';
 import { calibrate } from './ladder.ts';
 import { runPublish } from './publish.ts';
+import { benchModels, benchReport, benchStatus, runBench } from './bench.ts';
 import { dataDir, findStockfish, isMock, loadEnv, openRouterKey } from './config.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -147,9 +148,54 @@ async function publish() {
   }
 }
 
+async function bench() {
+  const sub = rest[0];
+  if (sub === 'models') { console.log(await benchModels()); return; }
+  if (sub === 'status') {
+    const { values: v } = parseArgs({ args: rest.slice(1), options: {
+      run: { type: 'string' }, json: { type: 'boolean', default: false },
+    } });
+    console.log(await benchStatus({ ...(v.run ? { runId: v.run } : {}), json: !!v.json }));
+    return;
+  }
+  if (sub === 'report') {
+    const { values: v } = parseArgs({ args: rest.slice(1), options: { run: { type: 'string' } } });
+    console.log(`report: ${await benchReport({ ...(v.run ? { runId: v.run } : {}) })}`);
+    return;
+  }
+  if (sub !== 'run') {
+    console.error('usage: chessdecide bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] [--commit-each-cell] | bench status [--run ID] [--json] | bench report [--run ID] | bench models');
+    process.exit(2);
+  }
+  const { values: v } = parseArgs({ args: rest.slice(1), options: {
+    plan: { type: 'string' },
+    new: { type: 'boolean', default: false },
+    run: { type: 'string' },
+    'dry-run': { type: 'boolean', default: false },
+    mock: { type: 'boolean', default: false },
+    'no-sql': { type: 'boolean', default: false },
+    'stop-on-error': { type: 'boolean', default: false },
+    'allow-over-cap': { type: 'boolean', default: false },
+    'commit-each-cell': { type: 'boolean', default: false },
+  } });
+  if (!v.plan) { console.error('bench run: --plan <file> is required'); process.exit(2); }
+  try {
+    const res = await runBench({
+      planPath: v.plan, newRun: !!v.new, ...(v.run ? { runId: v.run } : {}),
+      dryRun: !!v['dry-run'], ...(v.mock ? { mock: true } : {}), ...(v['no-sql'] ? { sql: false } : {}),
+      stopOnError: !!v['stop-on-error'], allowOverCap: !!v['allow-over-cap'], commitEachCell: !!v['commit-each-cell'],
+    });
+    process.exitCode = res.exitCode;
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : String(e));
+    process.exitCode = 2;
+  }
+}
+
 if (cmd === 'game') await game();
 else if (cmd === 'probe') await probe();
 else if (cmd === 'ladder') await ladder();
 else if (cmd === 'serve') { loadEnv(); const { startDaemon } = await import('./serve.ts'); await startDaemon({ mock: isMock() }); }
 else if (cmd === 'publish') await publish();
-else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume] | publish [--out FILE] [--series ID...] [--all-games] [--dry-run] [--remote] [--config FILE]'); process.exit(2); }
+else if (cmd === 'bench') await bench();
+else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume] | publish [--out FILE] [--series ID...] [--all-games] [--dry-run] [--remote] [--config FILE] | bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] | bench status [--run ID] [--json] | bench report [--run ID] | bench models'); process.exit(2); }

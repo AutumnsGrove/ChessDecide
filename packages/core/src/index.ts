@@ -19,3 +19,4 @@ export * from './leaderboard.ts';
 export * from './labels.ts';
 export * from './pgn.ts';
 export * from './csv.ts';
+export * from './bench.ts';

@@ -243,3 +243,15 @@ export async function calibrate(opts: CalibrateOptions): Promise<CalibrateResult
 
   return { file, path, games: games.length, wallMs: Date.now() - started, warnings };
 }
+
+/** The exact ladder file for `version`, or undefined when it is missing/invalid. */
+export function loadLadderVersion(dataDir: string, version: number): { file: LadderFile; path: string } | undefined {
+  const path = join(ladderDir(dataDir), `ladder-v${version}.json`);
+  if (!existsSync(path)) return undefined;
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf8'));
+    return isLadderFile(parsed) ? { file: parsed, path } : undefined;
+  } catch {
+    return undefined;
+  }
+}

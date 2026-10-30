@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`benchReport > writes a deterministic report (snapshot) 1`] = `
+"# Bench run core-v1-20261030-1412
+
+Plan \`bench/plans/core-v1.json\` (sha256 4f2a000000000000…) · seed core-v1-20261030-1412 · judge depth 14 · concurrency 2
+Ladder v2 (calibrated) · size standard (50) · caps $0.5000 per series, $2.0000 per run
+Ran 2026-10-30 14:12 UTC → 2026-10-30 16:41 UTC (2 h 29 min) · node 26.7.0 · Stockfish 19 · git 1a2b3c4
+**Spend $0.5201 of $2.0000** · 3 cells: 2 finished · 141 games · 2 aborted
+
+| Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
+| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **D1 Ultra · hinted** | \`01M64EK96X…\` | **908 ± 112** (796–1020) | 23-4-23 | 50 % | 141.2 | 83.1 % | 11.8 % | $0.0091 | 50 |
+| **Jev 1.14 · hinted** | \`01M64BJR3Q…\` | **775 ± 159** (618–935) | 11-3-36 | 25 % | 154.3 | 79.2 % | 15.1 % | $0.0210 | 50 |
+| **Jev 1.14 · clean** | \`01M625J2GZ…\` | **908 ± 112** (796–1020) | 8-2-31 | 22 % | 231.5 | 76.2 % | 19.6 % | $0.4900 | 41 |
+
+## Separated pairs (METRICS.md B6)
+
+| A vs B | P(A stronger) | Elo gap (95 %) | Verdict |
+| --- | ---: | --- | --- |
+| D1U hinted vs Jev hinted | 94.0 % | +133 (+12 … +260) | **separated** |
+| Jev hinted vs Jev clean | 52.0 % | +9 (−240 … +258) | ≈ not separable |
+
+## Ladder walk
+
+| Model · arm | uci1320 | eps50 |
+| --- | ---: | ---: |
+| D1 Ultra · hinted | 45 % | 80 % |
+| Jev 1.14 · hinted | 30 % | 72 % |
+| Jev 1.14 · clean | 22 % | — |
+
+## Not finished
+
+- cell 2 (typesafe/jev-1.14#clean, budget) stopped_budget at 41/50 games, $0.4900 — budget: spent 0.49 + est 0.02 > cap 0.50
+
+## Provenance
+
+- plan: \`bench/plans/core-v1.json\` sha256 4f2a000000000000000000000000000000000000000000000000000000000000 · seed core-v1-20261030-1412 · host \`bench-box\`
+- ladder: data/ladder/ladder-v2.json · stop reason: completed
+"
+`;

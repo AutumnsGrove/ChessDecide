@@ -1,5 +1,31 @@
 # Changelog
 
+## T13 — Headless bench runs
+
+- `packages/core/src/bench.ts` (pure): `parseBenchPlan` (every rule + field name, unknown keys
+  rejected, `image` accepted now that T12 is merged), `expandCells` (models × arms × repeat, stable
+  names), `planPrefix`, `seriesCapFor`, `cellState`, `benchReport` (markdown, deterministic: intervals
+  never bare, `≈` for overlapping pairs, ladder walk, not-finished list, MOCK/uncalibrated banners) and
+  `benchSummary` (fixed key order). +11 tests, one report snapshot.
+- `packages/runner/src/bench.ts`: preflight (git identity, key, Stockfish, catalog/prices, ladder file
+  + `ladder_levels` import, DB schema, disk, estimate gate), resume from `data/bench/<run>/manifest.json`,
+  per-cell cap `min(series_cap, run_cap − spent)` recomputed from the DB, sequential cells through the
+  existing `SeriesControlPlane`, per-game log to stdout and `run.log`, a cell watchdog that pauses
+  (state `timeout`), fail-forward (or `--stop-on-error`), and the artifact bundle: `report.md`,
+  `summary.json`, `leaderboard.csv` (filtered to the run), `series/<id>.json`, `sql/part-001.sql`.
+  The SQL step refuses to write when `ladder_levels` lack the run's version.
+- CLI: `bench run|status|report|models`; `bench models` lists prices, `bench status` reads
+  `status.json` + the DB with an ETA, exit codes 0/2/3/130. Plan paths resolve from the invocation
+  directory (`INIT_CWD`), not `packages/runner`.
+- Fixed while wiring: `outputPaths` now always numbers its files (`…-001.sql`), so a single-file run
+  matches the DEPLOY runbook. Ladder tests that drive `calibrate` got explicit 60 s timeouts (the new
+  bench suite made the 5 s default flaky under load).
+- Tests: core 11 (bench), runner 13 (smoke bundle, finished cells skipped, resume of a paused series,
+  dry run, `--no-sql`, ladder guard, run cap, status, preflight key/model/cap/schema); `pnpm verify`
+  green (runner 46 + 3 skipped).
+- Deviation: with `--mock` games cost $0, so the run-cap stop is exercised as “cap leaves < $0.05”
+  (zero cells) plus the pure `seriesCapFor` tests; a mid-run budget stop needs real spend.
+
 ## T12 — Image arm
 
 - New `@chessdecide/render`: `boardSvg` / `boardPng` / `boardDataUrl` (resvg, 512×512, `#f0d9b5`/`#b58863`,

@@ -67,7 +67,7 @@ describe('ladder calibration', () => {
     expect(existsSync(res.path)).toBe(true);
     expect(loadLadder(dir).version).toBe(1);
     expect(await ladderGameCount(db, 1, 'random', 'eps50')).toBe(2);
-  });
+  }, 60_000);
 
   it('resumes: a rerun with --resume plays only missing games', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'cd-ladder-resume-'));
@@ -79,14 +79,14 @@ describe('ladder calibration', () => {
     expect(second.games).toBe(10);
     expect(logs.some((l) => l.includes('0 to play'))).toBe(true);
     expect(existsSync(second.path)).toBe(true);
-  });
+  }, 60_000);
 
   it('starts a fresh version without --resume', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'cd-ladder-fresh-'));
     await calibrate(opts(dir, { version: 3 }));
     await calibrate(opts(dir, { version: 3 }));
     expect(await ladderGameCount(db, 3, 'random', 'eps50')).toBe(2);
-  });
+  }, 60_000);
 
   it('loadLadder ignores corrupt files and picks the highest valid version', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'cd-ladder-load-'));

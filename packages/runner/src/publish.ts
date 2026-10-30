@@ -206,7 +206,7 @@ export async function planPublish(db: Db, opts: PublishOptions = {}): Promise<Pu
 
 /** `outBase` for one file; `out-001.sql`, `out-002.sql`, … when it needs chunking. */
 export function outputPaths(outBase: string, count: number): string[] {
-  if (count <= 1) return count === 1 ? [outBase] : [];
+  if (count <= 0) return [];
   const m = /^(.*?)(\.[^./\\]*)?$/.exec(outBase)!;
   return Array.from({ length: count }, (_, i) => `${m[1]}-${String(i + 1).padStart(3, '0')}${m[2] ?? '.sql'}`);
 }
