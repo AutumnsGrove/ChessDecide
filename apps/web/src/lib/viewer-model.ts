@@ -1,11 +1,7 @@
 /** Pure helpers for the Viewer. Fixed templates over Stockfish numbers: NO generated commentary. */
-import type { Game, Ply, PlayerDesc } from '@chessdecide/core';
+import { playerLabel, type Game, type Ply } from '@chessdecide/core';
 
-export function playerLabel(p: PlayerDesc): string {
-  if (p.type === 'model') return p.model;
-  if (p.type === 'ladder') return p.level === 'random' ? 'Random mover' : `Ladder ${p.level}`;
-  return `Stockfish ${p.elo}`;
-}
+export { playerLabel };
 /** Win bar fill for White, 0..100 (50 = level). Logistic on centipawns. */
 export function evalPct(cp: number): number { return 50 + 50 * (2 / (1 + Math.exp(-cp / 300)) - 1); }
 export const pawns = (cp: number) => (Math.abs(cp) / 100).toFixed(1);

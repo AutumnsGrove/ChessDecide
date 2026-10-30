@@ -40,6 +40,8 @@ test('start a series from the dialog and watch the rating form', async ({ page }
   await expect(page.locator('.rating .big')).toBeVisible({ timeout: 90_000 });
   await expect(page.locator('.head .chip')).toHaveText('finished', { timeout: 90_000 });
   await expect(page.locator('.strip .cell')).toHaveCount(8, { timeout: 90_000 });
+  await expect(page.getByRole('link', { name: 'Download JSON' })).toHaveAttribute('href', /\/api\/series\/[0-9A-Z]+\/export\.json$/);
+  await expect(page.getByRole('link', { name: 'Download CSV' })).toHaveAttribute('href', /\/api\/series\/[0-9A-Z]+\/export\.csv$/);
 });
 
 test('pause, resume and stop change the series status', async ({ page, request }) => {

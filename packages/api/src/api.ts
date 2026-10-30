@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import {
-  ARM_PRESETS, DEFAULT_LADDER, buildLeaderboard, compareArms, type Game, type GameConfig, type GameEvent, type LadderFile,
-  type Series, type SeriesConfig, type SeriesEvent,
+  ARM_PRESETS, DEFAULT_LADDER, buildLeaderboard, compareArms, gameToPgn, leaderboardCsv, seriesCsv,
+  type Game, type GameConfig, type GameEvent, type LadderFile, type Series, type SeriesConfig, type SeriesEvent,
 } from '@chessdecide/core';
 import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
 import { buildSeries, leaderboardInput, listGames, loadGame, loadPublishedLadder, seriesSummaries, type Db } from '@chessdecide/db';
@@ -153,6 +153,12 @@ export function createApi(deps: ApiDeps): Hono {
     return c.json({ ladder: { version: ladder.version, calibrated: ladder.calibrated }, rows, reference });
   });
 
+  app.get('/leaderboard/export.csv', async (c) => {
+    const ladder = await currentLadder();
+    const { rows } = buildLeaderboard(await leaderboardInput(deps.db, ladder.version), ladder.version, ladder.levels);
+    return c.body(leaderboardCsv(rows), 200, { 'Content-Type': 'text/csv; charset=utf-8', ...attachment('leaderboard.csv') });
+  });
+
   app.get('/leaderboard/compare', async (c) => {
     const a = c.req.query('a'), b = c.req.query('b');
     if (!a || !b) throw new ApiError('bad_request', 'a and b are required');
@@ -199,6 +205,17 @@ export function createApi(deps: ApiDeps): Hono {
   app.get('/series/:id/games', async (c) => {
     const s = await buildSeries(deps.db, c.req.param('id'));
     return s ? c.json(s.games) : c.json(err('not_found', 'series not found'), 404);
+  });
+
+  app.get('/series/:id/export.json', async (c) => {
+    const s = await buildSeries(deps.db, c.req.param('id'));
+    return s ? c.json(s, 200, attachment(`${s.id}.json`)) : c.json(err('not_found', 'series not found'), 404);
+  });
+
+  app.get('/series/:id/export.csv', async (c) => {
+    const s = await buildSeries(deps.db, c.req.param('id'));
+    if (!s) return c.json(err('not_found', 'series not found'), 404);
+    return c.body(seriesCsv(s), 200, { 'Content-Type': 'text/csv; charset=utf-8', ...attachment(`${s.id}.csv`) });
   });
 
   app.get('/series/:id/events', async (c) => {
@@ -263,6 +280,16 @@ export function createApi(deps: ApiDeps): Hono {
   app.get('/games/:id', async (c) => {
     const g = await loadGame(deps.db, c.req.param('id'));
     return g ? c.json(g) : c.json(err('not_found', 'game not found'), 404);
+  });
+
+  /** Downloads: read-only, exist in every mode. Plain links in the UI, no scripting. */
+  const attachment = (name: string) => ({ 'Content-Disposition': `attachment; filename="${name}"` });
+
+  app.get('/games/:id/pgn', async (c) => {
+    const g = await loadGame(deps.db, c.req.param('id'));
+    if (!g) return c.json(err('not_found', 'game not found'), 404);
+    const pgn = gameToPgn(g, { site: deps.mode === 'public' ? 'chessdecide' : 'local' });
+    return c.body(pgn, 200, { 'Content-Type': 'text/plain; charset=utf-8', ...attachment(`${g.id}.pgn`) });
   });
 
   // Live events. On connect: a full `snapshot`, then hub events. Reconnecting clients simply get a fresh snapshot.

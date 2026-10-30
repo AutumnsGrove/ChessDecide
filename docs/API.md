@@ -193,7 +193,10 @@ export interface GameTotals {
 `GET /api/games` → list of summaries (id, status, result, models, plies, cost, created_at).
 `GET /api/games/{id}` → `Game`. `DELETE /api/games/{id}` → 204 (not allowed while running).
 `GET /api/games/{id}/pgn` → `text/plain` PGN with `[White]`, `[Black]`, `[Result]`,
-`[Event "ChessDecide"]`, and per-move comments `{[%eval 0.23] p=0.31}`.
+`[Event "ChessDecide"]`, and per-move comments `{[%eval 0.23] p=0.31}` (the `p=` half only for a
+real model pick). Model/Arm/Level/CostUSD tags; `SetUp`/`FEN` for a non-standard start; move numbers
+follow the starting FEN's fullmove number. All four export routes are read-only and exist in `public`
+mode.
 
 Control (all return the current `Game` summary `{id,status,status_reason}`):
 
@@ -290,6 +293,10 @@ Endpoints: `GET /api/series` (summaries), `GET /api/series/{id}`, `DELETE /api/s
 stands), `PATCH /api/series/{id}` (`{budget_usd?, size?}` — raising the cap or switching a
 Quick series to "completion" resumes it), `GET /api/series/{id}/export.json|csv`.
 
+`export.json` is the full `Series` object. `export.csv` is one row per game, header
+`index,block,level_id,level_elo,model_color,result,model_score,termination,adjudicated,plies,acpl,cost_usd,game_id`
+(RFC 4180 quoting, empty field for null). Both send `Content-Disposition: attachment`.
+
 **Events** `GET /api/series/{id}/events`
 
 | `event` | `data` |
@@ -338,6 +345,9 @@ Elo of the loaded ladder file. `separated_from` lists arms whose 95 % intervals 
 one's; the UI never ranks arms that overlap.
 
 `GET /api/leaderboard/compare?a=<arm_id>&b=<arm_id>` → `{ p_a_gt_b, diff_mean, diff_lo, diff_hi }`.
+
+`GET /api/leaderboard/export.csv` → one row per arm:
+`arm_id,model,arm,series_id,status,games,elo_mean,elo_lo,elo_hi,w,d,l,score_pct,acpl,acceptable_rate,blunder_rate,cost_usd`.
 
 ### 3.6 Later (M5, reserved)
 

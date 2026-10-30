@@ -29,7 +29,10 @@
 
 <div class="head">
   <h1 class="h">Leaderboard</h1>
-  {#if app.health?.control}<button class="new" onclick={openNewSeries}>New series</button>{/if}
+  <div class="actions">
+    {#if rows.length > 0}<a class="dl" href="/api/leaderboard/export.csv" download>Download CSV</a>{/if}
+    {#if app.health?.control}<button class="new" onclick={openNewSeries}>New series</button>{/if}
+  </div>
 </div>
 <p class="note">Elo on the ChessDecide ladder. Every number carries its 95 % interval; arms are only ranked apart when those intervals do not overlap.</p>
 
@@ -73,6 +76,8 @@
 
 <style>
   .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .actions { display: flex; align-items: center; gap: 12px; }
+  .dl { font-size: 13px; color: var(--accent); }
   .h { font-size: 18px; margin: 0; }
   .sub { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mute); margin: 0 0 8px; }
   .new, .primary { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; font-size: 14px; }

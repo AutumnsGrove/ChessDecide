@@ -113,6 +113,10 @@
     <div class="stat"><b>{mistakeCount(game)}</b><span>mistakes</span></div>
     <div class="stat"><b>${game.cost_usd.toFixed(3)}</b><span>cost of game</span></div>
   </div>
+
+  <div class="downloads">
+    <a href="/api/games/{game.id}/pgn" download>Download PGN</a>
+  </div>
 </div>
 
 <style>
@@ -142,4 +146,6 @@
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .stat { background: var(--panel); border-radius: 8px; padding: 10px; text-align: center; }
   .stat b { display: block; font: 600 18px var(--mono); } .stat span { font-size: 12px; color: var(--mute); }
+  .downloads { display: flex; justify-content: flex-end; }
+  .downloads a { font-size: 13px; color: var(--accent); }
 </style>

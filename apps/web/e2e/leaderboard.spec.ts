@@ -48,6 +48,7 @@ test('the home page is the leaderboard, with finished arms on the axis and in th
   await expect(page.locator('tbody tr.arm', { hasText: 'jev-1.14 · clean' }).first()).toBeVisible();
   await expect(page.locator('.axis .row').first()).toBeVisible();
   await expect(page.getByText('Elo on the ChessDecide ladder').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download CSV' })).toHaveAttribute('href', '/api/leaderboard/export.csv');
 });
 
 test('two arms get a comparison with a probability and an Elo gap', async ({ page, request }) => {

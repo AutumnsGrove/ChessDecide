@@ -1,5 +1,32 @@
 # Changelog
 
+## T11 — PGN, JSON and CSV exports
+
+- `packages/core/src/pgn.ts`: `gameToPgn(game, { site })` writes tags in the spec order (Event, Site,
+  Date, Round, White, Black, Result, Termination, then `SetUp`/`FEN` for a non-standard start, Model,
+  Arm, Level, CostUSD) and movetext wrapped at 80 columns. Every judged ply gets
+  `{[%eval 0.23] p=0.31}` — eval in pawns from White POV, clamped to ±10.00, `p=` only for a real
+  model pick (never engine or forced). Judged model plies carry `?!`/`?`/`??`. Move numbers follow the
+  starting FEN's side and fullmove number, so random-opening games export as `3. e4`, not `1. e4`.
+- `packages/core/src/csv.ts`: RFC 4180 quoting with `\n` newlines and empty fields for null. Fixed
+  headers for `seriesCsv` (one row per game) and `leaderboardCsv` (one row per arm).
+- `packages/core/src/labels.ts`: `playerLabel` moved out of the web app so PGN tags, CSV and the Viewer
+  share one label (`liquid/d1-ultra`, `Ladder uci1500`, `Stockfish 1500`); the web re-exports it.
+- `packages/api`: `GET /api/games/:id/pgn` (`text/plain`), `GET /api/series/:id/export.json`,
+  `GET /api/series/:id/export.csv`, `GET /api/leaderboard/export.csv` (`text/csv`), all with
+  `Content-Disposition: attachment` and all available in public mode.
+- `apps/web`: plain download links — Viewer “Download PGN”, series detail “Download JSON / CSV”,
+  leaderboard “Download CSV”. No scripting; they are normal links to the API.
+- Tests: `packages/core/test/exports.test.ts` (+13) replays each PGN with chess.js to the same final
+  FEN and ply count, checks tags/comments/glyphs/forced/custom FEN/black-to-move/wrapping, CSV quoting,
+  and rebuilds `RatedGame[]` from the series CSV (`estimate` within ±0.5 of `Series.elo`). API exports
+  are covered by `query-budget.test.ts` (body, header and ≤ 10 queries); e2e asserts the three links.
+- Deployed the same day (`pnpm build` + `wrangler deploy --config wrangler.production.jsonc`); the live
+  PGN uses `[Site "chessdecide"]` and starts from the game's real opening FEN.
+- Tests: core 83 (+13), api 40 (+5), db 12, runner 31 (+1 skipped), web 22; `pnpm verify` and `pnpm e2e`
+  (42) green, `pnpm build` green.
+
+
 ## T10 — Publish command, deploy runbook, query budget
 
 - `packages/runner/src/publish.ts`: `pnpm cli publish` reads the local D1 and writes re-runnable SQL

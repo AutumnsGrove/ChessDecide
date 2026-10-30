@@ -98,6 +98,11 @@
   <span class="chip {statusClass}">{series.status.replace('_', ' ')}</span>
 </div>
 
+<div class="downloads">
+  <a href="/api/series/{series.id}/export.json" download>Download JSON</a>
+  <a href="/api/series/{series.id}/export.csv" download>Download CSV</a>
+</div>
+
 {#if !data.ladder.calibrated}
   <div class="notice" role="status">Ladder uncalibrated: opponent ratings are nominal.</div>
 {/if}
@@ -213,6 +218,8 @@
   .chip.warn { background: #3d3418; color: var(--warn); }
   .chip.bad { background: #44221e; color: var(--bad); }
   .notice { background: #3d3418; color: var(--warn); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
+  .downloads { display: flex; gap: 14px; }
+  .downloads a { font-size: 13px; color: var(--accent); }
   .controls { display: flex; gap: 6px; }
   .controls button { flex: 1; padding: 8px 10px; font-size: 13px; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); }
   .controls button:disabled { opacity: 0.55; cursor: default; }

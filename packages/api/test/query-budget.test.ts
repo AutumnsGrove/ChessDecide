@@ -68,8 +68,15 @@ beforeAll(async () => {
       created_at: `2026-03-0${i + 1}T00:00:00Z`, finished_at: '2026-03-09T00:00:00Z',
     });
     for (let g = 0; g < 2; g++) {
+      const config = {
+        white: { type: 'model', model: a.model, arm: a.arm },
+        black: { type: 'ladder', level: 'uci1500' },
+        opening: { type: 'startpos' }, pace_ms: 0, budget_usd: 0.5, judge_depth: 14,
+        max_plies: 200, adjudicate: true, seed: g,
+      };
       await db.insert(schema.games).values({
-        id: `${id}G${g}`, status: 'finished', config_json: JSON.stringify({ seed: g }), white_player: '{}', black_player: '{}',
+        id: `${id}G${g}`, status: 'finished', config_json: JSON.stringify(config),
+        white_player: JSON.stringify(config.white), black_player: JSON.stringify(config.black),
         series_id: id, series_index: g, block_index: 0, level_id: 'uci1500', level_elo: 1500,
         model_color: g === 0 ? 'white' : 'black', model_score: g === 0 ? 1 : 0, adjudicated: 0,
         start_fen: 'start', result: g === 0 ? '1-0' : '0-1', termination: 'checkmate', cost_usd: 0.005,
@@ -93,12 +100,12 @@ afterAll(async () => { await dispose?.(); });
 describe('read-only route query budget', () => {
   const app = () => createApi({ db: counted.db, mode: 'public' });
 
-  const calls = async (path: string): Promise<{ status: number; queries: number; body: string }> => {
+  const calls = async (path: string): Promise<{ status: number; queries: number; body: string; type: string }> => {
     counted.reset();
     const res = await app().fetch(new Request(`http://x${path}`));
     const queries = counted.count();
     const body = await res.text();
-    return { status: res.status, queries, body };
+    return { status: res.status, queries, body, type: res.headers.get('content-type') ?? '' };
   };
 
   /** Every route the public site uses: 4 arms, 8 games, 16 plies, one series each. */
@@ -111,6 +118,10 @@ describe('read-only route query budget', () => {
     '/api/series',
     '/api/series/S0',
     '/api/series/S0/games',
+    '/api/games/S0G0/pgn',
+    '/api/series/S0/export.json',
+    '/api/series/S0/export.csv',
+    '/api/leaderboard/export.csv',
   ];
 
   for (const path of routes) {
@@ -141,6 +152,30 @@ describe('read-only route query budget', () => {
     const ladder = (await (await app().fetch(new Request('http://x/api/ladder'))).json()) as { version: number; levels: unknown[] };
     expect(ladder.version).toBe(2);
     expect(ladder.levels).toHaveLength(2);
+  });
+
+  it('exports answer with the promised body and content type', async () => {
+    const pgn = await calls('/api/games/S0G0/pgn');
+    expect(pgn.type).toContain('text/plain');
+    expect(pgn.body).toContain('[Event "ChessDecide"]');
+    expect(pgn.body).toContain('[Site "chessdecide"]');
+    expect(pgn.body.trimEnd().endsWith('1-0')).toBe(true);
+
+    const json = await calls('/api/series/S0/export.json');
+    expect(json.type).toContain('application/json');
+    const body = JSON.parse(json.body) as { id: string; games: unknown[] };
+    expect(body.id).toBe('S0');
+    expect(body.games).toHaveLength(2);
+
+    const seriesCsvOut = await calls('/api/series/S0/export.csv');
+    expect(seriesCsvOut.type).toContain('text/csv');
+    expect(seriesCsvOut.body.split('\n')[0]).toBe('index,block,level_id,level_elo,model_color,result,model_score,termination,adjudicated,plies,acpl,cost_usd,game_id');
+    expect(seriesCsvOut.body.trimEnd().split('\n')).toHaveLength(3);
+
+    const boardCsv = await calls('/api/leaderboard/export.csv');
+    expect(boardCsv.type).toContain('text/csv');
+    expect(boardCsv.body.split('\n')[0]).toBe('arm_id,model,arm,series_id,status,games,elo_mean,elo_lo,elo_hi,w,d,l,score_pct,acpl,acceptable_rate,blunder_rate,cost_usd');
+    expect(boardCsv.body.trimEnd().split('\n')).toHaveLength(5);
   });
 
   it('public mode exposes no control or catalog routes', async () => {

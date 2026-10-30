@@ -4,16 +4,15 @@ Autumn uses **she/her** pronouns. She often works by voice: keep replies short a
 
 ## 1. State
 
-**T10 is done and deployed.** `pnpm verify`, `pnpm build` and `pnpm e2e` all pass, the public read-only
-site is live at **https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide`
+**T11 is done** (and deployed to the live site). `pnpm verify`, `pnpm build` and `pnpm e2e` all pass,
+the public read-only site is at **https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide`
 `394e0101-b338-4bee-9375-bc9f96b5480c`, ENAM) with the four real series published twice at identical
-counts. Next task is **T11 exports**.
+counts. Next task is **T12 image arm** — the last one in the curriculum.
 
 | Task | State |
 | --- | --- |
-| T00–T10 | done (T10 deployed 2026-10-30) |
-| **T11 exports** | **not started — next** |
-| T12 image arm | not started |
+| T00–T11 | done (T10/T11 deployed 2026-10-30) |
+| **T12 image arm** | **not started — next, and the last task** |
 
 ## 2. Where the deploy lives
 
@@ -26,15 +25,21 @@ counts. Next task is **T11 exports**.
 - Refresh after new series: `pnpm cli publish --remote --config wrangler.production.jsonc` (build and
   deploy only if code changed). `docs/DEPLOY.md` is the full runbook.
 
-## 3. First thing next session: T11 exports
+## 3. First thing next session: T12 image arm
 
-Read `docs/build/tasks/T11-exports.md`. Two things to keep in mind from T10:
+Read `docs/build/tasks/T12-image-arm.md`. Notes carried over:
 
-- series detail pages exist locally and in public mode, so exports must work read-only too;
-- any new read route goes through `packages/api/test/query-budget.test.ts` (≤ 10 queries).
+- any new read route goes through `packages/api/test/query-budget.test.ts` (≤ 10 queries);
+- exports are live: `/api/games/:id/pgn`, `/api/series/:id/export.json|csv`, `/api/leaderboard/export.csv`;
+- the image arm needs real model calls, so it will cost money — T12 says what budget; ask before spending.
 
 ## 4. Catches worth remembering
 
+- **PGN move numbers follow the starting FEN.** Random-opening games begin at move 3; numbering from
+  ply 1 would label `3. e4` as `1. e4`. `gameToPgn` tracks the FEN's side/fullmove; a Black-to-move start
+  emits `1... e5`.
+- **`playerLabel` lives in core** (`packages/core/src/labels.ts`); the web re-exports it. Use it for any
+  tag/label so PGN, CSV and the Viewer agree.
 - **Public mode derives the ladder from the published rows.** With no ladder file, the API would
   default to nominal v0 and show an empty leaderboard (it did, on the first deploy).
   `publishedLadderVersion`/`loadPublishedLadder` fix that; `GET /api/ladder` now serves the published
@@ -65,5 +70,6 @@ Only two of six pairs are separated at 25 games (Jev clean < Jev hinted; Jev cle
 
 ## 5. Next steps
 
-1. T10 credential step with Autumn (§2), then T11 exports, T12 image arm.
+1. T12 image arm (ask about the spend first), then redeploy with `pnpm build` + `wrangler deploy
+   --config wrangler.production.jsonc` and republish if new series exist.
 2. Phase 2 (live Cloudflare) is out of this curriculum.

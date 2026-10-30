@@ -34,8 +34,9 @@ async function openFinished(request: APIRequestContext, page: Page) {
 const moveLabel = (page: Page) => page.locator('.lab');
 
 test('replay keys step through the game and Space autoplays', async ({ page, request }) => {
-  await openFinished(request, page);
+  const game = await openFinished(request, page);
   await expect(moveLabel(page)).toContainText('Move 0 of 6');
+  await expect(page.getByRole('link', { name: 'Download PGN' })).toHaveAttribute('href', `/api/games/${game.id}/pgn`);
 
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight');
   await expect(moveLabel(page)).toContainText('Move 3 of 6');
