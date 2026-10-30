@@ -1,0 +1,19 @@
+{
+  // Production config: `wrangler deploy --config wrangler.production.jsonc`.
+  // Its database_id must be the Cloudflare D1 id (a UUID), never "local-dev".
+  // Runbook: docs/DEPLOY.md.
+  "name": "chessdecide-web",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "binding": "ASSETS", "directory": ".svelte-kit/cloudflare" },
+  "vars": { "CHESSDECIDE_MODE": "public" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chessdecide",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ]
+}

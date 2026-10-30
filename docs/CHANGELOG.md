@@ -1,5 +1,38 @@
 # Changelog
 
+## T10 — Publish command, deploy runbook, query budget
+
+- `packages/runner/src/publish.ts`: `pnpm cli publish` reads the local D1 and writes re-runnable SQL
+  (`INSERT OR REPLACE`) for `ladder_levels`, `series`, `games`, `plies` in that order. It selects series
+  with a verdict (`finished`, `stopped_budget`, `stopped_error`) or explicit `--series <id>...`, adds
+  finished games outside any series with `--all-games`, and never touches `attempts`, `oracle_moves`,
+  `settings`, `models_snapshot` or `ladder_games`. Column lists are explicit, so a new local column
+  cannot leak by accident.
+- Publish safety: `config_json` is parsed and refused if any field name or value looks like a key;
+  `plies.attempt_id` is nulled; strings use doubled quotes; rows are rendered with an explicit single
+  table per statement. Files are chunked under 2 MB and a single row over D1's 100 KB statement cap
+  fails with the table and key named. `--dry-run` prints counts and bytes and writes nothing.
+- `--remote` refuses to run unless the config it is given holds a real Cloudflare D1 id (a UUID), so
+  `wrangler.jsonc` (`local-dev`) cannot receive production SQL. It then runs `wrangler d1 execute DB
+  --remote --config <file> --file <chunk>` per file. `--config` resolves against `apps/web/`.
+- `apps/web/wrangler.production.jsonc`: separate production config (its own `database_id` placeholder,
+  `vars.CHESSDECIDE_MODE=public`, same migrations dir). `docs/DEPLOY.md`: ordered runbook (login, create
+  D1, migrate, build + deploy, publish twice, verify `/api/health`, `/`, `/series`, replay, 400 px) with
+  the expected output at each step and what is never published.
+- `packages/db`: `buildSeries` split into `assembleSeries` (pure projection) plus a batched
+  `leaderboardInput`, so the leaderboard reads all chosen series, games and plies in a fixed number of
+  queries instead of three per arm. `packages/api/test/query-budget.test.ts` wraps `DB.prepare` and
+  asserts every public route ≤ 10 queries (leaderboard is exactly 4 with four arms).
+- Real dry run on the four real series: `ladder_levels 12, series 4, games 100, plies 5088`, 5.5 MB in
+  three files (2.0, 2.0, 1.3 MB); no `sk-or-` string anywhere in the output.
+- `apps/web`: added the `cookie` dependency (2.0.1, the ESM release SvelteKit 3 externalises in the
+  server build). `pnpm build` was failing at SvelteKit's "Analysing routes" step because the emitted
+  chunk imported a bare `cookie` and resolved to a stray CJS copy outside the repo; with the dependency
+  declared, `apps/web/node_modules/cookie` is the ESM one and the build is reproducible.
+- Tests: runner 30 (+12 publish), api 34 (+10 query budget), db 12; `pnpm verify` green, `pnpm build` green.
+  `--remote` and the deploy itself are blocked on Autumn's `wrangler login` (T10 §4).
+
+
 ## T08b — Four arms on one ladder
 
 - Ran three more Quick 25 series after the first one: Jev `hinted` (**775 ± 159**, 11-1-13, $0.0210),

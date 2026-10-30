@@ -11,6 +11,7 @@ import { DecisionsClient, ModelPlayer, type AttemptRow, type AttemptSink } from 
 import { openLocalDb } from './d1.ts';
 import { buildPorts, createRuntime, newGame } from './runtime.ts';
 import { calibrate } from './ladder.ts';
+import { runPublish } from './publish.ts';
 import { dataDir, findStockfish, isMock, loadEnv, openRouterKey } from './config.ts';
 
 const [cmd, ...rest] = process.argv.slice(2);
@@ -115,8 +116,40 @@ async function ladder() {
   }
 }
 
+/** Publish finished series/games as SQL for a remote D1 (read-only site). Spec: T10. */
+async function publish() {
+  const { values: v } = parseArgs({ args: rest, options: {
+    out: { type: 'string' },
+    series: { type: 'string', multiple: true },
+    'all-games': { type: 'boolean', default: false },
+    'dry-run': { type: 'boolean', default: false },
+    remote: { type: 'boolean', default: false },
+    config: { type: 'string', default: 'wrangler.jsonc' },
+  } });
+  if (v.remote && v['dry-run']) {
+    console.error('publish: --remote and --dry-run cannot be combined');
+    process.exit(2);
+  }
+  const { db, close } = await openLocalDb();
+  try {
+    await runPublish({
+      db,
+      ...(v.out ? { outBase: v.out } : {}),
+      ...(v.series?.length ? { seriesIds: v.series } : {}),
+      allGames: !!v['all-games'], dryRun: !!v['dry-run'], remote: !!v.remote,
+      ...(v.remote && v.config ? { configPath: v.config } : {}),
+    });
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : String(e));
+    process.exitCode = 2;
+  } finally {
+    await close();
+  }
+}
+
 if (cmd === 'game') await game();
 else if (cmd === 'probe') await probe();
 else if (cmd === 'ladder') await ladder();
 else if (cmd === 'serve') { loadEnv(); const { startDaemon } = await import('./serve.ts'); await startDaemon({ mock: isMock() }); }
-else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume]'); process.exit(2); }
+else if (cmd === 'publish') await publish();
+else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume] | publish [--out FILE] [--series ID...] [--all-games] [--dry-run] [--remote] [--config FILE]'); process.exit(2); }

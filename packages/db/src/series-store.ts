@@ -84,6 +84,15 @@ export async function buildSeries(db: Db, id: string): Promise<Series | undefine
   if (!row) return undefined;
   const gameRows = await db.select().from(s.games).where(eq(s.games.series_id, id)).orderBy(asc(s.games.series_index));
   const plies = await pliesForGames(db, gameRows.map((g) => g.id));
+  return assembleSeries(row, gameRows, plies);
+}
+
+/** Pure projection of a series row + its games/plies. Shared by buildSeries and the leaderboard batch. */
+export function assembleSeries(
+  row: SeriesRow,
+  gameRows: (typeof s.games.$inferSelect)[],
+  plies: Map<string, Ply[]>,
+): Series {
   const games: SeriesGame[] = gameRows.map((r) => {
     const index = r.series_index ?? 0;
     const modelColor = (r.model_color as Color | null) ?? 'white';
@@ -186,11 +195,24 @@ export async function leaderboardInput(db: Db, ladderVersion: number): Promise<A
     arm_id: armKey(r), series_id: r.id, status: r.status as SeriesStatus,
     ladder_version: r.ladder_version, finished_games: done.get(r.id) ?? 0,
   })), ladderVersion));
+  const selected = rows.filter((r) => ids.has(r.id));
   const out: ArmSeries[] = [];
-  for (const row of rows) {
-    if (!ids.has(row.id)) continue;
-    const series = await buildSeries(db, row.id);
-    if (!series) continue;
+  if (selected.length === 0) return out;
+
+  // One games query + one plies query for every selected arm, instead of 3 queries per arm:
+  // the leaderboard stays a constant number of D1 queries as the arm count grows.
+  const gameRows = await db.select().from(s.games).where(inArray(s.games.series_id, selected.map((r) => r.id)))
+    .orderBy(asc(s.games.series_id), asc(s.games.series_index));
+  const plies = await pliesForGames(db, gameRows.map((g) => g.id));
+  const gamesBySeries = new Map<string, typeof gameRows>();
+  for (const g of gameRows) {
+    const list = gamesBySeries.get(g.series_id ?? '') ?? [];
+    list.push(g);
+    gamesBySeries.set(g.series_id ?? '', list);
+  }
+
+  for (const row of selected) {
+    const series = assembleSeries(row, gamesBySeries.get(row.id) ?? [], plies);
     const rated = series.games.filter((g) => g.status === 'finished' && g.model_score !== undefined)
       .map((g) => ({ opponentElo: g.level_elo, score: g.model_score! }));
     out.push({

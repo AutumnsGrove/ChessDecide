@@ -1,48 +1,54 @@
-# Handoff — where we left off (2026-10-29, session 4)
+# Handoff — where we left off (2026-10-30, session 5)
 
 Autumn uses **she/her** pronouns. She often works by voice: keep replies short and conversational.
 
 ## 1. State
 
-T08 is **finished** (first real series) and T08b added three more series so four arms share one ruler.
-**T09 leaderboard is built; `pnpm verify` is green, `pnpm e2e` has not passed yet (see §2).**
+T09's e2e is now **green** (42/42) and **T10's code is finished**. `pnpm verify`, `pnpm build` and
+`pnpm e2e` all pass. The only thing left in T10 is the **credential step**, which must be done with
+Autumn present (see §2).
 
 | Task | State |
 | --- | --- |
-| T00–T07 | done |
-| T08 first real series | done (Jev·clean 532 ± 160, $0.0299) |
-| T08b three more series | done (see `docs/build/reports/T08b-arms-and-models.md`) |
-| **T09 leaderboard** | **code complete; e2e needs a fix run** |
-| T10–T12 | not started |
+| T00–T09 | done |
+| **T10 publish + runbook** | **code complete; deploy blocked on Autumn's `wrangler login`** |
+| T11 exports | not started |
+| T12 image arm | not started |
 
-## 2. First thing next session: finish T09's e2e
+## 2. First thing next session: the T10 STOP
 
-`pnpm verify` is green (typecheck + svelte-check + all unit tests, including the new leaderboard
-core/db/api/web suites). `pnpm e2e` was last run mid-edit; the failures were all in
-`apps/web/e2e/leaderboard.spec.ts` and the fixes below are already applied but unverified:
+Ask Autumn: *"Ready to deploy the public site? This needs `wrangler login` on your machine and
+creates a D1 database named `chessdecide` in your account."*
 
-- Locator destructuring is not iterable → use `.nth(0)` / `.nth(1)` (done).
-- The uncalibrated text matched 3 elements → assert on `.notice` (done).
-- Data from earlier specs leaks into later projects (same temp D1), so assertions are now
-  `hasText`-scoped instead of assuming row order/count (done).
-- `buildLeaderboard` now drops arms with 0 rated games (a just-created series used to show
-  `1345 ± 9633`), so a leftover series no longer appears as a rated row.
+If yes, follow `docs/DEPLOY.md` in order (it is written to be followed literally):
+login → `wrangler d1 create chessdecide` → paste the UUID into
+`apps/web/wrangler.production.jsonc` → `d1 migrations apply --remote --config wrangler.production.jsonc`
+→ `pnpm build` + `wrangler deploy --config wrangler.production.jsonc` →
+`pnpm cli publish --remote --config wrangler.production.jsonc` twice (counts must not change) →
+check `/api/health` (`mode: public, control: false`), `/`, `/series`, a replay, and 400 px.
 
-Run `pnpm e2e` (kill anything on 8731/5273 first — the config uses `reuseExistingServer: false`).
-Then commit `Add leaderboard` if it was not already part of the T08b/T09 commit, and move to T10.
+If not yet: commit T10 as it is (the deploy is the only missing acceptance item) and start T11.
+
+`pnpm cli publish --remote` without `--config` deliberately refuses: `apps/web/wrangler.jsonc` still
+has `database_id: "local-dev"`. The guard also rejects non-UUID placeholders, so the production
+config cannot be pointed at the local DB or left unfilled by accident.
 
 ## 3. Catches worth remembering
 
+- **`pnpm build` needed a new dependency.** SvelteKit 3 externalises `cookie` in the server build;
+  the emitted chunk imported it bare and resolved to a stray CJS `~/node_modules/cookie`. `apps/web`
+  now depends on `cookie@2.0.1`, so the build is reproducible. This was broken before T10 — run
+  `pnpm build` when touching the web app, `pnpm verify` alone will not catch it.
 - `ApiError(code, message, **status**)` — the third argument is the HTTP status, not `retryable`.
-  `new ApiError('not_found', …)` silently yields 400; pass 404 explicitly.
-- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`): `series.arm_id` alone is only the
-  preset, so two models with `clean` would otherwise collapse into one row.
-- Elo is only comparable within one `ladder_version`; the API filters on it and the UI falls back to
-  the nominal ladder when `/api/ladder` is absent (public mode).
-- Do not run `pnpm verify` while a series or calibration is running: core perft/completion tests
-  time out under 4 Stockfish workers.
-- Mock mode (`CHESSDECIDE_MOCK=1`) is what the e2e suite uses; series there finish in seconds with no
-  spend.
+- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`), never `arm_id` alone.
+- `/api/leaderboard/compare` always uses `DEFAULT_LADDER.version` (0 unless `/api/ladder` exists), so
+  in public mode it compares arms on ladder v0. The series rows must carry that `ladder_version`.
+- `buildSeries` is now `assembleSeries` (pure) + batched reads in `leaderboardInput`: the leaderboard
+  is a fixed 4 D1 queries regardless of arm count (`packages/api/test/query-budget.test.ts`).
+- Real publish sizes: 4 series → 100 games, 5088 plies, 5.5 MB in three files (just under the 2 MB
+  chunk limit). `--dry-run` is the quick way to check.
+- Do not run `pnpm verify` while a series or calibration is running (core perft timeouts under
+  Stockfish workers). Mock mode (`CHESSDECIDE_MOCK=1`) is what e2e uses; it spends nothing.
 
 ## 4. Real-run numbers (all on ladder v2, Quick 25, cap $0.50)
 
@@ -54,9 +60,8 @@ Then commit `Add leaderboard` if it was not already part of the T08b/T09 commit,
 | Jev · clean | **532 ± 160** | 8-2-15 | 231.5 | $0.0299 | `01M625J2GZ003DBZWK012ERQQ8` |
 
 Only two of six pairs are separated at 25 games (Jev clean < Jev hinted; Jev clean < D1U hinted).
-Session 3's $0.0299 estimate of "$0.10–0.15 for a Quick series" is ~4× high; real cost is $0.01–0.03.
 
 ## 5. Next steps
 
-1. Green `pnpm e2e` for T09, then T10 publish/read-only deploy, T11 exports, T12 image arm.
+1. T10 credential step with Autumn (§2), then T11 exports, T12 image arm.
 2. Phase 2 (live Cloudflare) is out of this curriculum.

@@ -16,6 +16,7 @@
     "@chessdecide/db": "workspace:*",
     "@chessdecide/providers": "workspace:*",
     "chessground": "9.2.1",
+    "cookie": "2.0.1",
     "drizzle-orm": "0.45.4"
   },
   "devDependencies": {
@@ -30,5 +31,7 @@
     "vitest": "5.0.5",
     "wrangler": "4.154.0"
   },
-  "imports": { "#lib/*": "./src/lib/*" }
+  "imports": {
+    "#lib/*": "./src/lib/*"
+  }
 }
