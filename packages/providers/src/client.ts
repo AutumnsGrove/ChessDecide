@@ -53,10 +53,12 @@ export class DecisionsClient {
   }
 
   /** One HTTP call, no retry. Network errors and timeouts become status 0. */
-  private async once(model: string, bodyJson: string): Promise<HttpResult> {
+  private async once(model: string, bodyJson: string, signal?: AbortSignal): Promise<HttpResult> {
     const t0 = this.now();
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), this.o.timeoutMs ?? 60_000);
+    const onAbort = () => ctl.abort();
+    if (signal?.aborted) ctl.abort(); else signal?.addEventListener('abort', onAbort, { once: true });
     try {
       const r = await this.f(this.o.url ?? DECISIONS_URL, {
         method: 'POST',
@@ -69,22 +71,25 @@ export class DecisionsClient {
       return { status: r.status, json, latencyMs: this.now() - t0, headers };
     } catch (e) {
       return { status: 0, json: { network_error: String(e) }, latencyMs: this.now() - t0, headers: {} };
-    } finally { clearTimeout(timer); }
+    } finally { clearTimeout(timer); signal?.removeEventListener('abort', onAbort); }
   }
 
-  /** Retries 429, 5xx and network errors with backoff 1 s, 2 s, 4 s (+-20 % jitter, Retry-After wins). Other 4xx: no retry. */
-  async call(model: string, bodyJson: string): Promise<CallOutcome> {
+  /**
+   * Retries 429, 5xx and network errors with backoff 1 s, 2 s, 4 s (+-20 % jitter, Retry-After wins). Other 4xx: no retry.
+   * An aborted `signal` cancels the in-flight request and ends the call without further retries.
+   */
+  async call(model: string, bodyJson: string, signal?: AbortSignal): Promise<CallOutcome> {
     const backoff = this.o.backoffMs ?? [1000, 2000, 4000];
     const attempts: HttpResult[] = [];
     const gate = this.gate(model);
     for (let i = 0; ; i++) {
       await gate.acquire();
       let r: HttpResult;
-      try { r = await this.once(model, bodyJson); } finally { gate.release(); }
+      try { r = await this.once(model, bodyJson, signal); } finally { gate.release(); }
       attempts.push(r);
       const retryable = r.status === 0 || r.status === 429 || r.status >= 500;
       if (r.status === 429) gate.throttle();
-      if (!retryable || i >= backoff.length) return { ...r, attempts, retries: i };
+      if (!retryable || signal?.aborted || i >= backoff.length) return { ...r, attempts, retries: i };
       const ra = Number(r.headers['retry-after']);
       const base = Number.isFinite(ra) && ra > 0 ? ra * 1000 : backoff[i]!;
       await this.sleep(base * (0.8 + 0.4 * this.rng()));

@@ -38,7 +38,7 @@ export class ModelPlayer implements Player {
     this.armId = typeof d.arm === 'string' ? d.arm : 'custom';
   }
 
-  async move(ctx: MoveContext): Promise<PlayerMove> {
+  async move(ctx: MoveContext, signal?: AbortSignal): Promise<PlayerMove> {
     const d = this.d, arm = this.arm;
     const imageDataUrl = arm.interface === 'image' ? await d.renderImage!(ctx.fen) : undefined;
     const built = build({ model: d.model, position: { fen: ctx.fen, historySan: ctx.historySan }, legal: ctx.legal, arm, ...(imageDataUrl ? { imageDataUrl } : {}) });
@@ -60,7 +60,7 @@ export class ModelPlayer implements Player {
         resp = cached.response; cacheHit = true;
         attemptId = await d.sink.record({ ...base, cache_hit: true, status: 'ok', latency_ms: 0, cost_usd: 0, response_json: JSON.stringify(resp) });
       } else {
-        const out = await d.client.call(d.model, built.json);
+        const out = await d.client.call(d.model, built.json, signal);
         retries += out.retries;
         let prev: number | undefined;
         for (const a of out.attempts) {                          // every HTTP call is its own row
