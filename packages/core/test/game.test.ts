@@ -85,6 +85,15 @@ describe('stepGame', () => {
     expect(g.status).toBe('paused'); expect(g.status_reason).toContain('upstream 502'); expect(g.plies).toHaveLength(0);
     expect(h.events.some((e) => e.event === 'error')).toBe(true);
   });
+  it('a move that fails because the signal aborted leaves the game untouched for playToEnd to abort', async () => {
+    const ac = new AbortController();
+    const failing: Player = { kind: 'model', async move() { ac.abort(); throw new Error('aborted'); } };
+    const h = harness(failing, scripted('engine', []));
+    const g = await playToEnd(newGame(), h.ports, { signal: ac.signal });
+    expect(g.status).toBe('aborted'); expect(g.plies).toHaveLength(0);
+    expect(h.events.some((e) => e.event === 'error')).toBe(false);
+  });
+
   it('illegal move from a player pauses the game', async () => {
     const h = harness(scripted('model', ['e2e5']), scripted('engine', []));
     const g = await stepGame(newGame(), h.ports);

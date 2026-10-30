@@ -55,6 +55,7 @@ export class SeriesControlPlane implements SeriesPlane {
   private lastBlock = new Map<string, number>();
   private openingCache = new Map<string, Map<number, Opening>>();
   private resumeNeeded = new Set<string>();
+  private locks = new Map<string, Promise<unknown>>();
 
   constructor(private deps: SeriesDeps) {}
 
@@ -126,7 +127,25 @@ export class SeriesControlPlane implements SeriesPlane {
     await this.loops.get(id);
   }
 
-  private async setStatus(id: string, status: SeriesStatus, reason?: string): Promise<void> {
+  /**
+   * Series-row updates are load-modify-write. Two games can end at the same moment (and a status change
+   * can land between them), so each update waits for the previous one or it would overwrite the other's
+   * cost, Elo history or status.
+   */
+  private locked<T>(id: string, fn: () => Promise<T>): Promise<T> {
+    const prev = this.locks.get(id) ?? Promise.resolve();
+    const run = prev.then(fn, fn);
+    const tail = run.catch(() => undefined);
+    this.locks.set(id, tail);
+    void tail.then(() => { if (this.locks.get(id) === tail) this.locks.delete(id); });
+    return run;
+  }
+
+  private setStatus(id: string, status: SeriesStatus, reason?: string): Promise<void> {
+    return this.locked(id, () => this.writeStatus(id, status, reason));
+  }
+
+  private async writeStatus(id: string, status: SeriesStatus, reason?: string): Promise<void> {
     const row = await loadSeriesRow(this.deps.db, id);
     if (!row) return;
     await saveSeries(this.deps.db, { ...row, status, status_reason: reason ?? null });
@@ -252,7 +271,7 @@ export class SeriesControlPlane implements SeriesPlane {
     let retries = 0;
     for (;;) {
       const ports = await buildPorts(this.deps.rt, this.deps.db, game, {
-        mock: this.deps.mock, events: this.deps.gameHub,
+        mock: this.deps.mock, events: this.deps.gameHub, ladder: this.deps.ladder(),
         ...(this.deps.judge ? { judge: this.deps.judge } : {}),
         ...(this.deps.makeOpponentFor ? { makeOpponentFor: this.deps.makeOpponentFor } : {}),
       });
@@ -276,11 +295,15 @@ export class SeriesControlPlane implements SeriesPlane {
     await this.onGameEnd(id, game);
   }
 
-  private async onGameEnd(id: string, game: Game): Promise<void> {
+  private onGameEnd(id: string, game: Game): Promise<void> {
+    return this.locked(id, () => this.recordGameEnd(id, game));
+  }
+
+  private async recordGameEnd(id: string, game: Game): Promise<void> {
     const row = await loadSeriesRow(this.deps.db, id);
     if (!row) return;
     if (game.status === 'stopped_budget') {
-      await this.setStatus(id, 'stopped_budget', 'budget');
+      await this.writeStatus(id, 'stopped_budget', 'budget');
       return;
     }
     if (game.status === 'finished') {
@@ -306,7 +329,10 @@ export class SeriesControlPlane implements SeriesPlane {
       this.deps.hub.emit(id, { event: 'spend', data: { series_usd: cost, cap_usd: row.budget_usd ?? 1 } });
       return;
     }
-    if (game.status === 'aborted' && !this.stopFlags.has(id)) {
+    if (game.status === 'aborted') {
+      // An aborted game still spent whatever its model calls cost; keep the series total and cap honest.
+      if (game.cost_usd > 0) await saveSeries(this.deps.db, { ...row, cost_usd: (row.cost_usd ?? 0) + game.cost_usd });
+      if (this.stopFlags.has(id)) return;
       if (game.status_reason === 'transport') {
         this.deps.hub.emit(id, { event: 'error', data: { code: 'transport', message: 'game aborted after 3 retries', game_id: game.id } });
       }
@@ -316,7 +342,11 @@ export class SeriesControlPlane implements SeriesPlane {
     }
   }
 
-  private async finish(id: string, reason: 'target_reached' | 'precision_reached' | 'max_games' | 'too_many_aborts'): Promise<void> {
+  private finish(id: string, reason: 'target_reached' | 'precision_reached' | 'max_games' | 'too_many_aborts'): Promise<void> {
+    return this.locked(id, () => this.writeFinish(id, reason));
+  }
+
+  private async writeFinish(id: string, reason: 'target_reached' | 'precision_reached' | 'max_games' | 'too_many_aborts'): Promise<void> {
     const row = await loadSeriesRow(this.deps.db, id);
     if (!row) return;
     const recs = await seriesGames(this.deps.db, id);

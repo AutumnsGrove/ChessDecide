@@ -1,7 +1,7 @@
 import { ulid } from 'ulid';
 import {
   ARM_PRESETS, DEFAULT_LADDER, START_FEN, legalMoves, lastFen, mulberry32,
-  type BudgetPort, type Color, type Game, type GameConfig, type JudgePort, type LadderLevel, type Player, type Ports, type PlayerDesc,
+  type BudgetPort, type Color, type Game, type GameConfig, type JudgePort, type LadderFile, type LadderLevel, type Player, type Ports, type PlayerDesc,
 } from '@chessdecide/core';
 import { EngineJudge, NativeUciEngine, makeOpponent, type Opponent } from '@chessdecide/engine';
 import {
@@ -40,6 +40,7 @@ export function newGame(config: GameConfig, startFen = START_FEN): Game {
 export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
   mock: boolean; events?: Ports['events'];
   judge?: JudgePort;                                            // tests / series fake judge
+  ladder?: LadderFile;                                          // the ruler in force; default DEFAULT_LADDER
   makeOpponentFor?: (level: LadderLevel, rng: () => number) => Promise<Opponent>;  // tests
 }): Promise<Ports & { closePlayers(): Promise<void> }> {
   const players = new Map<Color, Player>();
@@ -69,10 +70,13 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
         ...(image ? { renderImage: async (fen: string) => boardDataUrl(fen) } : {}),
       });
     }
-    const level = DEFAULT_LADDER.levels.find((l) => l.id === (desc.type === 'ladder' ? desc.level : 'uci1500'))!;
+    const ladder = opts.ladder ?? DEFAULT_LADDER;
+    const levelId = desc.type === 'ladder' ? desc.level : 'uci1500';
+    const level = ladder.levels.find((l) => l.id === levelId);
+    if (!level) throw new ApiError('invalid_config', `unknown ladder level ${levelId}`, 400);
     const opp = opts.makeOpponentFor
       ? await opts.makeOpponentFor(level, rng)
-      : await makeOpponent(level, () => NativeUciEngine.start({ path: findStockfish() }), rng, 50);
+      : await makeOpponent(level, () => NativeUciEngine.start({ path: findStockfish() }), rng, ladder.movetime_ms);
     opponents.push(opp);
     return engineAsPlayer(opp);
   };

@@ -1,5 +1,5 @@
 import {
-  applyMove, mulberry32, type Decision, type MoveContext, type Player, type PlayerMove,
+  mulberry32, type Decision, type MoveContext, type Player, type PlayerMove,
 } from '@chessdecide/core';
 
 const VALUE: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -45,7 +45,6 @@ export class MockPlayer implements Player {
     const cost = (tokens / 1e6) * (o.priceInPerM ?? 0.042);
     const top = [...ctx.legal].sort((a, b) => probs[b.uci]! - probs[a.uci]!).slice(0, 8).map((m) => ({ uci: m.uci, san: m.san, p: probs[m.uci]! }));
     if (!top.some((t) => t.uci === pick)) { const m = ctx.legal.find((x) => x.uci === pick)!; top.push({ uci: m.uci, san: m.san, p: probs[pick]! }); }
-    void applyMove;
     const decision: Decision = {
       model_slug: 'mock/heuristic', arm: 'clean', pick_uci: pick, p_pick: probs[pick]!, confidence: probs[pick]!, n_options: ctx.legal.length,
       top_options: top, prob_sum: 1, latency_ms: o.latencyMs ?? 0, usage: { input_tokens: tokens, output_tokens: 0, cost_usd: cost },

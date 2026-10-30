@@ -164,7 +164,7 @@ async function bench() {
     return;
   }
   if (sub !== 'run') {
-    console.error('usage: chessdecide bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] [--commit-each-cell] | bench status [--run ID] [--json] | bench report [--run ID] | bench models');
+    console.error('usage: chessdecide bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] [--commit-each-cell] [--for MINUTES] [--heartbeat SECONDS] | bench status [--run ID] [--json] | bench report [--run ID] | bench models');
     process.exit(2);
   }
   const { values: v } = parseArgs({ args: rest.slice(1), options: {
@@ -177,13 +177,20 @@ async function bench() {
     'stop-on-error': { type: 'boolean', default: false },
     'allow-over-cap': { type: 'boolean', default: false },
     'commit-each-cell': { type: 'boolean', default: false },
+    for: { type: 'string' },
+    heartbeat: { type: 'string' },
   } });
+  const minutes = v.for === undefined ? undefined : Number(v.for);
+  if (minutes !== undefined && !(minutes > 0)) { console.error('bench run: --for <minutes> must be a positive number'); process.exit(2); }
+  const beatSeconds = v.heartbeat === undefined ? (minutes ? 30 : 0) : Number(v.heartbeat);
+  if (!(beatSeconds >= 0)) { console.error('bench run: --heartbeat <seconds> must be 0 or more'); process.exit(2); }
   if (!v.plan) { console.error('bench run: --plan <file> is required'); process.exit(2); }
   try {
     const res = await runBench({
       planPath: v.plan, newRun: !!v.new, ...(v.run ? { runId: v.run } : {}),
       dryRun: !!v['dry-run'], ...(v.mock ? { mock: true } : {}), ...(v['no-sql'] ? { sql: false } : {}),
       stopOnError: !!v['stop-on-error'], allowOverCap: !!v['allow-over-cap'], commitEachCell: !!v['commit-each-cell'],
+      ...(minutes ? { sliceMinutes: minutes } : {}), ...(beatSeconds ? { heartbeatSeconds: beatSeconds } : {}),
     });
     process.exitCode = res.exitCode;
   } catch (e) {

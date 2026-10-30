@@ -56,6 +56,7 @@ export async function stepGame(game: Game, ports: Ports, signal?: AbortSignal): 
       uci = pm.uci; decision = pm.decision ?? null; engineInfo = pm.engine_info ?? null;
       probs = pm.probs; spent = pm.cost_usd ?? 0;
     } catch (e) {
+      if (signal?.aborted) return game;                 // stopped mid-move: playToEnd marks the game aborted
       const message = e instanceof Error ? e.message : String(e);
       ports.events.emit(game.id, { event: 'error', data: { code: 'move_failed', message, ply: plyNo } });
       return setStatus(game, ports, 'paused', `error: ${message}`);

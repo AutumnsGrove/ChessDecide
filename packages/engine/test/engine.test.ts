@@ -1,4 +1,6 @@
-import { existsSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { mulberry32, legalMoves, START_FEN, DEFAULT_LADDER } from '@chessdecide/core';
 import { EngineJudge, NativeUciEngine, makeOpponent, parseInfo, lineCp } from '../src/index.ts';
@@ -71,4 +73,31 @@ sf('native engine', () => {
     expect(random).toBeGreaterThan(8); expect(random).toBeLessThan(32);   // ~50 % of 40
     await opp.close();
   }, 60_000);
+});
+
+describe('search timeout', () => {
+  it('kills a hung engine and reboots it instead of reading its late bestmove', async () => {
+    // First process never answers `go`; every later one does. A reused first process would answer the
+    // second search with the first search's stale line.
+    const dir = mkdtempSync(join(tmpdir(), 'fake-uci-'));
+    const marker = join(dir, 'booted');
+    const bin = join(dir, 'fake-uci.mjs');
+    writeFileSync(bin, `#!/usr/bin/env node
+import { existsSync, writeFileSync } from 'node:fs';
+import { createInterface } from 'node:readline';
+const hang = !existsSync(${JSON.stringify(marker)});
+writeFileSync(${JSON.stringify(marker)}, '1');
+createInterface({ input: process.stdin }).on('line', (l) => {
+  if (l === 'uci') console.log('id name fake\\nuciok');
+  else if (l === 'isready') console.log('readyok');
+  else if (l.startsWith('go') && !hang) console.log('info depth 1 score cp 0 pv e2e4\\nbestmove e2e4');
+  else if (l === 'quit') process.exit(0);
+});
+`);
+    chmodSync(bin, 0o755);
+    const e = await NativeUciEngine.start({ path: bin, searchTimeoutMs: 400 });
+    const r = await e.search({ fen: START_FEN, depth: 1 });
+    expect(r.bestUci).toBe('e2e4');
+    await e.close();
+  });
 });

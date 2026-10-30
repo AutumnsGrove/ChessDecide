@@ -23,6 +23,7 @@ export interface BenchPlan {
   run_cap_usd: number;
   repeat: number;
   concurrency: 1 | 2;
+  parallel_models: number;                    // cells running at once, never two of the same model (1..4)
   judge_depth: number;
   max_hours: number;
   cell_timeout_min: number;
@@ -32,11 +33,11 @@ export interface BenchPlan {
 
 export interface BenchCell { index: number; model: string; arm: ArmName; repeat: number; seriesName: string }
 export type CellState = 'pending' | 'running' | 'finished' | 'budget' | 'failed' | 'timeout';
-export type BenchStopReason = 'completed' | 'stopped_budget' | 'stopped_time' | 'stopped_error' | 'interrupted';
+export type BenchStopReason = 'completed' | 'stopped_budget' | 'stopped_time' | 'stopped_error' | 'interrupted' | 'sliced';
 
 const PLAN_KEYS = new Set([
   'name', 'models', 'arms', 'size', 'ladder', 'ladder_version', 'series_cap_usd', 'run_cap_usd',
-  'repeat', 'concurrency', 'judge_depth', 'max_hours', 'cell_timeout_min', 'artifacts', 'seed',
+  'repeat', 'concurrency', 'parallel_models', 'judge_depth', 'max_hours', 'cell_timeout_min', 'artifacts', 'seed',
 ]);
 const SIZE_PRESETS = ['quick', 'standard', 'custom', 'completion'] as const;
 
@@ -118,6 +119,9 @@ export function parseBenchPlan(json: unknown): BenchPlan {
     throw new BenchPlanError('repeat', 'must be an integer in 1..5');
   const concurrency = json.concurrency === undefined ? 2 : json.concurrency;
   if (concurrency !== 1 && concurrency !== 2) throw new BenchPlanError('concurrency', 'must be 1 or 2');
+  const parallelModels = json.parallel_models === undefined ? 1 : json.parallel_models;
+  if (!Number.isInteger(parallelModels) || (parallelModels as number) < 1 || (parallelModels as number) > 4)
+    throw new BenchPlanError('parallel_models', 'must be an integer in 1..4');
   const judgeDepth = json.judge_depth === undefined ? 14 : json.judge_depth;
   if (!Number.isInteger(judgeDepth) || (judgeDepth as number) < 6 || (judgeDepth as number) > 20)
     throw new BenchPlanError('judge_depth', 'must be an integer in 6..20');
@@ -140,7 +144,7 @@ export function parseBenchPlan(json: unknown): BenchPlan {
     name, models, arms, size, ladder,
     ladder_version: json.ladder_version as number,
     series_cap_usd: seriesCap, run_cap_usd: runCap,
-    repeat: repeat as number, concurrency: concurrency as 1 | 2, judge_depth: judgeDepth as number,
+    repeat: repeat as number, concurrency: concurrency as 1 | 2, parallel_models: parallelModels as number, judge_depth: judgeDepth as number,
     max_hours: maxHours, cell_timeout_min: cellTimeout,
     artifacts: { sql },
     ...(json.seed !== undefined ? { seed: json.seed as number } : {}),

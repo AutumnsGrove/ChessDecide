@@ -43,6 +43,22 @@ describe('DecisionsClient', () => {
     const b = client([() => resp(400, { e: 1 })]);
     expect((await b.c.call('m', '{}')).retries).toBe(0); expect(b.calls()).toBe(1);
   });
+  it('an aborted signal cancels the in-flight request and is not retried', async () => {
+    const ac = new AbortController();
+    let calls = 0;
+    const c = new DecisionsClient({
+      apiKey: 'k', maxRps: 1000, rng: () => 0.5, sleep: async () => {},
+      fetch: ((_url: string, init: RequestInit) => {
+        calls++;
+        return new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new Error('aborted'))));
+      }) as unknown as typeof fetch,
+    });
+    const pending = c.call('m', '{}', ac.signal);
+    await new Promise((r) => setTimeout(r, 5));
+    ac.abort();
+    const r = await pending;
+    expect(r.status).toBe(0); expect(r.retries).toBe(0); expect(calls).toBe(1);
+  });
   it('honours Retry-After', async () => {
     const { c, sleeps } = client([() => resp(429, {}, { 'retry-after': '7' }), () => resp(200, okBody('e2e4', keys))]);
     await c.call('m', '{}');

@@ -26,6 +26,7 @@ describe('parseBenchPlan', () => {
     const p = plan();
     expect(p.repeat).toBe(1);
     expect(p.concurrency).toBe(2);
+    expect(p.parallel_models).toBe(1);
     expect(p.judge_depth).toBe(14);
     expect(p.max_hours).toBe(8);
     expect(p.cell_timeout_min).toBe(90);
@@ -50,6 +51,9 @@ describe('parseBenchPlan', () => {
     expect(field({ run_cap_usd: 0.1 })).toBe('run_cap_usd');
     expect(field({ repeat: 6 })).toBe('repeat');
     expect(field({ concurrency: 3 })).toBe('concurrency');
+    expect(field({ parallel_models: 0 })).toBe('parallel_models');
+    expect(field({ parallel_models: 5 })).toBe('parallel_models');
+    expect(field({ parallel_models: 1.5 })).toBe('parallel_models');
     expect(field({ judge_depth: 21 })).toBe('judge_depth');
     expect(field({ max_hours: 0.1 })).toBe('max_hours');
     expect(field({ cell_timeout_min: 1 })).toBe('cell_timeout_min');

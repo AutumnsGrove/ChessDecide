@@ -155,7 +155,31 @@ caps above it should not be needed.
 
 ## 5. Launch it
 
-Detached, survives a dropped session:
+### Attached (recommended for an agent driving the sweep)
+
+A detached process is invisible to a container that only counts live tool calls, so it can be evicted
+minutes after you start it. Run the sweep **attached**, in slices, as ordinary tool calls:
+
+```bash
+pnpm cli bench run --plan bench/plans/all-models-v1.json --commit-each-cell --for 8
+echo "exit=$?"
+```
+
+- `--for MINUTES` works for at most that long, then pauses running cells cleanly and exits.
+  Pick a slice comfortably under the tool-call timeout (the process can overrun by the length of one
+  in-flight model call; with a 10-minute limit use `--for 7` or `8`).
+- **Exit 75 means "more to do": run the exact same command again.** It resumes where it stopped and never
+  re-spends. Loop until the exit code is `0` (done) or `3` (stopped on budget, time or error: read the log).
+- `--heartbeat SECONDS` (default 30 with `--for`) prints a one-line progress summary so the call never
+  goes silent, e.g. `[19:48:34] 1/2 cells · 4 games · $0.0117 · m/one#clean 1/3`.
+- Add `parallel_models` (1–4) to the plan to run different models at once; two cells of the same model
+  never overlap, and running cells keep their unspent cap reserved so the run cap cannot be overshot.
+- Without `--for` the command is still attached: it blocks until the sweep ends and `Ctrl-C` pauses it
+  cleanly (resumable). Use that on your own terminal.
+
+### Detached
+
+Detached, survives a dropped session (only where the host keeps idle processes alive):
 
 ```bash
 nohup pnpm cli bench run --plan bench/plans/all-models-v1.json \

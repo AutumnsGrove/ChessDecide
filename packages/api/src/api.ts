@@ -101,6 +101,7 @@ export function createApi(deps: ApiDeps): Hono {
   app.post('/estimate', async (c) => {
     if (!deps.catalog) return notAvailable(c);
     const config = (await c.req.json().catch(() => { throw new ApiError('bad_request', 'invalid JSON body'); })) as GameConfig | SeriesConfig;
+    if (!config || typeof config !== 'object' || Array.isArray(config)) throw new ApiError('bad_request', 'body must be a game or series config');
     const models = await catalogList();
     try {
       return c.json('size' in config ? estimateSeries(config as SeriesConfig, models) : estimateGame(config as GameConfig, models));
@@ -269,7 +270,8 @@ export function createApi(deps: ApiDeps): Hono {
   });
 
   app.get('/games', async (c) => {
-    const limit = Math.min(200, Math.max(1, Number(c.req.query('limit') ?? 50)));
+    const asked = Number(c.req.query('limit') ?? 50);
+    const limit = Number.isFinite(asked) ? Math.min(200, Math.max(1, Math.floor(asked))) : 50;
     const rows = await listGames(deps.db, limit);
     return c.json(rows.map((g) => ({
       id: g.id, status: g.status, result: g.result, termination: g.termination, white: JSON.parse(g.white_player), black: JSON.parse(g.black_player),

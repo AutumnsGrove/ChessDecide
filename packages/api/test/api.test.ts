@@ -34,6 +34,11 @@ describe('api (read-only)', () => {
     const r = await app().request('/api/health');
     expect(await r.json()).toMatchObject({ ok: true, mode: 'public', control: false });
   });
+  it('treats a non-numeric limit as the default instead of passing NaN to the query', async () => {
+    const r = await app().request('/api/games?limit=abc');
+    expect(r.status).toBe(200);
+    expect(((await r.json()) as unknown[]).length).toBeGreaterThan(0);
+  });
   it('lists and fetches games; 404 uses the error envelope', async () => {
     const list = await (await app().request('/api/games')).json() as any[];
     expect(list[0]).toMatchObject({ id: 'g1', result: '1-0' });
@@ -127,6 +132,13 @@ describe('api (T01 local capabilities)', () => {
     expect(await r.json()).toMatchObject({ error: { code: 'upstream_error', retryable: true } });
   });
 
+  it('answers 400, not 500, to an estimate body that is not an object', async () => {
+    const { app } = localApi();
+    for (const body of ['null', '5', '[]']) {
+      const r = await app.request('/api/estimate', { method: 'POST', body });
+      expect(r.status, body).toBe(400);
+    }
+  });
   it('estimates a game and rejects an unknown model', async () => {
     const { app } = localApi();
     const ok = await post(app, '/api/estimate', gameConfig());

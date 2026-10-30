@@ -8,6 +8,7 @@ pnpm cli bench models                                  # eligible models + price
 pnpm cli bench run --plan bench/plans/core-v1.json --dry-run
 pnpm cli bench run --plan bench/plans/core-v1.json     # tmux, hours, real spend
 pnpm cli bench status                                  # progress of the newest run
+pnpm cli bench run --plan bench/plans/core-v1.json --for 8   # attached slice; exit 75 = run it again
 ```
 
 ## Plans
@@ -20,6 +21,9 @@ pnpm cli bench status                                  # progress of the newest 
 
 Running a sweep on a remote box (no wrangler, commit the bundle, publish later):
 [`docs/BENCH-RUNBOOK.md`](../docs/BENCH-RUNBOOK.md).
+
+`parallel_models` (1–4, default 1) runs different models at the same time; the same model never overlaps with itself.
+See the runbook for the attached `--for` mode that agents should use.
 
 Add models by editing `models` (slugs from `pnpm cli bench models`). Keep `ladder_version` equal to the
 calibrated file in `data/ladder/` — the report records it, and a run on the wrong ruler is not

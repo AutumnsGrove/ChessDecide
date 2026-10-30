@@ -31,11 +31,12 @@ describe('board renderer', () => {
     expect(boardDataUrl(START).startsWith('data:image/png;base64,iVBOR')).toBe(true);
   });
 
-  it('pins the start-position PNG hash', () => {
-    // Regenerate after an intentional look change:
-    //   node --experimental-strip-types -e "import('./packages/render/src/index.ts').then(m=>console.log(require('crypto').createHash('sha256').update(m.boardPng('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')).digest('hex')))"
-    const sha = createHash('sha256').update(boardPng(START)).digest('hex');
-    expect(sha).toBe('b4c5295453f62850e9dcb581ec65ad9eba1fb97c8fadd59c4b157f489125c0c0');
+  it('pins the start-position SVG hash', () => {
+    // The SVG is byte-stable everywhere. The PNG is not: resvg rasterises the file/rank labels with
+    // whatever sans-serif the machine has, so a PNG hash differs between laptop and CI.
+    // Regenerate after an intentional look change by printing sha256(boardSvg(START)).
+    const sha = createHash('sha256').update(boardSvg(START)).digest('hex');
+    expect(sha).toBe('5f403bdfd10a75cff0a447da8215936665b110296063ff377b37e96355df5b95');
   });
 
   it('draws every piece, including a promoted queen', () => {
