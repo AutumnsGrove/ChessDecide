@@ -15,7 +15,11 @@ pnpm cli bench status                                  # progress of the newest 
 | File | What | Cost |
 | --- | --- | --- |
 | `plans/core-v1.json` | 2 models × 2 arms, standard 50, adaptive ladder v2, caps $0.50 / $2.00 | ≈ $0.15–0.25, ≈ 2 h 20 min |
+| `plans/all-models-v1.json` | every canonical Decisions model × `clean` × 50 games (25 cells, 1,250 games) | ≈ $1–4, ≈ 12–17 h |
 | `plans/smoke.json` | 1 cell, 3 games, fixed `eps50`, for `--mock` | $0 |
+
+Running a sweep on a remote box (no wrangler, commit the bundle, publish later):
+[`docs/BENCH-RUNBOOK.md`](../docs/BENCH-RUNBOOK.md).
 
 Add models by editing `models` (slugs from `pnpm cli bench models`). Keep `ladder_version` equal to the
 calibrated file in `data/ladder/` — the report records it, and a run on the wrong ruler is not

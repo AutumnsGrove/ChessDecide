@@ -11,7 +11,8 @@ it ends.
 | Task | State |
 | --- | --- |
 | T00–T12 | done; T10–T12 deployed |
-| **T13 headless bench** | **code done + committed; real `core-v1` run in progress** |
+| **T13 headless bench** | **done: code committed, `core-v1` run in progress** |
+| **Next: roster sweep** | **runbook `docs/BENCH-RUNBOOK.md` + plan `bench/plans/all-models-v1.json`** |
 | Live site | https://chessdecide-web.m7jv4v7npb.workers.dev (4 arms, 100 games, ladder v2) |
 
 Current numbers on the public site (Quick 25 series): D1U hinted 895 ± 162, Jev hinted 775 ± 159,
@@ -39,8 +40,10 @@ D1U clean 733 ± 158, Jev clean 532 ± 160.
    (T09 picks the latest finished), so the 50-game intervals replace the 25-game ones.
 2. Commit (the watcher does it) and push.
 3. Publish the bundle's SQL to the production D1, then open the site and confirm the new intervals.
-4. Optional next experiment: add models to `bench/plans/core-v1.json` (or a new plan, e.g. `core-v2`)
-   and `pnpm cli bench run --plan …`; image is its own arm (`arms: ["image"]`).
+4. For the full roster sweep, hand a remote agent **`docs/BENCH-RUNBOOK.md`**. It installs Stockfish,
+   runs `bench/plans/all-models-v1.json` (25 models × clean × 50 games, 1,250 games), keeps a monitor
+   log, and commits the bundle. That box has no wrangler: publish its `sql/part-*.sql` from this
+   machine afterwards (`docs/DEPLOY.md` §7).
 
 ## 4. Catches worth remembering
 
