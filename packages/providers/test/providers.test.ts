@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { START_FEN, legalMoves, stepGame, playToEnd, type Game, type Ports } from '@chessdecide/core';
-import { DecisionsClient, ModelPlayer, MockPlayer, estimateCallUsd, gameBudget, type AttemptRow, type AttemptSink } from '../src/index.ts';
+import {
+  DecisionsClient, ModelPlayer, MockPlayer, estimateCallUsd, estimateGame, gameBudget,
+  type AttemptRow, type AttemptSink, type ModelInfo,
+} from '../src/index.ts';
 
 const okBody = (choice: string, keys: string[], cost = 0.00004) => ({
   id: 'x', model: 'typesafe/jev-1.14-2026', provider: 'TypeSafe',
@@ -82,6 +85,19 @@ describe('ModelPlayer', () => {
     await p.move(ctx()); const mv = await p.move(ctx());
     expect(calls()).toBe(1); expect(mv.cost_usd).toBe(0); expect(mv.decision!.cache_hit).toBe(true); expect(sink.rows[1]!.cache_hit).toBe(true);
   });
+  it('image arm renders the board and sends an image message', async () => {
+    const { c } = client([() => resp(200, okBody('e2e4', keys))]);
+    const sink = memSink(); const rendered: string[] = [];
+    const mv = await new ModelPlayer({
+      client: c, sink, model: 'm', arm: 'image', seed: 1,
+      renderImage: async (fen) => { rendered.push(fen); return 'data:image/png;base64,AAAA'; },
+    }).move(ctx());
+    expect(mv.uci).toBe('e2e4');
+    expect(rendered).toEqual([START_FEN]);
+    expect(sink.rows[0]!.interface).toBe('image');
+    expect(sink.rows[0]!.request_json).toContain('image_url');
+    expect(sink.rows[0]!.request_json).toContain('data:image/png;base64,AAAA');
+  });
   it('transport failure after retries throws (the game pauses)', async () => {
     const { c } = client([() => resp(502, {})]);
     await expect(new ModelPlayer({ client: c, sink: memSink(), model: 'm', arm: 'clean', seed: 1 }).move(ctx())).rejects.toThrow(/HTTP 502/);
@@ -95,6 +111,16 @@ describe('budget and mock', () => {
     const b = gameBudget({ capUsd: est, pricePerMInput: 0.042 });
     expect(b.check({ ...game(), cost_usd: 0 }).ok).toBe(true);        // spent + est == cap allowed
     expect(b.check({ ...game(), cost_usd: 1e-9 }).ok).toBe(false);    // > cap not allowed
+  });
+  it('image arm adds 600 input tokens per estimated call', () => {
+    const models: ModelInfo[] = [{
+      slug: 'm', canonical_slug: null, name: 'm', context_length: 100_000,
+      price_in_per_m: 1, input_modalities: ['text', 'image'], roster: true, disabled_reason: null,
+    }];
+    const clean = estimateGame(game().config, models);
+    const image = estimateGame({ ...game().config, white: { type: 'model', model: 'm', arm: 'image' } }, models);
+    expect(image.est_input_tokens - clean.est_input_tokens).toBe(600 * clean.calls);
+    expect(image.breakdown[0]!.arm).toBe('image');
   });
   it('mock player is deterministic and plays a whole game with the core stepper', async () => {
     const mk = () => new MockPlayer({ seed: 7 });

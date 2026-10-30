@@ -49,6 +49,7 @@ export class ModelPlayer implements Player {
       model_slug: d.model, arm_id: this.armId, interface: arm.interface, key_format: arm.key_format, descriptor: arm.descriptor,
       state_variant: arm.state_variant, template: arm.template, prompt_version: PROMPT_VERSION, repeat, seed: d.seed,
       order_json: JSON.stringify(built.order), request_hash: hash, request_bytes: built.json.length,
+      request_json: built.json,                      // local-only raw body; the sink gzips it
     };
 
     let spent = 0, retries = 0, lastErr: ParseError | undefined;

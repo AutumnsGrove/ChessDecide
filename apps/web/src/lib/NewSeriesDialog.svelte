@@ -17,7 +17,7 @@
   let loadError = $state('');
 
   let model = $state('typesafe/jev-1.14');
-  let arm = $state<'clean' | 'hinted'>('clean');
+  let arm = $state<'clean' | 'hinted' | 'image'>('clean');
   let size = $state<'quick' | 'standard' | 'completion'>('quick');
   let ladderMode = $state<'adaptive' | 'fixed'>('adaptive');
   let level = $state('uci1320');
@@ -144,8 +144,9 @@
       <div class="radios">
         <label><input type="radio" name="arm" value="clean" bind:group={arm} /> Clean</label>
         <label><input type="radio" name="arm" value="hinted" bind:group={arm} /> Hinted</label>
-        <label class="off"><input type="radio" name="arm" value="image" disabled /> Image <small>coming soon</small></label>
+        <label><input type="radio" name="arm" value="image" bind:group={arm} /> Image</label>
       </div>
+      {#if arm === 'image'}<p class="caveat">Sends a picture of the board instead of text positions. Jev switches to a slower mode for images.</p>{/if}
     </fieldset>
 
     <fieldset class="field">
@@ -215,8 +216,7 @@
   }
   .radios { display: flex; flex-wrap: wrap; gap: 6px 16px; }
   .radios label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; }
-  .radios label.off { color: var(--mute); }
-  .radios small { color: var(--mute); font-size: 11px; }
+  .caveat { margin: 6px 0 0; font-size: 12px; color: var(--mute); }
   .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
   .check small { color: var(--mute); }
   .estimate { font: 13px var(--mono); color: var(--mute); background: var(--panel-2); border-radius: var(--radius); padding: 8px 10px; min-height: 34px; }

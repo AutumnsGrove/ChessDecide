@@ -5,9 +5,10 @@ import {
 } from '@chessdecide/core';
 import { EngineJudge, NativeUciEngine, makeOpponent, type Opponent } from '@chessdecide/engine';
 import {
-  DecisionsClient, MockPlayer, ModelPlayer, createCatalog, estimateCallUsd,
+  DecisionsClient, IMAGE_EXTRA_TOKENS, MockPlayer, ModelPlayer, createCatalog, estimateCallUsd,
   type Catalog,
 } from '@chessdecide/providers';
+import { boardDataUrl } from '@chessdecide/render';
 import { d1AttemptSink, d1GameStore, meanInputTokens, type Db } from '@chessdecide/db';
 import { ApiError } from '@chessdecide/api';
 import { findStockfish, judgeWorkers, openRouterKey } from './config.ts';
@@ -45,13 +46,13 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
   const opponents: Opponent[] = [];
   const rng = mulberry32(game.config.seed);
   /** Per model side: what one call may cost. The single budget port sums both sides. */
-  const modelSides: Array<{ price: number; variant: 'slim' | 'full'; mean?: number }> = [];
+  const modelSides: Array<{ price: number; variant: 'slim' | 'full'; mean?: number; extraTokens: number }> = [];
 
   const mk = async (side: Color, desc: PlayerDesc): Promise<Player> => {
     if (desc.type === 'model') {
       const arm = typeof desc.arm === 'string' ? ARM_PRESETS[desc.arm] : desc.arm;
       const armId = typeof desc.arm === 'string' ? desc.arm : 'custom';
-      if (arm.interface === 'image') throw new ApiError('invalid_config', 'image arm arrives in T12', 400);
+      const image = arm.interface === 'image';
       const seed = game.config.seed + (side === 'white' ? 1 : 2);
       if (opts.mock) return new MockPlayer({ seed });
       const info = (await catalog.list()).find((m) => m.slug === desc.model);
@@ -59,8 +60,14 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
       const key = openRouterKey();
       if (!key) throw new ApiError('no_api_key', 'OPENROUTER_API_KEY is not set', 424);
       const mean = await meanInputTokens(db, desc.model, armId);
-      modelSides.push({ price: info.price_in_per_m, variant: arm.state_variant, ...(mean !== undefined ? { mean } : {}) });
-      return new ModelPlayer({ client: clientFor(key), sink: d1AttemptSink(db), model: desc.model, arm: desc.arm, seed });
+      modelSides.push({
+        price: info.price_in_per_m, variant: arm.state_variant, extraTokens: image ? IMAGE_EXTRA_TOKENS : 0,
+        ...(mean !== undefined ? { mean } : {}),
+      });
+      return new ModelPlayer({
+        client: clientFor(key), sink: d1AttemptSink(db), model: desc.model, arm: desc.arm, seed,
+        ...(image ? { renderImage: async (fen: string) => boardDataUrl(fen) } : {}),
+      });
     }
     const level = DEFAULT_LADDER.levels.find((l) => l.id === (desc.type === 'ladder' ? desc.level : 'uci1500'))!;
     const opp = opts.makeOpponentFor
@@ -75,7 +82,7 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
   const budget: BudgetPort = modelSides.length === 0 ? { check: () => ({ ok: true }) } : {
     check(g: Game) {
       const n = legalMoves(lastFen(g)).length;
-      const est = modelSides.reduce((sum, m) => sum + estimateCallUsd(n, m.price, m.variant, m.mean), 0);
+      const est = modelSides.reduce((sum, m) => sum + estimateCallUsd(n, m.price, m.variant, m.mean, m.extraTokens), 0);
       const ok = g.cost_usd + est <= g.config.budget_usd + 1e-12;
       return ok ? { ok } : { ok, reason: `budget: spent ${g.cost_usd.toFixed(6)} + est ${est.toFixed(6)} > cap ${g.config.budget_usd}` };
     },

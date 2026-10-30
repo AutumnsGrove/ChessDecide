@@ -4,15 +4,15 @@ Autumn uses **she/her** pronouns. She often works by voice: keep replies short a
 
 ## 1. State
 
-**T11 is done** (and deployed to the live site). `pnpm verify`, `pnpm build` and `pnpm e2e` all pass,
-the public read-only site is at **https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide`
-`394e0101-b338-4bee-9375-bc9f96b5480c`, ENAM) with the four real series published twice at identical
-counts. Next task is **T12 image arm** — the last one in the curriculum.
+**The curriculum is finished: T00–T12 are all done.** T11 and T12 are deployed to the live site at
+**https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide` `394e0101-b338-4bee-9375-bc9f96b5480c`,
+ENAM). Next work is not a build task: run the model roster as series and watch the leaderboard grow
+(see §5).
 
 | Task | State |
 | --- | --- |
-| T00–T11 | done (T10/T11 deployed 2026-10-30) |
-| **T12 image arm** | **not started — next, and the last task** |
+| T00–T12 | **done** (phase-1 curriculum complete, 2026-10-30) |
+| Next | run real series for the remaining models; T12 image has one game so far |
 
 ## 2. Where the deploy lives
 
@@ -25,13 +25,14 @@ counts. Next task is **T12 image arm** — the last one in the curriculum.
 - Refresh after new series: `pnpm cli publish --remote --config wrangler.production.jsonc` (build and
   deploy only if code changed). `docs/DEPLOY.md` is the full runbook.
 
-## 3. First thing next session: T12 image arm
+## 3. First thing next session: run the roster
 
-Read `docs/build/tasks/T12-image-arm.md`. Notes carried over:
+No build task left. The point now is data:
 
-- any new read route goes through `packages/api/test/query-budget.test.ts` (≤ 10 queries);
-- exports are live: `/api/games/:id/pgn`, `/api/series/:id/export.json|csv`, `/api/leaderboard/export.csv`;
-- the image arm needs real model calls, so it will cost money — T12 says what budget; ask before spending.
+- one Quick series per model × arm you care about (25 games, $0.01–0.03 each, 15–25 min);
+- the daemon handles them locally; the public site only updates after
+  `pnpm cli publish --remote --config wrangler.production.jsonc` (and a deploy only if code changed);
+- image is a separate arm on purpose (T12): one game so far, ~22 % more per game, no visible gain.
 
 ## 4. Catches worth remembering
 
@@ -70,6 +71,7 @@ Only two of six pairs are separated at 25 games (Jev clean < Jev hinted; Jev cle
 
 ## 5. Next steps
 
-1. T12 image arm (ask about the spend first), then redeploy with `pnpm build` + `wrangler deploy
-   --config wrangler.production.jsonc` and republish if new series exist.
-2. Phase 2 (live Cloudflare) is out of this curriculum.
+1. Run series for the rest of the roster (`docs/build/reports/T08b-arms-and-models.md` has the four arms
+   done), republish, and let the leaderboard separate the arms. A 25-game series is 15–25 min and
+   $0.01–0.03; 10 in one go is ~3 h and under $0.25.
+2. Phase 2 (live Cloudflare: Durable Objects + hosted Stockfish) is out of this curriculum.

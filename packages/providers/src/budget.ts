@@ -1,8 +1,12 @@
 import { legalMoves, lastFen, type BudgetPort, type Game } from '@chessdecide/core';
 
 /** docs/PROMPTS.md §10. Conservative estimate of one call's input cost in USD. */
-export function estimateCallUsd(nOptions: number, pricePerMInput: number, stateVariant: 'slim' | 'full' = 'slim', rollingMeanTokens?: number): number {
-  const tokens = rollingMeanTokens ?? (stateVariant === 'slim' ? 400 + 45 * nOptions : 400 + 75 * nOptions);
+export function estimateCallUsd(
+  nOptions: number, pricePerMInput: number, stateVariant: 'slim' | 'full' = 'slim',
+  rollingMeanTokens?: number, extraInputTokens = 0,
+): number {
+  // A measured mean already reflects the arm (including image tokens); only the formula adds the extra.
+  const tokens = rollingMeanTokens ?? (stateVariant === 'slim' ? 400 + 45 * nOptions : 400 + 75 * nOptions) + extraInputTokens;
   return (tokens / 1e6) * pricePerMInput;
 }
 

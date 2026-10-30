@@ -17,7 +17,7 @@ export interface GameEstimate {
 const TYPICAL_OPTIONS = 30;
 const BASE_TOKENS = 400;
 const TOKENS_PER_OPTION = 45;
-const IMAGE_EXTRA_TOKENS = 600;
+export const IMAGE_EXTRA_TOKENS = 600;
 
 const isImage = (arm: Arm | string): boolean => (typeof arm === 'string' ? arm === 'image' : arm.interface === 'image');
 const armId = (arm: Arm | string): string => (typeof arm === 'string' ? arm : 'custom');

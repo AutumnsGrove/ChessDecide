@@ -1,5 +1,27 @@
 # Changelog
 
+## T12 — Image arm
+
+- New `@chessdecide/render`: `boardSvg` / `boardPng` / `boardDataUrl` (resvg, 512×512, `#f0d9b5`/`#b58863`,
+  White at the bottom, coordinates, no highlights or arrows). Byte-stable output: the start-position SVG
+  and PNG are snapshotted/hash-pinned in tests. Piece SVGs are extracted at build time from
+  `chessground.cburnett.css` by `scripts/extract-pieces.ts` into a committed `src/pieces.ts`; the
+  renderer never reads CSS at runtime.
+- Wiring: `runtime.ts` passes `renderImage: boardDataUrl` to `ModelPlayer` for `arm.interface === 'image'`
+  and the “arrives in T12” error is gone. The running budget adds 600 input tokens per call for an image
+  side until a measured mean exists. `estimateGame` already priced the +600 (now covered by a test).
+- Found and fixed while wiring: `attempts.request_gz` was always null — `ModelPlayer` never put the
+  request body in the row. It now records `request_json` (local-only, gzipped by the sink), so the raw
+  request/response pair D13 promises is actually stored. `attempts.interface` is `'image'` for image calls.
+- UI: Image is a real arm option in New game and New series, with the one-line caveat; the caveat only
+  shows when Image is selected.
+- Tests: render (6: SVG snapshots for start + Italian, determinism, 512×512, pinned sha256, promoted
+  queen, bad FEN), providers (image message via `renderImage`, +600 tokens), runner mock game with the
+  image arm, and `image.live.test.ts` (two real calls, `LIVE=1` only).
+- Live: Jev 1,480 in / 220 out / $0.000062 / 1,088 ms; D1 Ultra 633 in / $0.000027 / 392 ms, both `e2e4`.
+  One real game (cap $0.05, game `01M66ZFTK1JS9WTJ41KDHT7T9Y`): 0-1 adjudicated, 40 plies, 50 s,
+  $0.001467. Image costs ~22 % more per game than clean with no visible gain (`docs/SPIKE.md` §10).
+
 ## T11 — PGN, JSON and CSV exports
 
 - `packages/core/src/pgn.ts`: `gameToPgn(game, { site })` writes tags in the spec order (Event, Site,

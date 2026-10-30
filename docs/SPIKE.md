@@ -356,3 +356,29 @@ Findings:
    near 1200 (nearest level `uci1320`) and adapt from there.
 5. The daemon now serves v2 through `loadLadder(dataDir())`; `GET /api/ladder` reports
    `calibrated: true, version: 2`. E2E tests use an empty `CHESSDECIDE_DATA` so they stay deterministic.
+
+## 10. Image arm — live check and first real game (2026-10-30)
+
+Renderer: `packages/render` (resvg). 512×512 PNG, start position **31,923 bytes**, sha256 pinned in
+`packages/render/test/render.test.ts`; same FEN → identical bytes.
+
+Two live calls at the start position (both returned `e2e4`, legal):
+
+| model | input tok | output tok | cost | latency |
+| --- | ---: | ---: | ---: | ---: |
+| `typesafe/jev-1.14` | 1,480 | 220 | $0.000062 | 1,088 ms |
+| `liquid/d1-ultra` | 633 | 0 | $0.000027 | 392 ms |
+
+First real image game (`cap $0.05`, Jev image vs `uci1320`, random4 seed 101, judge depth 14,
+game `01M66ZFTK1JS9WTJ41KDHT7T9Y`): **0-1 adjudicated**, 40 plies (20 model calls), **50 s wall**,
+**$0.001467**. From ply 19 to 33 it shuffled `Nc7`/`Nd5` and never made progress.
+
+| per call | image | clean (same model, series games) | delta |
+| --- | ---: | ---: | ---: |
+| input tokens | 1,747 | 1,107 | +58 % |
+| cost | $0.000073 | $0.000046 | +59 % |
+| latency | 397 ms | 354 ms | +12 % |
+| cost per game | $0.00147 | $0.0012 | +22 % |
+
+The board image costs about a fifth more per game than text and does not obviously play better.
+It is a separate arm on purpose: keep it out of the main comparison until it has its own series.

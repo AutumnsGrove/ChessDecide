@@ -158,8 +158,9 @@
       <div class="radios">
         <label><input type="radio" name="arm" value="clean" bind:group={arm} /> Clean</label>
         <label><input type="radio" name="arm" value="hinted" bind:group={arm} /> Hinted</label>
-        <label class="off" title="The image arm arrives in a later task"><input type="radio" name="arm" value="image" disabled /> Image <small>coming soon</small></label>
+        <label><input type="radio" name="arm" value="image" bind:group={arm} /> Image</label>
       </div>
+      {#if arm === 'image'}<p class="caveat">Sends a picture of the board instead of text positions. Jev switches to a slower mode for images.</p>{/if}
     </fieldset>
 
     <div class="field">
@@ -245,8 +246,7 @@
   }
   .radios { display: flex; flex-wrap: wrap; gap: 6px 16px; }
   .radios label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; }
-  .radios label.off { color: var(--mute); }
-  .radios small { color: var(--mute); font-size: 11px; }
+  .caveat { margin: 6px 0 0; font-size: 12px; color: var(--mute); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
   .check small { color: var(--mute); }
