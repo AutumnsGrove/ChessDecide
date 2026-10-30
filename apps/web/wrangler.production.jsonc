@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "chessdecide",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "394e0101-b338-4bee-9375-bc9f96b5480c",
       "migrations_dir": "../../packages/db/migrations"
     }
   ]

@@ -53,12 +53,17 @@ beforeAll(async () => {
   db = drizzle(proxy.env.DB, { schema });
   counted = counting(proxy.env.DB);
 
+  await db.insert(schema.ladder_levels).values([
+    { ladder_version: 2, id: 'uci1320', kind: 'uci', params_json: JSON.stringify({ uci_elo: 1320 }), elo: 1320, se: 30, games: 200 },
+    { ladder_version: 2, id: 'uci1500', kind: 'uci', params_json: JSON.stringify({ uci_elo: 1500 }), elo: 1583, se: 30, games: 200 },
+  ]);
+
   for (const [i, a] of ARMS.entries()) {
     const id = `S${i}`;
     await saveSeries(db, {
       id, name: `${a.model} · ${a.arm}`, model_slug: a.model, arm_id: a.arm, arm_json: '{}',
       status: 'finished', status_reason: null, size_json: JSON.stringify({ preset: 'quick' }),
-      ladder_mode: 'adaptive', ladder_level: null, ladder_version: 0, seed: i + 1, budget_usd: 0.5,
+      ladder_mode: 'adaptive', ladder_level: null, ladder_version: 2, seed: i + 1, budget_usd: 0.5,
       cost_usd: 0.01, elo_mean: a.mean, elo_lo: a.mean - 160, elo_hi: a.mean + 160, w: 2, d: 0, l: 0,
       created_at: `2026-03-0${i + 1}T00:00:00Z`, finished_at: '2026-03-09T00:00:00Z',
     });
@@ -101,7 +106,7 @@ describe('read-only route query budget', () => {
     '/api/health',
     '/api/games',
     '/api/games/S0G0',
-    '/api/leaderboard?ladder_version=0',
+    '/api/leaderboard',
     '/api/leaderboard/compare?a=liquid/d1-ultra%23hinted&b=typesafe/jev-1.14%23clean',
     '/api/series',
     '/api/series/S0',
@@ -117,9 +122,25 @@ describe('read-only route query budget', () => {
   }
 
   it('the leaderboard does not grow its query count with the number of arms', async () => {
-    const { queries } = await calls('/api/leaderboard?ladder_version=0');
-    // rows + finished-game counts + games + plies; buildSeries per arm is now in memory.
-    expect(queries).toBe(4);
+    const { queries } = await calls('/api/leaderboard');
+    // rows + finished-game counts + games + plies, plus the published ladder (version + levels).
+    // buildSeries per arm is in memory, so this number does not move when arms are added.
+    expect(queries).toBe(6);
+  });
+
+  it('public mode derives the ruler from the published ladder', async () => {
+    const res = await app().fetch(new Request('http://x/api/leaderboard'));
+    const board = (await res.json()) as { ladder: { version: number; calibrated: boolean }; rows: { arm_id: string }[]; reference: { id: string }[] };
+    expect(board.ladder).toEqual({ version: 2, calibrated: true });
+    expect(board.rows).toHaveLength(4);
+    expect(board.reference.map((r) => r.id)).toEqual(['uci1320', 'uci1500']);
+
+    const health = (await (await app().fetch(new Request('http://x/api/health'))).json()) as { ladder: { version: number; calibrated: boolean } };
+    expect(health.ladder).toEqual({ version: 2, calibrated: true });
+
+    const ladder = (await (await app().fetch(new Request('http://x/api/ladder'))).json()) as { version: number; levels: unknown[] };
+    expect(ladder.version).toBe(2);
+    expect(ladder.levels).toHaveLength(2);
   });
 
   it('public mode exposes no control or catalog routes', async () => {

@@ -313,6 +313,11 @@ objects (`calls`, `est_cost_usd`) plus `over_cap_typical`/`over_cap_worst` boole
 
 `GET /api/ladder` → `{ version, calibrated, movetime_ms, sf_version, calibrated_at, levels: [ {id, kind, label, elo, se, games} ] }`
 
+In `public` mode there is no ladder file: the route rebuilds the ladder from the published
+`ladder_levels` rows for the highest ladder version that has a finished series (`calibrated` is true
+when that version > 0; `movetime_ms` and `sf_version` are nominal). With nothing published it is
+404 `not_available` and the leaderboard falls back to the nominal ladder.
+
 `POST /api/ladder/calibrate` → `202 {job_id}` (CPU only; refuses while a series runs);
 `GET /api/ladder/calibrate/events` SSE: `progress {pair, done, total, eta_s}`, `levels`
 (provisional fit), `done {version}`, `error`. `DELETE` not supported — ladders are versioned
@@ -321,6 +326,9 @@ files, a new calibration writes `ladder-v{N+1}.json`.
 ### 3.5 Leaderboard
 
 `GET /api/leaderboard?ladder_version=1` → `{ ladder: {version, calibrated}, rows, reference }`.
+Without the query parameter the version is the daemon's loaded ladder locally, and in `public` mode
+the highest published version that has a finished series (so the deployed leaderboard is never empty
+just because the series were rated on v2).
 One row per arm (its latest finished, else longest, series on that ladder version):
 `{ arm_id, model, arm, series_id, status, games, elo{mean,lo,hi,half_width}, w,d,l, score_pct,
 acpl, acceptable_rate, blunder_rate, cost_usd, cost_per_game, separated_from: [arm_id…] }`.

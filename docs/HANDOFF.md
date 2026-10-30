@@ -4,47 +4,49 @@ Autumn uses **she/her** pronouns. She often works by voice: keep replies short a
 
 ## 1. State
 
-T09's e2e is now **green** (42/42) and **T10's code is finished**. `pnpm verify`, `pnpm build` and
-`pnpm e2e` all pass. The only thing left in T10 is the **credential step**, which must be done with
-Autumn present (see §2).
+**T10 is done and deployed.** `pnpm verify`, `pnpm build` and `pnpm e2e` all pass, the public read-only
+site is live at **https://chessdecide-web.m7jv4v7npb.workers.dev** (D1 `chessdecide`
+`394e0101-b338-4bee-9375-bc9f96b5480c`, ENAM) with the four real series published twice at identical
+counts. Next task is **T11 exports**.
 
 | Task | State |
 | --- | --- |
-| T00–T09 | done |
-| **T10 publish + runbook** | **code complete; deploy blocked on Autumn's `wrangler login`** |
-| T11 exports | not started |
+| T00–T10 | done (T10 deployed 2026-10-30) |
+| **T11 exports** | **not started — next** |
 | T12 image arm | not started |
 
-## 2. First thing next session: the T10 STOP
+## 2. Where the deploy lives
 
-Ask Autumn: *"Ready to deploy the public site? This needs `wrangler login` on your machine and
-creates a D1 database named `chessdecide` in your account."*
+- D1: `chessdecide` / `394e0101-b338-4bee-9375-bc9f96b5480c`; production config
+  `apps/web/wrangler.production.jsonc`; local dev stays `wrangler.jsonc` (`local-dev`).
+- Worker: `chessdecide-web`, `https://chessdecide-web.m7jv4v7npb.workers.dev`,
+  `CHESSDECIDE_MODE=public` (no control routes, no key, no spend).
+- Remote data: 4 series, 100 games, 5088 plies, 12 ladder levels. Deployed leaderboard: D1U hinted
+  895 ± 162, Jev hinted 775 ± 159, D1U clean 733 ± 158, Jev clean 532 ± 160, all on ladder v2.
+- Refresh after new series: `pnpm cli publish --remote --config wrangler.production.jsonc` (build and
+  deploy only if code changed). `docs/DEPLOY.md` is the full runbook.
 
-If yes, follow `docs/DEPLOY.md` in order (it is written to be followed literally):
-login → `wrangler d1 create chessdecide` → paste the UUID into
-`apps/web/wrangler.production.jsonc` → `d1 migrations apply --remote --config wrangler.production.jsonc`
-→ `pnpm build` + `wrangler deploy --config wrangler.production.jsonc` →
-`pnpm cli publish --remote --config wrangler.production.jsonc` twice (counts must not change) →
-check `/api/health` (`mode: public, control: false`), `/`, `/series`, a replay, and 400 px.
+## 3. First thing next session: T11 exports
 
-If not yet: commit T10 as it is (the deploy is the only missing acceptance item) and start T11.
+Read `docs/build/tasks/T11-exports.md`. Two things to keep in mind from T10:
 
-`pnpm cli publish --remote` without `--config` deliberately refuses: `apps/web/wrangler.jsonc` still
-has `database_id: "local-dev"`. The guard also rejects non-UUID placeholders, so the production
-config cannot be pointed at the local DB or left unfilled by accident.
+- series detail pages exist locally and in public mode, so exports must work read-only too;
+- any new read route goes through `packages/api/test/query-budget.test.ts` (≤ 10 queries).
 
-## 3. Catches worth remembering
+## 4. Catches worth remembering
 
-- **`pnpm build` needed a new dependency.** SvelteKit 3 externalises `cookie` in the server build;
-  the emitted chunk imported it bare and resolved to a stray CJS `~/node_modules/cookie`. `apps/web`
-  now depends on `cookie@2.0.1`, so the build is reproducible. This was broken before T10 — run
-  `pnpm build` when touching the web app, `pnpm verify` alone will not catch it.
+- **Public mode derives the ladder from the published rows.** With no ladder file, the API would
+  default to nominal v0 and show an empty leaderboard (it did, on the first deploy).
+  `publishedLadderVersion`/`loadPublishedLadder` fix that; `GET /api/ladder` now serves the published
+  ladder in public mode. If series ever move to a newer ladder, republish and the default follows.
+- **`pnpm build` needed a new dependency.** SvelteKit 3 externalises `cookie`; the emitted chunk
+  imported it bare and resolved to a stray CJS `~/node_modules/cookie`. `apps/web` now depends on
+  `cookie@2.0.1`. `pnpm verify` alone does not catch a broken build — run `pnpm build` after web changes.
 - `ApiError(code, message, **status**)` — the third argument is the HTTP status, not `retryable`.
 - A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`), never `arm_id` alone.
-- `/api/leaderboard/compare` always uses `DEFAULT_LADDER.version` (0 unless `/api/ladder` exists), so
-  in public mode it compares arms on ladder v0. The series rows must carry that `ladder_version`.
+- `/api/leaderboard/compare` ignores `ladder_version`; it compares on `currentLadder().version`.
 - `buildSeries` is now `assembleSeries` (pure) + batched reads in `leaderboardInput`: the leaderboard
-  is a fixed 4 D1 queries regardless of arm count (`packages/api/test/query-budget.test.ts`).
+  is a fixed 6 D1 queries regardless of arm count.
 - Real publish sizes: 4 series → 100 games, 5088 plies, 5.5 MB in three files (just under the 2 MB
   chunk limit). `--dry-run` is the quick way to check.
 - Do not run `pnpm verify` while a series or calibration is running (core perft timeouts under

@@ -1,5 +1,5 @@
 /** Ladder persistence: calibrated levels and CPU calibration games. */
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, max } from 'drizzle-orm';
 import { DEFAULT_LADDER, type CalibGame, type LadderFile, type LadderLevel } from '@chessdecide/core';
 import * as s from './schema.ts';
 import type { Db } from './store.ts';
@@ -35,6 +35,32 @@ export async function loadLadderLevels(db: Db, version: number): Promise<LadderL
       ...(p.eps !== undefined ? { eps: p.eps } : {}), ...(p.uci_elo !== undefined ? { uci_elo: p.uci_elo } : {}),
     };
   }).sort((a, b) => nominalOrder(a.id) - nominalOrder(b.id) || (a.id < b.id ? -1 : 1));
+}
+
+const VERDICT = ['finished', 'stopped_budget', 'stopped_error'] as const;
+
+/** Highest ladder version that has a series with a verdict; falls back to the highest levels present. */
+export async function publishedLadderVersion(db: Db): Promise<number | undefined> {
+  const [row] = await db.select({ v: max(s.series.ladder_version) }).from(s.series)
+    .where(inArray(s.series.status, [...VERDICT]));
+  if (row?.v !== null && row?.v !== undefined) return Number(row.v);
+  const [lvl] = await db.select({ v: max(s.ladder_levels.ladder_version) }).from(s.ladder_levels);
+  return lvl?.v === null || lvl?.v === undefined ? undefined : Number(lvl.v);
+}
+
+/**
+ * The ladder a read-only deployment should present: the ruler its published series were rated on.
+ * `undefined` when nothing was published, so callers can fall back to the nominal ladder.
+ */
+export async function loadPublishedLadder(db: Db): Promise<LadderFile | undefined> {
+  const version = await publishedLadderVersion(db);
+  if (version === undefined) return undefined;
+  const levels = await loadLadderLevels(db, version);
+  if (levels.length === 0) return undefined;
+  return {
+    version, calibrated: version > 0, movetime_ms: DEFAULT_LADDER.movetime_ms, sf_version: 'unknown',
+    anchor: DEFAULT_LADDER.anchor, levels,
+  };
 }
 
 export interface LadderGameRow {

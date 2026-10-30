@@ -22,15 +22,24 @@
 - `packages/db`: `buildSeries` split into `assembleSeries` (pure projection) plus a batched
   `leaderboardInput`, so the leaderboard reads all chosen series, games and plies in a fixed number of
   queries instead of three per arm. `packages/api/test/query-budget.test.ts` wraps `DB.prepare` and
-  asserts every public route ≤ 10 queries (leaderboard is exactly 4 with four arms).
+  asserts every public route ≤ 10 queries (leaderboard is exactly 6 with four arms).
 - Real dry run on the four real series: `ladder_levels 12, series 4, games 100, plies 5088`, 5.5 MB in
   three files (2.0, 2.0, 1.3 MB); no `sk-or-` string anywhere in the output.
 - `apps/web`: added the `cookie` dependency (2.0.1, the ESM release SvelteKit 3 externalises in the
   server build). `pnpm build` was failing at SvelteKit's "Analysing routes" step because the emitted
   chunk imported a bare `cookie` and resolved to a stray CJS copy outside the repo; with the dependency
   declared, `apps/web/node_modules/cookie` is the ESM one and the build is reproducible.
-- Tests: runner 30 (+12 publish), api 34 (+10 query budget), db 12; `pnpm verify` green, `pnpm build` green.
-  `--remote` and the deploy itself are blocked on Autumn's `wrangler login` (T10 §4).
+- Tests: runner 31 (+12 publish), api 35 (+11 query budget), db 12; `pnpm verify` green, `pnpm build` green.
+- **Deployed** with Autumn: D1 `chessdecide` (`394e0101-…`, ENAM), migrations 0000–0002 applied
+  remotely, Worker at `https://chessdecide-web.m7jv4v7npb.workers.dev`. Published twice; remote counts
+  identical both times (4 series / 100 games / 5088 plies / 12 ladder levels).
+- Fix found by the deploy: public mode defaulted to the nominal ladder (v0) while the series were rated
+  on v2, so `/` came up empty. `publishedLadderVersion`/`loadPublishedLadder` now derive the ruler from
+  the published `ladder_levels` (highest version with a finished series; `calibrated` when > 0), and
+  `GET /api/ladder` serves it read-only. The deployed leaderboard shows all four arms on v2 with the
+  calibrated ticks; health reports `ladder: {version: 2, calibrated: true}`.
+- Phone check on the deployed site (400×800): leaderboard shows four arms, no horizontal scroll, no New
+  game/series buttons; a published game replays with board, eval graph, controls and the decision panel.
 
 
 ## T08b — Four arms on one ladder

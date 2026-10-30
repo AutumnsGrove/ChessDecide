@@ -5,7 +5,7 @@ import {
   type Series, type SeriesConfig, type SeriesEvent,
 } from '@chessdecide/core';
 import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
-import { buildSeries, leaderboardInput, listGames, loadGame, seriesSummaries, type Db } from '@chessdecide/db';
+import { buildSeries, leaderboardInput, listGames, loadGame, loadPublishedLadder, seriesSummaries, type Db } from '@chessdecide/db';
 import type { EventHub } from './hub.ts';
 import { ApiError } from './errors.ts';
 
@@ -72,7 +72,7 @@ export function createApi(deps: ApiDeps): Hono {
   }
 
   app.get('/health', async (c) => {
-    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    const ladder = await currentLadder();
     let budget = { session_usd: 0, today_usd: 0, total_usd: 0 };
     if (deps.spend) {
       const zero = { usd: 0, calls: 0, cache_hits: 0 };
@@ -120,12 +120,23 @@ export function createApi(deps: ApiDeps): Hono {
     return c.json(await deps.spend(iso));
   });
 
-  app.get('/ladder', (c) => {
-    if (!deps.ladder) return notAvailable(c);
-    return c.json(deps.ladder());
+  app.get('/ladder', async (c) => {
+    if (deps.ladder) return c.json(deps.ladder());
+    const published = await loadPublishedLadder(deps.db);
+    return published ? c.json(published) : notAvailable(c);
   });
 
   // ---- leaderboard (read-only; exists in public mode) ----
+  /**
+   * Local mode hands in the ladder file the daemon loaded. A read-only deployment derives it from the
+   * published `ladder_levels` (the ruler its series were rated on) and only then falls back to nominal —
+   * otherwise a public leaderboard would filter on v0 and show nothing.
+   */
+  async function currentLadder(): Promise<LadderFile> {
+    if (deps.ladder) return deps.ladder();
+    return (await loadPublishedLadder(deps.db)) ?? DEFAULT_LADDER;
+  }
+
   const ladderVersion = (c: any, ladder: LadderFile): number => {
     const raw = c.req.query('ladder_version');
     if (raw === undefined) return ladder.version;
@@ -135,7 +146,7 @@ export function createApi(deps: ApiDeps): Hono {
   };
 
   app.get('/leaderboard', async (c) => {
-    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    const ladder = await currentLadder();
     const version = ladderVersion(c, ladder);
     const input = await leaderboardInput(deps.db, version);
     const { rows, reference } = buildLeaderboard(input, version, ladder.levels);
@@ -145,7 +156,7 @@ export function createApi(deps: ApiDeps): Hono {
   app.get('/leaderboard/compare', async (c) => {
     const a = c.req.query('a'), b = c.req.query('b');
     if (!a || !b) throw new ApiError('bad_request', 'a and b are required');
-    const ladder = deps.ladder?.() ?? DEFAULT_LADDER;
+    const ladder = await currentLadder();
     const input = await leaderboardInput(deps.db, ladder.version);
     const sa = input.find((s) => s.arm_id === a), sb = input.find((s) => s.arm_id === b);
     if (!sa || !sb) throw new ApiError('not_found', 'arm not found', 404);

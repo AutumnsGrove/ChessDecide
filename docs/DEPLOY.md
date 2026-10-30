@@ -4,6 +4,13 @@ Follow these in order. Each step says what you should see before you move on.
 This needs Autumn present: steps 1–2 touch her Cloudflare account. Nothing below spends
 model money; the totals are already in the local D1.
 
+**Current deployment (2026-10-30):** done. D1 `chessdecide` =
+`394e0101-b338-4bee-9375-bc9f96b5480c` (ENAM), Worker
+`https://chessdecide-web.m7jv4v7npb.workers.dev`, migrations 0000–0002 remote, 4 series / 100 games /
+5088 plies published twice with identical counts. Re-running this page is for a *new* account,
+database, or after adding migrations/data — steps 1–2 are already satisfied unless the D1 or the
+Worker is deleted.
+
 Two wrangler configs exist on purpose:
 
 | File | Used for | `database_id` |
