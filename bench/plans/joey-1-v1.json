@@ -1,0 +1,27 @@
+{
+  "name": "joey-1-v1",
+  "models": [
+    "baseten/joey-1"
+  ],
+  "arms": [
+    "clean",
+    "hinted"
+  ],
+  "size": {
+    "preset": "standard"
+  },
+  "ladder": {
+    "mode": "adaptive"
+  },
+  "ladder_version": 2,
+  "series_cap_usd": 1,
+  "run_cap_usd": 2,
+  "repeat": 1,
+  "concurrency": 2,
+  "judge_depth": 14,
+  "max_hours": 48,
+  "cell_timeout_min": 120,
+  "artifacts": {
+    "sql": true
+  }
+}
