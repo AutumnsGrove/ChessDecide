@@ -141,6 +141,15 @@ describe('SeriesControlPlane', () => {
     expect(s.elo?.games ?? 0).toBe(0);
   }, 120_000);
 
+  it('counts the spend of aborted games in the series total', async () => {
+    const cp = makeCp({ makeOpponentFor: async () => ({ move: async () => { throw new Error('boom'); }, close: async () => {} }) });
+    const s = await run(cp, cfg({ seed: 11 }));
+    const rows = await db.select().from(schema.games).where(eq(schema.games.series_id, s.id));
+    const spent = rows.reduce((t, g) => t + (g.cost_usd ?? 0), 0);
+    expect(spent).toBeGreaterThan(0);                      // the mock model moved before the opponent failed
+    expect(s.cost_usd).toBeCloseTo(spent, 10);
+  }, 120_000);
+
   it('pauses and resumes; stop aborts in-flight games and keeps finished ones', async () => {
     const cp = makeCp();
     const created = await cp.create(cfg({ size: { preset: 'custom', games: 6 } }));
