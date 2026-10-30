@@ -20,6 +20,7 @@ export class NativeUciEngine implements Engine {
   private applied = new Map<string, string>();
   private busy = false;
   private closed = false;
+  private poisoned = false;                        // timed out mid-search: its output can no longer be trusted
   constructor(private opts: NativeOptions) { this.id = opts.id ?? 'stockfish'; }
 
   static async start(opts: NativeOptions): Promise<NativeUciEngine> {
@@ -29,7 +30,7 @@ export class NativeUciEngine implements Engine {
   }
 
   private async boot(): Promise<void> {
-    this.lines = []; this.applied.clear();
+    this.lines = []; this.applied.clear(); this.poisoned = false;
     this.proc = spawn(this.opts.path, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     this.proc.on('exit', () => this.wake());
     this.proc.stderr.resume();
@@ -42,7 +43,7 @@ export class NativeUciEngine implements Engine {
     await this.ready();
   }
 
-  private dead() { return this.proc.exitCode !== null || this.proc.signalCode !== null; }
+  private dead() { return this.poisoned || this.proc.exitCode !== null || this.proc.signalCode !== null; }
   private wake() { const w = this.waiters; this.waiters = []; w.forEach((f) => f()); }
   private send(cmd: string) { this.proc.stdin.write(cmd + '\n'); }
 
@@ -57,7 +58,11 @@ export class NativeUciEngine implements Engine {
       }
       if (this.dead()) throw new Error('engine process exited');
       const left = deadline - Date.now();
-      if (left <= 0) throw new Error('engine timeout');
+      if (left <= 0) {
+        // A late `bestmove` would be read as the answer to the next search: discard the process instead.
+        this.poisoned = true; this.proc.kill('SIGKILL');
+        throw new Error('engine timeout');
+      }
       await new Promise<void>((res) => { const t = setTimeout(res, left); this.waiters.push(() => { clearTimeout(t); res(); }); });
     }
   }
