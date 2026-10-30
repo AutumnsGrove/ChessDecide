@@ -5,7 +5,7 @@ Autumn uses **she/her** pronouns. She often works by voice: keep replies short a
 ## 1. State
 
 **The core buildout is finished (T00–T13) and the public site is live.** A real `core-v1` bench run
-is **in progress right now** (started 14:31 local / 18:31 UTC), writing results that auto-commit when
+is **in progress right now** (restarted 14:42 local / 18:42 UTC after raising `max_hours` to 16), writing results that auto-commit when
 it ends.
 
 | Task | State |
@@ -20,10 +20,11 @@ D1U clean 733 ± 158, Jev clean 532 ± 160.
 ## 2. The run in progress
 
 - Command: `pnpm cli bench run --plan bench/plans/core-v1.json` (detached; log `/tmp/bench-core-v1.out`).
-- 4 cells × standard 50 = 200 games, caps $0.50/series and $2.00/run. Measured pace ≈ 1.7 min/game,
-  so **ETA ≈ 5–6 h**, spend ≈ $0.10–0.25 (the per-game logs say $0.0007–$0.0025).
+- 4 cells × standard 50 = 200 games, caps $0.50/series and $2.00/run, `max_hours` 16. Measured pace
+  early on ≈ 1–2 min/game, so **ETA ≈ 4–7 h**, spend ≈ $0.10–0.25 (per-game logs: $0.0004–$0.0025).
+  The first 5 games of cell 1 survived the restart (resume matched the series name).
 - Watch: `pnpm cli bench status` (or `--json`), `tail -f /tmp/bench-core-v1.out`,
-  `pnpm cli bench status --run core-v1-20261030-1831`.
+  `pnpm cli bench status --run core-v1-20261030-1842`.
 - A detached watcher (`/tmp/commit-bench.sh`, pid in `/tmp/commit-bench.pid`) commits
   `docs/build/reports/bench-core-v1-*/` as **`Record core-v1 bench results`** once `report.md` appears.
   It does **not** push; push when you are happy with the report.
