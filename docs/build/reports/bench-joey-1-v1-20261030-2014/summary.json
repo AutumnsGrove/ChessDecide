@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 2,
-    "finished": 0,
-    "games": 12,
+    "finished": 1,
+    "games": 50,
     "aborted": 0,
-    "cost_usd": 0.0026121399999999998
+    "cost_usd": 0.017793930000000003
   },
   "cells": [
     {
@@ -33,24 +33,24 @@
         "seriesName": "joey-1-v1/baseten/joey-1#clean"
       },
       "seriesId": "01M677729MRFX1CQ18661CNVE5",
-      "state": "running",
-      "status": "paused",
-      "statusReason": "paused",
-      "games": 12,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.0026121399999999998,
+      "costUsd": 0.017793930000000003,
       "elo": {
-        "mean": 467.46211794921874,
-        "lo": 180,
-        "hi": 736,
-        "games": 12
+        "mean": 378.9753453877093,
+        "lo": 274,
+        "hi": 483,
+        "games": 50
       },
-      "w": 2,
-      "d": 1,
-      "l": 9,
-      "acpl": 187.69132653061226,
-      "acceptableRate": 0.7142857142857143,
-      "blunderRate": 0.18622448979591838,
+      "w": 15,
+      "d": 10,
+      "l": 25,
+      "acpl": 266.0538606403013,
+      "acceptableRate": 0.6666666666666666,
+      "blunderRate": 0.25536723163841807,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -67,13 +67,55 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 4,
-          "score": 0.75
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.7
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-30T20:14:58.869Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-30T21:31:45.812Z"
     },
     {
       "cell": {
@@ -110,28 +152,28 @@
       "model": "baseten/joey-1",
       "arm": "clean",
       "series_id": "01M677729MRFX1CQ18661CNVE5",
-      "status": "paused",
-      "games": 12,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 467.46211794921874,
-        "lo": 180,
-        "hi": 736,
-        "half_width": 278,
-        "games": 12,
-        "w": 2,
-        "d": 1,
-        "l": 9,
-        "score_pct": 0.20833333333333334
+        "mean": 378.9753453877093,
+        "lo": 274,
+        "hi": 483,
+        "half_width": 104.5,
+        "games": 50,
+        "w": 15,
+        "d": 10,
+        "l": 25,
+        "score_pct": 0.4
       },
-      "w": 2,
-      "d": 1,
-      "l": 9,
-      "score_pct": 0.20833333333333334,
-      "acpl": 187.69132653061226,
-      "acceptable_rate": 0.7142857142857143,
-      "blunder_rate": 0.18622448979591838,
-      "cost_usd": 0.0026121399999999998,
-      "cost_per_game": 0.0002176783333333333,
+      "w": 15,
+      "d": 10,
+      "l": 25,
+      "score_pct": 0.4,
+      "acpl": 266.0538606403013,
+      "acceptable_rate": 0.6666666666666666,
+      "blunder_rate": 0.25536723163841807,
+      "cost_usd": 0.017793930000000003,
+      "cost_per_game": 0.00035587860000000005,
       "separated_from": []
     }
   ]
