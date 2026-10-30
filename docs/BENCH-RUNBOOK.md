@@ -58,7 +58,11 @@ Disk: the local D1 grows ~0.2–0.5 GB for a 25-cell run; committed artifacts ~7
 ## 2. The roster (fetched 2026-10-30)
 
 `pnpm cli bench models` prints the live Decisions catalog with prices; refresh it before every sweep.
-Twenty-five canonical models, cheapest first:
+**Cost rule: skip anything above $0.06/M input tokens.** That excludes `baseten/mammoth-1` and
+`openai/gpt-6-luna-decisions` ($0.10), `cloudflare/clef-omni` ($0.15) and `cloudflare/clef` ($0.24).
+`typesafe/jev-1.14` and `liquid/d1-ultra` are also left out: the `core-v1` run already covers both with
+50-game clean+hinted series, so that bundle is the source for those two arms. The sweep below is the 19
+included models, cheapest first:
 
 | slug | $/M in | ctx | name |
 | --- | ---: | ---: | --- |
@@ -77,16 +81,10 @@ Twenty-five canonical models, cheapest first:
 | `microsoft/microsoft-decision-1` | 0.04 | 32k | Microsoft: Microsoft-Decision-1 |
 | `togethercomputer/tev1-4b-experimental` | 0.04 | 32k | Together: Tev1 4B Experimental |
 | `typesafe/jev-1.13` | 0.04 | 262k | TypeSafe: Jev 1.13 |
-| `typesafe/jev-1.14` | 0.04 | 262k | TypeSafe: Jev 1.14 |
-| `liquid/d1-ultra` | 0.04 | 32k | LiquidAI: d1-ultra |
 | `upstage/solar-decide` | 0.05 | 524k | Upstage: Solar Decide |
 | `upstage/solar-decide-flash` | 0.05 | 524k | Upstage: Solar Decide Flash |
 | `nace-ai/drex-max` | 0.06 | 262k | Nace.AI: Drex Max |
 | `nace-ai/drex-v2.0` | 0.06 | 131k | Nace.AI: Drex v2.0 |
-| `baseten/mammoth-1` | 0.10 | 16k | Baseten: Mammoth 1 |
-| `openai/gpt-6-luna-decisions` | 0.10 | 1.05M | OpenAI: GPT-6 Luna Decisions |
-| `cloudflare/clef-omni` | 0.15 | 65k | Cloudflare: Clef Omni |
-| `cloudflare/clef` | 0.24 | 65k | Cloudflare: Clef |
 
 The catalog also lists `~…-latest` aliases (`~liquid/d1-latest`, `~typesafe/jev-latest`,
 `~perplexity/pplx-decider-latest`, `~perplexity/pplx-decider-flash-latest`,
@@ -100,15 +98,15 @@ Every time a **new** model appears: add its slug to a **new** plan (below). Do n
 
 ## 3. The plan
 
-`bench/plans/all-models-v1.json` (committed): 25 models × `clean` × standard 50 = **1,250 games,
-25 cells**, adaptive ladder v2, caps **$10 per series / $50 per run** (the caps are a runaway
-guardrail, not a budget: a cell is expected to cost $0.01–0.30).
+`bench/plans/all-models-v1.json` (committed): 19 models × `clean` + `hinted` × standard 50 =
+**1,900 games, 38 cells**, adaptive ladder v2, caps **$10 per series / $50 per run** (the caps are a
+runaway guardrail, not a budget: a cell is expected to cost $0.01–0.30).
 
 ```json
 {
   "name": "all-models-v1",
-  "models": ["…25 slugs…"],
-  "arms": ["clean"],
+  "models": ["…19 slugs…"],
+  "arms": ["clean", "hinted"],
   "size": { "preset": "standard" },
   "ladder": { "mode": "adaptive" },
   "ladder_version": 2,
@@ -125,15 +123,17 @@ guardrail, not a budget: a cell is expected to cost $0.01–0.30).
 
 Variants:
 
-- `"arms": ["clean", "hinted"]` doubles cells and time (2,500 games, ~35 h on a laptop).
+- `"arms": ["clean"]` halves cells and time (950 games) if the box is short on wall clock.
 - Add `"image"` only for an image round; it is slower and costs ~1.2× per game.
+- A new model must be ≤ $0.06/M to join the default sweep; beyond that, ask first.
 - A new sweep gets a new `"name"` (e.g. `all-models-2026-11`). A different name means a separate
   prefix, new series and a fresh run; the leaderboard still keeps one row per model+arm (latest
   finished series wins).
 
-Expected wall clock on a box like the four `core-v1` series: ~40–50 s/game → **≈ 12–17 h** for the
-1,250-game sweep, less on a faster machine. Preflight estimates this plan at **$4.64 typical / $11.59 worst**; measured actuals run 2–8× below
-typical, so expect **$1–3**. The preflight estimate is the honest upper bound.
+Expected wall clock on a box like the four `core-v1` series: ~40–50 s/game → **≈ 25–32 h** for the
+1,900-game sweep, less on a faster machine. Preflight estimates this plan at **$4.56 typical /
+$11.39 worst**; measured actuals run 2–8× below typical, so expect **$2–4**. The preflight estimate is
+the honest upper bound.
 
 ## 4. Preflight and dry run (spends nothing)
 
@@ -143,7 +143,7 @@ pnpm cli bench run --plan bench/plans/all-models-v1.json --dry-run
 ```
 
 The dry run prints a checklist (git identity, key, Stockfish, catalog prices, ladder, DB, disk,
-estimate) and the 25-cell matrix with a typical cost per cell. Stop if:
+estimate) and the 38-cell matrix with a typical cost per cell. Stop if:
 
 - a model is unknown or `disabled_reason` is set → remove it from **your copy** of the plan;
 - the typical total is beyond what you are willing to spend → shrink `models` (the estimate is
@@ -245,6 +245,9 @@ pnpm --filter @chessdecide/web exec wrangler d1 execute DB --remote \
 
 Then check `/api/leaderboard`, `/api/ladder` (version must match `summary.json`) and the row counts,
 exactly as in `docs/DEPLOY.md` §6–7. Re-running a file is safe (`INSERT OR REPLACE`).
+
+Publish the `core-v1` bundle too: it is the source for `typesafe/jev-1.14` and `liquid/d1-ultra`
+(clean + hinted, 50 games each), which this sweep deliberately leaves out.
 
 ## 10. Troubleshooting
 

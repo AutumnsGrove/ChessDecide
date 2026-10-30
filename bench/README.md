@@ -15,7 +15,7 @@ pnpm cli bench status                                  # progress of the newest 
 | File | What | Cost |
 | --- | --- | --- |
 | `plans/core-v1.json` | 2 models × 2 arms, standard 50, adaptive ladder v2, caps $0.50 / $2.00 | ≈ $0.15–0.25, ≈ 2 h 20 min |
-| `plans/all-models-v1.json` | every canonical Decisions model × `clean` × 50 games (25 cells, 1,250 games) | ≈ $1–4, ≈ 12–17 h |
+| `plans/all-models-v1.json` | 19 models (≤ $0.06/M, minus the two core-v1 arms) × `clean` + `hinted` × 50 games (38 cells, 1,900 games) | ≈ $2–4, ≈ 25–32 h |
 | `plans/smoke.json` | 1 cell, 3 games, fixed `eps50`, for `--mock` | $0 |
 
 Running a sweep on a remote box (no wrangler, commit the bundle, publish later):

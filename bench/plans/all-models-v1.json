@@ -16,19 +16,14 @@
     "microsoft/microsoft-decision-1",
     "togethercomputer/tev1-4b-experimental",
     "typesafe/jev-1.13",
-    "typesafe/jev-1.14",
-    "liquid/d1-ultra",
     "upstage/solar-decide",
     "upstage/solar-decide-flash",
     "nace-ai/drex-max",
-    "nace-ai/drex-v2.0",
-    "baseten/mammoth-1",
-    "openai/gpt-6-luna-decisions",
-    "cloudflare/clef-omni",
-    "cloudflare/clef"
+    "nace-ai/drex-v2.0"
   ],
   "arms": [
-    "clean"
+    "clean",
+    "hinted"
   ],
   "size": {
     "preset": "standard"
