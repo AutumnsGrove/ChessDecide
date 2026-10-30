@@ -1,2 +1,3 @@
 arm_id,model,arm,series_id,status,games,elo_mean,elo_lo,elo_hi,w,d,l,score_pct,acpl,acceptable_rate,blunder_rate,cost_usd
+baseten/joey-1#hinted,baseten/joey-1,hinted,01M67BKVN8H1692V9JM4S2GM8S,finished,50,721.1507113076325,613,830,23,3,24,0.49,134.89223638470452,0.8215527230590962,0.11703360370799537,0.009184839999999998
 baseten/joey-1#clean,baseten/joey-1,clean,01M677729MRFX1CQ18661CNVE5,finished,50,378.9753453877093,274,483,15,10,25,0.4,266.0538606403013,0.6666666666666666,0.25536723163841807,0.017793930000000003

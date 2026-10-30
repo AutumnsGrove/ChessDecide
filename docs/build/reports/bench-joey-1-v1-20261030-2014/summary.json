@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 2,
-    "finished": 1,
-    "games": 50,
+    "finished": 2,
+    "games": 100,
     "aborted": 0,
-    "cost_usd": 0.017793930000000003
+    "cost_usd": 0.02697877
   },
   "cells": [
     {
@@ -125,28 +125,134 @@
         "repeat": 1,
         "seriesName": "joey-1-v1/baseten/joey-1#hinted"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
-      "statusReason": null,
-      "games": 0,
+      "seriesId": "01M67BKVN8H1692V9JM4S2GM8S",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "costUsd": 0.009184839999999998,
+      "elo": {
+        "mean": 721.1507113076325,
+        "lo": 613,
+        "hi": 830,
+        "games": 50
+      },
+      "w": 23,
+      "d": 3,
+      "l": 24,
+      "acpl": 134.89223638470452,
+      "acceptableRate": 0.8215527230590962,
+      "blunderRate": 0.11703360370799537,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
-      "finishedAt": null
+      "startedAt": "2026-10-30T21:31:52.360Z",
+      "finishedAt": "2026-10-30T22:04:46.952Z"
     }
   ],
-  "pairs": [],
+  "pairs": [
+    {
+      "a": "Joey 1 · clean",
+      "b": "Joey 1 · hinted",
+      "pAGtB": 0.000004551163080035813,
+      "diffMean": -342.17536592299615,
+      "diffLo": -493,
+      "diffHi": -192
+    }
+  ],
   "leaderboard": [
+    {
+      "arm_id": "baseten/joey-1#hinted",
+      "model": "baseten/joey-1",
+      "arm": "hinted",
+      "series_id": "01M67BKVN8H1692V9JM4S2GM8S",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 721.1507113076325,
+        "lo": 613,
+        "hi": 830,
+        "half_width": 108.5,
+        "games": 50,
+        "w": 23,
+        "d": 3,
+        "l": 24,
+        "score_pct": 0.49
+      },
+      "w": 23,
+      "d": 3,
+      "l": 24,
+      "score_pct": 0.49,
+      "acpl": 134.89223638470452,
+      "acceptable_rate": 0.8215527230590962,
+      "blunder_rate": 0.11703360370799537,
+      "cost_usd": 0.009184839999999998,
+      "cost_per_game": 0.00018369679999999999,
+      "separated_from": [
+        "baseten/joey-1#clean"
+      ]
+    },
     {
       "arm_id": "baseten/joey-1#clean",
       "model": "baseten/joey-1",
@@ -174,7 +280,9 @@
       "blunder_rate": 0.25536723163841807,
       "cost_usd": 0.017793930000000003,
       "cost_per_game": 0.00035587860000000005,
-      "separated_from": []
+      "separated_from": [
+        "baseten/joey-1#hinted"
+      ]
     }
   ]
 }
