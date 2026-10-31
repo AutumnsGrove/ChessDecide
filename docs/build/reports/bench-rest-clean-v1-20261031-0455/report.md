@@ -41,9 +41,9 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 04:55 UTC (0 h 00 min) · node 22.22.0 �
 
 ## Not finished
 
-- cell 0 (perplexity/pplx-decider-flash-v1.2#clean, running) running at 32/50 games, $0.0081
+- cell 0 (perplexity/pplx-decider-flash-v1.2#clean, running) paused at 32/50 games, $0.0081 — paused
 - cell 1 (respan/span-02#clean, running) paused at 33/50 games, $0.0060 — paused
-- cell 2 (inception/mercury-decide#clean, running) running at 29/50 games, $0.0184
+- cell 2 (inception/mercury-decide#clean, running) paused at 29/50 games, $0.0184 — paused
 - cell 3 (perplexity/pplx-decider-v1.2#clean, running) paused at 40/50 games, $0.0167 — paused
 - cell 4 (cloudflare/clef-flash#clean, pending) created at 0/50 games, $0.0000
 - cell 5 (nace-ai/drex-v1.5#clean, pending) created at 0/50 games, $0.0000
