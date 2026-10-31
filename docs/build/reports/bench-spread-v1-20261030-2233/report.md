@@ -69,7 +69,7 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 02:15 UTC (3 h 42 min) · node 22.22.0 �
 ## Not finished
 
 - cell 7 (liquid/d1.1#hinted, running) paused at 33/50 games, $0.0056 — paused
-- cell 9 (microsoft/microsoft-decision-1#hinted, running) running at 12/50 games, $0.0042
+- cell 9 (microsoft/microsoft-decision-1#hinted, running) paused at 12/50 games, $0.0042 — paused
 
 ## Provenance
 
