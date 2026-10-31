@@ -19,9 +19,9 @@
   "totals": {
     "cells": 13,
     "finished": 3,
-    "games": 206,
-    "aborted": 4,
-    "cost_usd": 0.08301020199999999
+    "games": 213,
+    "aborted": 7,
+    "cost_usd": 0.08838307800000002
   },
   "cells": [
     {
@@ -222,21 +222,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 40,
+      "games": 41,
       "target": 50,
-      "costUsd": 0.03043700000000001,
+      "costUsd": 0.03089326000000001,
       "elo": {
-        "mean": 268.90240878447855,
-        "lo": 142,
-        "hi": 396,
-        "games": 40
+        "mean": 277.1117320165568,
+        "lo": 153,
+        "hi": 403,
+        "games": 41
       },
-      "w": 14,
+      "w": 15,
       "d": 5,
       "l": 21,
-      "acpl": 304.3045738045738,
-      "acceptableRate": 0.7089397089397089,
-      "blunderRate": 0.25727650727650725,
+      "acpl": 303.68753206772703,
+      "acceptableRate": 0.7080554130323242,
+      "blunderRate": 0.25705489994869163,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -289,8 +289,8 @@
         {
           "levelId": "random",
           "levelElo": 160,
-          "games": 2,
-          "score": 0
+          "games": 3,
+          "score": 1
         }
       ],
       "abortedGames": 0,
@@ -436,21 +436,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 12,
+      "games": 15,
       "target": 50,
-      "costUsd": 0.006311,
+      "costUsd": 0.00876264,
       "elo": {
-        "mean": 409.36730810278743,
-        "lo": 114,
-        "hi": 682,
-        "games": 12
+        "mean": 446.01496372739,
+        "lo": 210,
+        "hi": 673,
+        "games": 15
       },
-      "w": 2,
+      "w": 4,
       "d": 0,
-      "l": 10,
-      "acpl": 209.73139158576052,
-      "acceptableRate": 0.7119741100323624,
-      "blunderRate": 0.2168284789644013,
+      "l": 11,
+      "acpl": 206.77511961722487,
+      "acceptableRate": 0.7392344497607656,
+      "blunderRate": 0.19138755980861244,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -467,8 +467,14 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 4,
-          "score": 0.5
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 2,
+          "score": 0
         }
       ],
       "abortedGames": 0,
@@ -487,26 +493,32 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 4,
+      "games": 7,
       "target": 50,
-      "costUsd": 0.002135742,
+      "costUsd": 0.004161318,
       "elo": {
-        "mean": 694.4331014798493,
-        "lo": 86,
-        "hi": 1231,
-        "games": 4
+        "mean": 374.62710256896736,
+        "lo": 26,
+        "hi": 805,
+        "games": 7
       },
       "w": 0,
       "d": 0,
-      "l": 4,
-      "acpl": 97.51785714285714,
-      "acceptableRate": 0.75,
-      "blunderRate": 0.10714285714285714,
+      "l": 7,
+      "acpl": 175.35576923076923,
+      "acceptableRate": 0.7403846153846154,
+      "blunderRate": 0.15384615384615385,
       "blocks": [
         {
           "levelId": "uci1320",
           "levelElo": 1320,
           "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 4,
           "score": 0
         }
       ],
@@ -522,13 +534,13 @@
         "repeat": 1,
         "seriesName": "rest-clean-v1/upstage/solar-decide#clean"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
-      "statusReason": null,
+      "seriesId": "01M68F4P58XQJZA2MBT3H07EGZ",
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
-      "costUsd": 0,
+      "costUsd": 0.00043940000000000006,
       "elo": null,
       "w": 0,
       "d": 0,
@@ -536,10 +548,17 @@
       "acpl": null,
       "acceptableRate": null,
       "blunderRate": null,
-      "blocks": [],
-      "abortedGames": 0,
-      "startedAt": null,
-      "finishedAt": null
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 4,
+          "score": 0
+        }
+      ],
+      "abortedGames": 3,
+      "startedAt": "2026-10-31T07:52:43.944Z",
+      "finishedAt": "2026-10-31T07:57:58.526Z"
     },
     {
       "cell": {
@@ -705,35 +724,6 @@
   ],
   "leaderboard": [
     {
-      "arm_id": "typesafe/jev-1.13#clean",
-      "model": "typesafe/jev-1.13",
-      "arm": "clean",
-      "series_id": "01M68ERA3B2586RHMXVMX3CN59",
-      "status": "running",
-      "games": 4,
-      "elo": {
-        "mean": 694.4331014798493,
-        "lo": 86,
-        "hi": 1231,
-        "half_width": 572.5,
-        "games": 4,
-        "w": 0,
-        "d": 0,
-        "l": 4,
-        "score_pct": 0
-      },
-      "w": 0,
-      "d": 0,
-      "l": 4,
-      "score_pct": 0,
-      "acpl": 97.51785714285714,
-      "acceptable_rate": 0.75,
-      "blunder_rate": 0.10714285714285714,
-      "cost_usd": 0.002135742,
-      "cost_per_game": 0.0005339355,
-      "separated_from": []
-    },
-    {
       "arm_id": "perplexity/pplx-decider-v1.2#clean",
       "model": "perplexity/pplx-decider-v1.2",
       "arm": "clean",
@@ -768,27 +758,56 @@
       "arm": "clean",
       "series_id": "01M68D7NXHFAX6VY0MVTTT9BEB",
       "status": "running",
-      "games": 12,
+      "games": 15,
       "elo": {
-        "mean": 409.36730810278743,
-        "lo": 114,
-        "hi": 682,
-        "half_width": 284,
-        "games": 12,
-        "w": 2,
+        "mean": 446.01496372739,
+        "lo": 210,
+        "hi": 673,
+        "half_width": 231.5,
+        "games": 15,
+        "w": 4,
         "d": 0,
-        "l": 10,
-        "score_pct": 0.16666666666666666
+        "l": 11,
+        "score_pct": 0.26666666666666666
       },
-      "w": 2,
+      "w": 4,
       "d": 0,
-      "l": 10,
-      "score_pct": 0.16666666666666666,
-      "acpl": 209.73139158576052,
-      "acceptable_rate": 0.7119741100323624,
-      "blunder_rate": 0.2168284789644013,
-      "cost_usd": 0.006311,
-      "cost_per_game": 0.0005259166666666666,
+      "l": 11,
+      "score_pct": 0.26666666666666666,
+      "acpl": 206.77511961722487,
+      "acceptable_rate": 0.7392344497607656,
+      "blunder_rate": 0.19138755980861244,
+      "cost_usd": 0.00876264,
+      "cost_per_game": 0.000584176,
+      "separated_from": []
+    },
+    {
+      "arm_id": "typesafe/jev-1.13#clean",
+      "model": "typesafe/jev-1.13",
+      "arm": "clean",
+      "series_id": "01M68ERA3B2586RHMXVMX3CN59",
+      "status": "running",
+      "games": 7,
+      "elo": {
+        "mean": 374.62710256896736,
+        "lo": 26,
+        "hi": 805,
+        "half_width": 389.5,
+        "games": 7,
+        "w": 0,
+        "d": 0,
+        "l": 7,
+        "score_pct": 0
+      },
+      "w": 0,
+      "d": 0,
+      "l": 7,
+      "score_pct": 0,
+      "acpl": 175.35576923076923,
+      "acceptable_rate": 0.7403846153846154,
+      "blunder_rate": 0.15384615384615385,
+      "cost_usd": 0.004161318,
+      "cost_per_game": 0.000594474,
       "separated_from": []
     },
     {
@@ -855,27 +874,27 @@
       "arm": "clean",
       "series_id": "01M68501ZV83FPVVXKJQHFWSK8",
       "status": "running",
-      "games": 40,
+      "games": 41,
       "elo": {
-        "mean": 268.90240878447855,
-        "lo": 142,
-        "hi": 396,
-        "half_width": 127,
-        "games": 40,
-        "w": 14,
+        "mean": 277.1117320165568,
+        "lo": 153,
+        "hi": 403,
+        "half_width": 125,
+        "games": 41,
+        "w": 15,
         "d": 5,
         "l": 21,
-        "score_pct": 0.4125
+        "score_pct": 0.4268292682926829
       },
-      "w": 14,
+      "w": 15,
       "d": 5,
       "l": 21,
-      "score_pct": 0.4125,
-      "acpl": 304.3045738045738,
-      "acceptable_rate": 0.7089397089397089,
-      "blunder_rate": 0.25727650727650725,
-      "cost_usd": 0.03043700000000001,
-      "cost_per_game": 0.0007609250000000002,
+      "score_pct": 0.4268292682926829,
+      "acpl": 303.68753206772703,
+      "acceptable_rate": 0.7080554130323242,
+      "blunder_rate": 0.25705489994869163,
+      "cost_usd": 0.03089326000000001,
+      "cost_per_game": 0.0007534941463414636,
       "separated_from": []
     }
   ]
