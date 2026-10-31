@@ -20,8 +20,8 @@
     "cells": 13,
     "finished": 3,
     "games": 213,
-    "aborted": 7,
-    "cost_usd": 0.08838307800000002
+    "aborted": 10,
+    "cost_usd": 0.08849187800000002
   },
   "cells": [
     {
@@ -568,13 +568,13 @@
         "repeat": 1,
         "seriesName": "rest-clean-v1/upstage/solar-decide-flash#clean"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
-      "statusReason": null,
+      "seriesId": "01M68FF57ECFA9BAFP4S94MH74",
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
-      "costUsd": 0,
+      "costUsd": 0.00010879999999999999,
       "elo": null,
       "w": 0,
       "d": 0,
@@ -582,10 +582,17 @@
       "acpl": null,
       "acceptableRate": null,
       "blunderRate": null,
-      "blocks": [],
-      "abortedGames": 0,
-      "startedAt": null,
-      "finishedAt": null
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 4,
+          "score": 0
+        }
+      ],
+      "abortedGames": 3,
+      "startedAt": "2026-10-31T07:58:27.055Z",
+      "finishedAt": "2026-10-31T07:59:27.605Z"
     },
     {
       "cell": {

@@ -1,0 +1,111 @@
+{
+  "id": "01M68FF57ECFA9BAFP4S94MH74",
+  "name": "rest-clean-v1/upstage/solar-decide-flash#clean",
+  "model": "upstage/solar-decide-flash",
+  "arm": "clean",
+  "status": "stopped_error",
+  "status_reason": "too_many_aborts",
+  "size": {
+    "preset": "standard"
+  },
+  "ladder_version": 2,
+  "seed": 20261031,
+  "budget_usd": 1,
+  "cost_usd": 0.00010879999999999999,
+  "games": [
+    {
+      "game_id": "01M68FF7STDDBMB5SRPZKMXE3K",
+      "index": 0,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 4,
+      "acpl_model": 16,
+      "cost_usd": 0.00007099999999999999
+    },
+    {
+      "game_id": "01M68FF7WV7S109AEF7MBEKCNY",
+      "index": 1,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 1,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M68FFYF6QVFVPWF508DQM4AB",
+      "index": 2,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "running",
+      "result": "*",
+      "termination": "",
+      "adjudicated": false,
+      "plies": 5,
+      "acpl_model": 274,
+      "cost_usd": 0.00007145
+    },
+    {
+      "game_id": "01M68FG3EGN7QWBDPHVEWWV7CH",
+      "index": 3,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 3,
+      "acpl_model": 0,
+      "cost_usd": 0.0000378
+    }
+  ],
+  "blocks": [
+    {
+      "index": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "games": 4,
+      "score": 0,
+      "posterior_before": 1200,
+      "posterior_after": 1200
+    }
+  ],
+  "elo": null,
+  "elo_history": [],
+  "secondary": {
+    "games": 0,
+    "model_plies": 0,
+    "acpl": null,
+    "acpl_median": null,
+    "acceptable_rate": null,
+    "mistake_rate": null,
+    "blunder_rate": null,
+    "mean_p_acceptable": null,
+    "mean_e_win_loss": null,
+    "brier": null,
+    "ece": null,
+    "score_as_white": null,
+    "score_as_black": null,
+    "avg_plies": null,
+    "adjudicated_frac": null,
+    "cost_per_game": null,
+    "latency_p50": null,
+    "latency_p95": null,
+    "avg_input_tokens": null
+  },
+  "created_at": "2026-10-31T07:58:27.055Z"
+}
