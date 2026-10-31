@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 13,
-    "finished": 1,
-    "games": 165,
-    "aborted": 3,
-    "cost_usd": 0.063751554
+    "finished": 2,
+    "games": 196,
+    "aborted": 4,
+    "cost_usd": 0.07751079000000001
   },
   "cells": [
     {
@@ -36,21 +36,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 40,
+      "games": 47,
       "target": 50,
-      "costUsd": 0.010129180000000002,
+      "costUsd": 0.011873390000000001,
       "elo": {
-        "mean": 296.73584415790134,
-        "lo": 169,
-        "hi": 420,
-        "games": 40
+        "mean": 265.68740025332033,
+        "lo": 147,
+        "hi": 379,
+        "games": 47
       },
-      "w": 12,
+      "w": 13,
       "d": 2,
-      "l": 26,
-      "acpl": 316.3767757875232,
-      "acceptableRate": 0.6516368128474367,
-      "blunderRate": 0.2909203211859172,
+      "l": 32,
+      "acpl": 316.9761399787911,
+      "acceptableRate": 0.6489925768822906,
+      "blunderRate": 0.2916224814422057,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -103,7 +103,13 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 2,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 4,
           "score": 0
         }
       ],
@@ -120,24 +126,24 @@
         "seriesName": "rest-clean-v1/respan/span-02#clean"
       },
       "seriesId": "01M68501S1KKSMFBVMYEGXG68Z",
-      "state": "running",
-      "status": "running",
-      "statusReason": null,
-      "games": 40,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.0074576700000000004,
+      "costUsd": 0.008882460000000002,
       "elo": {
-        "mean": 353.8107182047933,
-        "lo": 231,
-        "hi": 475,
-        "games": 40
+        "mean": 311.22587548475093,
+        "lo": 201,
+        "hi": 418,
+        "games": 50
       },
-      "w": 13,
+      "w": 15,
       "d": 5,
-      "l": 22,
-      "acpl": 270.22759059122694,
-      "acceptableRate": 0.680864589955499,
-      "blunderRate": 0.25683407501589317,
+      "l": 30,
+      "acpl": 279.8768,
+      "acceptableRate": 0.6741333333333334,
+      "blunderRate": 0.2634666666666667,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -190,13 +196,19 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 2,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
           "score": 0
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-31T04:55:26.241Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T07:45:32.783Z"
     },
     {
       "cell": {
@@ -210,21 +222,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 35,
+      "games": 39,
       "target": 50,
-      "costUsd": 0.023807920000000003,
+      "costUsd": 0.028951020000000008,
       "elo": {
-        "mean": 247.13187754923817,
-        "lo": 108,
-        "hi": 385,
-        "games": 35
+        "mean": 260.17138550336375,
+        "lo": 131,
+        "hi": 389,
+        "games": 39
       },
-      "w": 11,
-      "d": 3,
+      "w": 13,
+      "d": 5,
       "l": 21,
-      "acpl": 303.98107049608353,
-      "acceptableRate": 0.7010443864229765,
-      "blunderRate": 0.26566579634464754,
+      "acpl": 299.7430593358737,
+      "acceptableRate": 0.7065868263473054,
+      "blunderRate": 0.25857376156777356,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -271,8 +283,8 @@
         {
           "levelId": "random",
           "levelElo": 160,
-          "games": 2,
-          "score": 0
+          "games": 5,
+          "score": 0.75
         }
       ],
       "abortedGames": 0,
@@ -386,7 +398,7 @@
       "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
-      "costUsd": 0.000392464,
+      "costUsd": 0.00051092,
       "elo": null,
       "w": 0,
       "d": 0,
@@ -402,7 +414,7 @@
           "score": 0
         }
       ],
-      "abortedGames": 3,
+      "abortedGames": 4,
       "startedAt": "2026-10-31T07:16:33.186Z",
       "finishedAt": "2026-10-31T07:19:00.282Z"
     },
@@ -414,23 +426,47 @@
         "repeat": 1,
         "seriesName": "rest-clean-v1/nace-ai/drex-v1.5#clean"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
+      "seriesId": "01M68D7NXHFAX6VY0MVTTT9BEB",
+      "state": "running",
+      "status": "running",
       "statusReason": null,
-      "games": 0,
+      "games": 10,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
-      "w": 0,
+      "costUsd": 0.00532868,
+      "elo": {
+        "mean": 414.0538776579395,
+        "lo": 75,
+        "hi": 730,
+        "games": 10
+      },
+      "w": 1,
       "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "l": 9,
+      "acpl": 210.00749063670412,
+      "acceptableRate": 0.7303370786516854,
+      "blunderRate": 0.20973782771535582,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 2,
+          "score": 0
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-10-31T07:19:24.850Z",
       "finishedAt": null
     },
     {
@@ -623,7 +659,16 @@
       "finishedAt": null
     }
   ],
-  "pairs": [],
+  "pairs": [
+    {
+      "a": "Span 02 · clean",
+      "b": "Pplx Decider V1.2 · clean",
+      "pAGtB": 0.008860260686611537,
+      "diffMean": -183.21933867853636,
+      "diffLo": -336,
+      "diffHi": -32
+    }
+  ],
   "leaderboard": [
     {
       "arm_id": "perplexity/pplx-decider-v1.2#clean",
@@ -653,36 +698,65 @@
       "cost_usd": 0.021964319999999996,
       "cost_per_game": 0.0004392863999999999,
       "separated_from": [
-        "inception/mercury-decide#clean"
+        "perplexity/pplx-decider-flash-v1.2#clean"
       ]
+    },
+    {
+      "arm_id": "nace-ai/drex-v1.5#clean",
+      "model": "nace-ai/drex-v1.5",
+      "arm": "clean",
+      "series_id": "01M68D7NXHFAX6VY0MVTTT9BEB",
+      "status": "running",
+      "games": 10,
+      "elo": {
+        "mean": 414.0538776579395,
+        "lo": 75,
+        "hi": 730,
+        "half_width": 327.5,
+        "games": 10,
+        "w": 1,
+        "d": 0,
+        "l": 9,
+        "score_pct": 0.1
+      },
+      "w": 1,
+      "d": 0,
+      "l": 9,
+      "score_pct": 0.1,
+      "acpl": 210.00749063670412,
+      "acceptable_rate": 0.7303370786516854,
+      "blunder_rate": 0.20973782771535582,
+      "cost_usd": 0.00532868,
+      "cost_per_game": 0.0005328679999999999,
+      "separated_from": []
     },
     {
       "arm_id": "respan/span-02#clean",
       "model": "respan/span-02",
       "arm": "clean",
       "series_id": "01M68501S1KKSMFBVMYEGXG68Z",
-      "status": "running",
-      "games": 40,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 353.8107182047933,
-        "lo": 231,
-        "hi": 475,
-        "half_width": 122,
-        "games": 40,
-        "w": 13,
+        "mean": 311.22587548475093,
+        "lo": 201,
+        "hi": 418,
+        "half_width": 108.5,
+        "games": 50,
+        "w": 15,
         "d": 5,
-        "l": 22,
-        "score_pct": 0.3875
+        "l": 30,
+        "score_pct": 0.35
       },
-      "w": 13,
+      "w": 15,
       "d": 5,
-      "l": 22,
-      "score_pct": 0.3875,
-      "acpl": 270.22759059122694,
-      "acceptable_rate": 0.680864589955499,
-      "blunder_rate": 0.25683407501589317,
-      "cost_usd": 0.0074576700000000004,
-      "cost_per_game": 0.00018644175,
+      "l": 30,
+      "score_pct": 0.35,
+      "acpl": 279.8768,
+      "acceptable_rate": 0.6741333333333334,
+      "blunder_rate": 0.2634666666666667,
+      "cost_usd": 0.008882460000000002,
+      "cost_per_game": 0.00017764920000000006,
       "separated_from": []
     },
     {
@@ -691,28 +765,30 @@
       "arm": "clean",
       "series_id": "01M68501M3Y374ZP1HW4YF17QP",
       "status": "running",
-      "games": 40,
+      "games": 47,
       "elo": {
-        "mean": 296.73584415790134,
-        "lo": 169,
-        "hi": 420,
-        "half_width": 125.5,
-        "games": 40,
-        "w": 12,
+        "mean": 265.68740025332033,
+        "lo": 147,
+        "hi": 379,
+        "half_width": 116,
+        "games": 47,
+        "w": 13,
         "d": 2,
-        "l": 26,
-        "score_pct": 0.325
+        "l": 32,
+        "score_pct": 0.2978723404255319
       },
-      "w": 12,
+      "w": 13,
       "d": 2,
-      "l": 26,
-      "score_pct": 0.325,
-      "acpl": 316.3767757875232,
-      "acceptable_rate": 0.6516368128474367,
-      "blunder_rate": 0.2909203211859172,
-      "cost_usd": 0.010129180000000002,
-      "cost_per_game": 0.00025322950000000006,
-      "separated_from": []
+      "l": 32,
+      "score_pct": 0.2978723404255319,
+      "acpl": 316.9761399787911,
+      "acceptable_rate": 0.6489925768822906,
+      "blunder_rate": 0.2916224814422057,
+      "cost_usd": 0.011873390000000001,
+      "cost_per_game": 0.0002526253191489362,
+      "separated_from": [
+        "perplexity/pplx-decider-v1.2#clean"
+      ]
     },
     {
       "arm_id": "inception/mercury-decide#clean",
@@ -720,30 +796,28 @@
       "arm": "clean",
       "series_id": "01M68501ZV83FPVVXKJQHFWSK8",
       "status": "running",
-      "games": 35,
+      "games": 39,
       "elo": {
-        "mean": 247.13187754923817,
-        "lo": 108,
-        "hi": 385,
-        "half_width": 138.5,
-        "games": 35,
-        "w": 11,
-        "d": 3,
+        "mean": 260.17138550336375,
+        "lo": 131,
+        "hi": 389,
+        "half_width": 129,
+        "games": 39,
+        "w": 13,
+        "d": 5,
         "l": 21,
-        "score_pct": 0.35714285714285715
+        "score_pct": 0.3974358974358974
       },
-      "w": 11,
-      "d": 3,
+      "w": 13,
+      "d": 5,
       "l": 21,
-      "score_pct": 0.35714285714285715,
-      "acpl": 303.98107049608353,
-      "acceptable_rate": 0.7010443864229765,
-      "blunder_rate": 0.26566579634464754,
-      "cost_usd": 0.023807920000000003,
-      "cost_per_game": 0.0006802262857142858,
-      "separated_from": [
-        "perplexity/pplx-decider-v1.2#clean"
-      ]
+      "score_pct": 0.3974358974358974,
+      "acpl": 299.7430593358737,
+      "acceptable_rate": 0.7065868263473054,
+      "blunder_rate": 0.25857376156777356,
+      "cost_usd": 0.028951020000000008,
+      "cost_per_game": 0.0007423338461538464,
+      "separated_from": []
     }
   ]
 }
