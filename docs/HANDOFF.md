@@ -1,73 +1,94 @@
-# Handoff — where we left off (2026-10-30, session 6)
+# Handoff — where we left off (2026-10-31, session 7)
 
 Autumn uses **she/her** pronouns. She often works by voice: keep replies short and conversational.
 
 ## 1. State
 
-**The core buildout is finished (T00–T13) and the public site is live.** A real `core-v1` bench run
-is **in progress right now** (restarted 14:42 local / 18:42 UTC after raising `max_hours` to 16), writing results that auto-commit when
-it ends.
+**Phase 1 (T00–T13) is finished and the public site is live.** The full model sweep is running on a
+**remote Claude Code box**, on branch `origin/bench/all-models-v1` — not here. Nothing is running on
+this laptop: no bench, no Stockfish, no daemon, ports 8731/5273 clear.
 
-| Task | State |
+| Item | State |
 | --- | --- |
-| T00–T12 | done; T10–T12 deployed |
-| **T13 headless bench** | **done: code committed, `core-v1` run in progress** |
-| **Next: roster sweep** | **runbook `docs/BENCH-RUNBOOK.md` + plan `bench/plans/all-models-v1.json`** |
+| T00–T13 | done; T10–T12 deployed |
+| `main` | clean at `64fbe5f` (merge of the code-review branch PR #2) |
+| **Remote sweep** | **in progress on `bench/all-models-v1`** (was 16 h in, ~8 h left at last check) |
+| Local runs | **none needed.** The local `core-v1` attempt is void (network died at game 22) and its rows/artifacts/branch were deleted |
 | Live site | https://chessdecide-web.m7jv4v7npb.workers.dev (4 arms, 100 games, ladder v2) |
 
-Current numbers on the public site (Quick 25 series): D1U hinted 895 ± 162, Jev hinted 775 ± 159,
-D1U clean 733 ± 158, Jev clean 532 ± 160.
+The remote branch runs the sweep in waves, each with its own plan and committed bundle:
 
-## 2. The run in progress
+| Plan on the branch | What |
+| --- | --- |
+| `joey-1-v1` | single-model pilot |
+| `rest-clean-v1` | the rest of the roster, clean |
+| `spread-v1` | parallel-model spread (`parallel_models`) |
+| `rest-hinted-v2` | hinted arm, without the models that turned out unusable |
+| `premium-v1` | `gpt-6-luna-decisions`, `clef-omni`, `clef` (costs stayed low, so premium came back in) |
 
-- Command: `pnpm cli bench run --plan bench/plans/core-v1.json` (detached; log `/tmp/bench-core-v1.out`).
-- 4 cells × standard 50 = 200 games, caps $0.50/series and $2.00/run, `max_hours` 16. Measured pace
-  early on ≈ 1–2 min/game, so **ETA ≈ 4–7 h**, spend ≈ $0.10–0.25 (per-game logs: $0.0004–$0.0025).
-  The first 5 games of cell 1 survived the restart (resume matched the series name).
-- Watch: `pnpm cli bench status` (or `--json`), `tail -f /tmp/bench-core-v1.out`,
-  `pnpm cli bench status --run core-v1-20261030-1842`.
-- A detached watcher (`/tmp/commit-bench.sh`, pid in `/tmp/commit-bench.pid`) commits
-  `docs/build/reports/bench-core-v1-*/` as **`Record core-v1 bench results`** once `report.md` appears.
-  It does **not** push; push when you are happy with the report.
-- The run's SQL lives in that bundle: `docs/build/reports/bench-core-v1-*/sql/part-*.sql`. Publish later
-  with `wrangler d1 execute DB --remote --config wrangler.production.jsonc --file …` per file
-  (`docs/DEPLOY.md` §7), then check `/api/leaderboard` shows ladder v2 and the 50-game intervals.
-- Do **not** run `pnpm verify` or `pnpm e2e` while it runs (Stockfish contention).
+Models ruled out during the sweep (see the branch's reports/commits): `togethercomputer/tev1-4b-experimental`,
+`jaredpalmer/kev-4b`, `scaledown/classify-1`, and `cloudflare/clef-flash`, `upstage/solar-decide`,
+`upstage/solar-decide-flash` (marked unsupported on the branch). It includes **all other models**,
+premium tier included, clean + hinted, 50 games per cell.
 
-## 3. After the run
+## 2. When the remote job lands
 
-1. Read `docs/build/reports/bench-core-v1-*/report.md`; the leaderboard should keep one series per arm
-   (T09 picks the latest finished), so the 50-game intervals replace the 25-game ones.
-2. Commit (the watcher does it) and push.
-3. Publish the bundle's SQL to the production D1, then open the site and confirm the new intervals.
-4. For the full roster sweep, hand a remote agent **`docs/BENCH-RUNBOOK.md`**. It installs Stockfish,
-   runs `bench/plans/all-models-v1.json` (19 models ≤ $0.06/M × clean + hinted × 50 games, 1,900 games; Jev 1.14 and D1 Ultra are left to `core-v1`), keeps a monitor
-   log, and commits the bundle. That box has no wrangler: publish its `sql/part-*.sql` from this
-   machine afterwards (`docs/DEPLOY.md` §7).
+1. `git fetch origin && git log --oneline origin/bench/all-models-v1` — read the commit trail; each wave
+   ends with a `Finalize … results` / `Record …` commit plus `docs/build/reports/bench-<plan>-<stamp>/`.
+2. Read every `docs/build/reports/bench-*/report.md`. Sanity: Elo always with its interval, ladder v2,
+   `summary.json` totals match the SQL row counts, unsupported models listed, spend per wave in the log.
+3. Merge the branch into `main` (PR #2's follow-up or a fast-forward if main has not moved). Run
+   `pnpm verify` here afterwards — the review branch changed bench/series/engine/providers code.
+4. **Publish from this machine** (the remote box has no wrangler), per bundle, files in filename order:
+   ```bash
+   pnpm --filter @chessdecide/web exec wrangler d1 execute DB --remote \
+     --config wrangler.production.jsonc \
+     --file ../../docs/build/reports/bench-<run>/sql/part-001.sql
+   # … repeat for each part, and for every bench-* bundle that should be public
+   ```
+   This includes the bundle that covers **Jev 1.14 and D1 Ultra** (clean + hinted): the remote job ran
+   them too, so the old local core-v1 plan is not needed.
+5. Check the live site: `/api/leaderboard` (one row per model+arm, 50-game intervals), `/api/ladder`
+   (must report v2), a replay, and the row counts against each `summary.json`.
+6. Update `docs/CHANGELOG.md` and the "real-run numbers" table below with the sweep's headline numbers.
+
+## 3. The next sweep (new model ships)
+
+The remote box is the machine for this: more compute and better uptime. Hand the agent
+**`docs/BENCH-RUNBOOK.md`** as it stands on `main` (the branch also improved it: attached `--for` slices,
+`--heartbeat`, exit 75 = run again, `parallel_models` 1–4). Then:
+
+- refresh the roster with `pnpm cli bench models`; a new model gets a **new plan name** (e.g.
+  `all-models-2026-11`), never an edit of a finished one;
+- keep the cost rule pragmatic: premium was affordable in the 2026-10 sweep, so include it unless a
+  dry run says otherwise; skip models that cannot answer the Decisions protocol (the branch records them);
+- `--for 7` slices in the agent loop, commit each wave, push.
 
 ## 4. Catches worth remembering
 
-- **Bench plan paths resolve from where you invoked the CLI** (`INIT_CWD`), not `packages/runner`;
-  artifacts default to `<repo>/docs/build/reports`, scratch to `data/bench/<run>/`.
-- **`--mock`/`CHESSDECIDE_MOCK=1`** runs the identical code path with zero spend. Preflight still
-  checks git identity, Stockfish, the ladder file and the DB.
-- **Resume:** re-running the same command continues an unfinished manifest. A finished run says
-  "already complete". Changing the plan is an error (`--new`) except after a budget stop (raising
-  `run_cap_usd` is the documented resume).
-- **`attempts.request_gz` was always null until T12** — `ModelPlayer` never recorded the request.
-  It now stores `request_json` (local-only), so the raw pair D13 promises exists.
-- **Image arm** (`@chessdecide/render`): first real game was 0-1 adjudicated, 40 plies, $0.001467,
-  ~22 % more per game than clean, no visible gain. `docs/SPIKE.md` §10.
-- **PGN move numbers follow the start FEN**: random-opening games start at move 3, so the export says
-  `3. e4`, and a Black-to-move start emits `1... e5`.
-- **Public mode derives the ladder from published rows** (`loadPublishedLadder`) and serves
-  `/api/ladder` read-only; otherwise the public leaderboard filters on nominal v0 and is empty.
-- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`). Never merge the preset alone.
+- **Bench plan paths resolve from where the CLI was invoked** (`INIT_CWD`); artifacts default to
+  `<repo>/docs/build/reports`, scratch to `data/bench/<run>/`.
+- **`--for MINUTES` + `--heartbeat` + exit 75** is the mode for agent-driven runs: each call is a normal
+  tool call, the command pauses cleanly and the next identical call resumes without re-spending.
+- **`parallel_models`** runs different models at once; the same model never overlaps itself, and running
+  cells keep their unspent cap reserved.
+- **Resume:** re-running continues unfinished cells. A finished run says "already complete". Editing a
+  plan needs `--new` (or a new plan name) except after a budget stop.
+- **Network failures are the realistic killer.** `fetch failed` × retries ends a cell `stopped_error`;
+  the sweep continues, but a `completed` manifest with zero finished cells is not a result. The review
+  branch fixed several of these paths (abort signal, engine reboot, stop reasons).
+- **`attempts.request_gz` was always null until T12** — `ModelPlayer` never recorded the request. It now
+  stores `request_json` (local-only), so the raw pair D13 promises exists.
+- **Image arm** (`@chessdecide/render`): first real game 0-1 adjudicated, 40 plies, $0.001467, ~22 % more
+  per game than clean, no visible gain (`docs/SPIKE.md` §10).
+- **PGN move numbers follow the start FEN** (`3. e4` for random openings; `1... e5` when Black starts).
+- **Public mode derives the ladder from published rows** (`loadPublishedLadder`) and serves `/api/ladder`
+  read-only; otherwise the public leaderboard filters on nominal v0 and is empty.
+- A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`), never the preset alone.
 - `ApiError(code, message, status)` — the third argument is the HTTP status.
-- `pnpm build` needs `apps/web` to depend on `cookie@2.0.1` (SvelteKit externalises it); a stray CJS
-  copy outside the repo broke the route analysis.
-- `outputPaths` in `publish.ts` now always numbers files (`part-001.sql`) so a single-file run matches
-  the DEPLOY runbook.
+- `apps/web` must depend on `cookie@2.0.1`; `pnpm build` fails otherwise (stray CJS copy trap).
+- `outputPaths` in `publish.ts` always numbers files (`part-001.sql`).
+- Do not run `pnpm verify`/`pnpm e2e`/`ladder calibrate` while a sweep is running.
 
 ## 5. Real-run numbers so far (Quick 25, ladder v2, cap $0.50)
 
@@ -78,9 +99,9 @@ D1U clean 733 ± 158, Jev clean 532 ± 160.
 | D1 Ultra · clean | **733 ± 158** | 8-2-15 | 177.6 | $0.0099 |
 | Jev · clean | **532 ± 160** | 8-2-15 | 231.5 | $0.0299 |
 
-The `core-v1` run replaces these with 50-game series (same arms) unless it stops early.
+The remote sweep replaces these with 50-game series and adds every other model.
 
 ## 6. Not planned
 
-Phase 2 (live Cloudflare: Durable Objects + hosted Stockfish), scale-out, and model-vs-model are out
-of this curriculum.
+Phase 2 (live Cloudflare: Durable Objects + hosted Stockfish), scale-out, and model-vs-model are out of
+this curriculum.
