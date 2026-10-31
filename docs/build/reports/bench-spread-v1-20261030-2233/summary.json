@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 10,
-    "finished": 1,
-    "games": 138,
+    "finished": 2,
+    "games": 155,
     "aborted": 0,
-    "cost_usd": 0.16037342999999996
+    "cost_usd": 0.18056939499999997
   },
   "cells": [
     {
@@ -33,24 +33,24 @@
         "seriesName": "spread-v1/baseten/elephant-1#clean"
       },
       "seriesId": "01M67F3V4MV239AWDDVG1M3NMP",
-      "state": "running",
-      "status": "running",
-      "statusReason": null,
-      "games": 45,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.03901373,
+      "costUsd": 0.045279255000000004,
       "elo": {
-        "mean": 518.438371272586,
-        "lo": 404,
-        "hi": 629,
-        "games": 45
+        "mean": 495.6265071564536,
+        "lo": 386,
+        "hi": 601,
+        "games": 50
       },
       "w": 15,
-      "d": 2,
-      "l": 28,
-      "acpl": 208.11285455642727,
-      "acceptableRate": 0.7296318648159325,
-      "blunderRate": 0.19855159927579963,
+      "d": 3,
+      "l": 32,
+      "acpl": 218.04510108864696,
+      "acceptableRate": 0.7122861586314152,
+      "blunderRate": 0.21202695697252463,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -109,13 +109,13 @@
         {
           "levelId": "eps50",
           "levelElo": 614,
-          "games": 2,
-          "score": 0
+          "games": 5,
+          "score": 0.1
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-30T22:33:01.845Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T00:39:08.056Z"
     },
     {
       "cell": {
@@ -156,21 +156,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 43,
+      "games": 47,
       "target": 50,
-      "costUsd": 0.10663099999999998,
+      "costUsd": 0.11937619999999997,
       "elo": {
-        "mean": 648.8990792692903,
-        "lo": 536,
-        "hi": 764,
-        "games": 43
+        "mean": 636.60995576839,
+        "lo": 529,
+        "hi": 745,
+        "games": 47
       },
-      "w": 20,
-      "d": 4,
-      "l": 19,
-      "acpl": 212.93379138038725,
-      "acceptableRate": 0.7164272329793879,
-      "blunderRate": 0.20112429731417863,
+      "w": 21,
+      "d": 5,
+      "l": 21,
+      "acpl": 214.61835478455512,
+      "acceptableRate": 0.7269166200335758,
+      "blunderRate": 0.19473978735310576,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -224,7 +224,13 @@
           "levelId": "eps50",
           "levelElo": 614,
           "games": 5,
-          "score": 0.6666666666666666
+          "score": 0.5
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 4,
+          "score": 0.5
         }
       ],
       "abortedGames": 0,
@@ -359,23 +365,41 @@
         "repeat": 1,
         "seriesName": "spread-v1/liquid/d1#hinted"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
+      "seriesId": "01M67NNKRTBTRQWT2S0WJ6DKS5",
+      "state": "running",
+      "status": "running",
       "statusReason": null,
-      "games": 0,
+      "games": 8,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
-      "w": 0,
+      "costUsd": 0.00118524,
+      "elo": {
+        "mean": 933.1030020504397,
+        "lo": 579,
+        "hi": 1268,
+        "games": 8
+      },
+      "w": 3,
       "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "l": 5,
+      "acpl": 119.44604316546763,
+      "acceptableRate": 0.7769784172661871,
+      "blunderRate": 0.1366906474820144,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 1
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-10-31T00:27:35.579Z",
       "finishedAt": null
     },
     {
@@ -487,35 +511,73 @@
       "finishedAt": null
     }
   ],
-  "pairs": [],
+  "pairs": [
+    {
+      "a": "Elephant 1 · clean",
+      "b": "D1 · clean",
+      "pAGtB": 0.19082048550844424,
+      "diffMean": -67.1294471593727,
+      "diffLo": -219,
+      "diffHi": 83
+    }
+  ],
   "leaderboard": [
+    {
+      "arm_id": "liquid/d1#hinted",
+      "model": "liquid/d1",
+      "arm": "hinted",
+      "series_id": "01M67NNKRTBTRQWT2S0WJ6DKS5",
+      "status": "running",
+      "games": 8,
+      "elo": {
+        "mean": 933.1030020504397,
+        "lo": 579,
+        "hi": 1268,
+        "half_width": 344.5,
+        "games": 8,
+        "w": 3,
+        "d": 0,
+        "l": 5,
+        "score_pct": 0.375
+      },
+      "w": 3,
+      "d": 0,
+      "l": 5,
+      "score_pct": 0.375,
+      "acpl": 119.44604316546763,
+      "acceptable_rate": 0.7769784172661871,
+      "blunder_rate": 0.1366906474820144,
+      "cost_usd": 0.00118524,
+      "cost_per_game": 0.000148155,
+      "separated_from": []
+    },
     {
       "arm_id": "baseten/mammoth-1#clean",
       "model": "baseten/mammoth-1",
       "arm": "clean",
       "series_id": "01M67F3VBHXMFYEX1V1KSFPQ6K",
       "status": "running",
-      "games": 43,
+      "games": 47,
       "elo": {
-        "mean": 648.8990792692903,
-        "lo": 536,
-        "hi": 764,
-        "half_width": 114,
-        "games": 43,
-        "w": 20,
-        "d": 4,
-        "l": 19,
-        "score_pct": 0.5116279069767442
+        "mean": 636.60995576839,
+        "lo": 529,
+        "hi": 745,
+        "half_width": 108,
+        "games": 47,
+        "w": 21,
+        "d": 5,
+        "l": 21,
+        "score_pct": 0.5
       },
-      "w": 20,
-      "d": 4,
-      "l": 19,
-      "score_pct": 0.5116279069767442,
-      "acpl": 212.93379138038725,
-      "acceptable_rate": 0.7164272329793879,
-      "blunder_rate": 0.20112429731417863,
-      "cost_usd": 0.10663099999999998,
-      "cost_per_game": 0.002479790697674418,
+      "w": 21,
+      "d": 5,
+      "l": 21,
+      "score_pct": 0.5,
+      "acpl": 214.61835478455512,
+      "acceptable_rate": 0.7269166200335758,
+      "blunder_rate": 0.19473978735310576,
+      "cost_usd": 0.11937619999999997,
+      "cost_per_game": 0.0025399191489361697,
       "separated_from": []
     },
     {
@@ -552,28 +614,28 @@
       "model": "baseten/elephant-1",
       "arm": "clean",
       "series_id": "01M67F3V4MV239AWDDVG1M3NMP",
-      "status": "running",
-      "games": 45,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 518.438371272586,
-        "lo": 404,
-        "hi": 629,
-        "half_width": 112.5,
-        "games": 45,
+        "mean": 495.6265071564536,
+        "lo": 386,
+        "hi": 601,
+        "half_width": 107.5,
+        "games": 50,
         "w": 15,
-        "d": 2,
-        "l": 28,
-        "score_pct": 0.35555555555555557
+        "d": 3,
+        "l": 32,
+        "score_pct": 0.33
       },
       "w": 15,
-      "d": 2,
-      "l": 28,
-      "score_pct": 0.35555555555555557,
-      "acpl": 208.11285455642727,
-      "acceptable_rate": 0.7296318648159325,
-      "blunder_rate": 0.19855159927579963,
-      "cost_usd": 0.03901373,
-      "cost_per_game": 0.0008669717777777779,
+      "d": 3,
+      "l": 32,
+      "score_pct": 0.33,
+      "acpl": 218.04510108864696,
+      "acceptable_rate": 0.7122861586314152,
+      "blunder_rate": 0.21202695697252463,
+      "cost_usd": 0.045279255000000004,
+      "cost_per_game": 0.0009055851000000001,
       "separated_from": []
     }
   ]
