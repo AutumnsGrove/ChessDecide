@@ -3,8 +3,7 @@
   "name": "spread-v1/baseten/elephant-1#clean",
   "model": "baseten/elephant-1",
   "arm": "clean",
-  "status": "paused",
-  "status_reason": "paused",
+  "status": "running",
   "size": {
     "preset": "standard"
   },
@@ -740,13 +739,13 @@
       "level_id": "eps50",
       "level_elo": 614,
       "model_color": "black",
-      "status": "paused",
+      "status": "running",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 60,
-      "acpl_model": 309.7,
-      "cost_usd": 0.0007775249999999999
+      "plies": 108,
+      "acpl_model": 304.8867924528302,
+      "cost_usd": 0.0012952449999999996
     },
     {
       "game_id": "01M67N5TD5NZM9JV3E538NXR2F",
@@ -755,13 +754,13 @@
       "level_id": "eps50",
       "level_elo": 614,
       "model_color": "white",
-      "status": "paused",
+      "status": "running",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 57,
-      "acpl_model": 372.2758620689655,
-      "cost_usd": 0.0008092350000000002
+      "plies": 105,
+      "acpl_model": 327.8076923076923,
+      "cost_usd": 0.0012966800000000001
     }
   ],
   "blocks": [

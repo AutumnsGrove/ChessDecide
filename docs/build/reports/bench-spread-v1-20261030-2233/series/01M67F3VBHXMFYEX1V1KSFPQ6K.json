@@ -3,15 +3,14 @@
   "name": "spread-v1/baseten/mammoth-1#clean",
   "model": "baseten/mammoth-1",
   "arm": "clean",
-  "status": "paused",
-  "status_reason": "paused",
+  "status": "running",
   "size": {
     "preset": "standard"
   },
   "ladder_version": 2,
   "seed": 20261030,
   "budget_usd": 3,
-  "cost_usd": 0.10537349999999998,
+  "cost_usd": 0.10663099999999998,
   "games": [
     {
       "game_id": "01M67F3WDR6G0V9HYEBYMQ7NXA",
@@ -692,13 +691,13 @@
       "level_id": "eps50",
       "level_elo": 614,
       "model_color": "white",
-      "status": "paused",
+      "status": "running",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 19,
-      "acpl_model": 170.1,
-      "cost_usd": 0.0007752000000000001
+      "plies": 67,
+      "acpl_model": 265.27272727272725,
+      "cost_usd": 0.0028337
     },
     {
       "game_id": "01M67NBCPHBHNWHD050GSR77TM",
@@ -707,13 +706,29 @@
       "level_id": "eps50",
       "level_elo": 614,
       "model_color": "black",
-      "status": "paused",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 32,
+      "acpl_model": 182.75,
+      "cost_usd": 0.0012575000000000002
+    },
+    {
+      "game_id": "01M67NJA7548976FTSDXJTGWQ9",
+      "index": 44,
+      "block": 8,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "white",
+      "status": "running",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 13,
-      "acpl_model": 74.66666666666667,
-      "cost_usd": 0.0003912
+      "plies": 24,
+      "acpl_model": 114.16666666666667,
+      "cost_usd": 0.0008489000000000001
     }
   ],
   "blocks": [
@@ -793,22 +808,22 @@
       "index": 8,
       "level_id": "eps50",
       "level_elo": 614,
-      "games": 4,
-      "score": 0.5,
+      "games": 5,
+      "score": 0.6666666666666666,
       "posterior_before": 641.4916052614869,
-      "posterior_after": 639.8942511624314
+      "posterior_after": 648.8990792692903
     }
   ],
   "elo": {
-    "mean": 639.8942511624314,
-    "lo": 525,
-    "hi": 757,
-    "half_width": 116,
-    "games": 42,
-    "w": 19,
+    "mean": 648.8990792692903,
+    "lo": 536,
+    "hi": 764,
+    "half_width": 114,
+    "games": 43,
+    "w": 20,
     "d": 4,
     "l": 19,
-    "score_pct": 0.5
+    "score_pct": 0.5116279069767442
   },
   "elo_history": [
     {
@@ -1062,28 +1077,34 @@
       "mean": 639.8942511624314,
       "lo": 525,
       "hi": 757
+    },
+    {
+      "games": 43,
+      "mean": 648.8990792692903,
+      "lo": 536,
+      "hi": 764
     }
   ],
   "secondary": {
-    "games": 42,
-    "model_plies": 1585,
-    "acpl": 213.2384858044164,
-    "acpl_median": 65,
-    "acceptable_rate": 0.7160883280757098,
-    "mistake_rate": 0.23659305993690852,
-    "blunder_rate": 0.20126182965299685,
-    "mean_p_acceptable": 0.6471698394995246,
-    "mean_e_win_loss": 18.957674825839174,
-    "brier": 0.47488149549823466,
-    "ece": 0.5215883576919298,
+    "games": 43,
+    "model_plies": 1601,
+    "acpl": 212.93379138038725,
+    "acpl_median": 64,
+    "acceptable_rate": 0.7164272329793879,
+    "mistake_rate": 0.23672704559650218,
+    "blunder_rate": 0.20112429731417863,
+    "mean_p_acceptable": 0.6480858552648424,
+    "mean_e_win_loss": 18.922809565727977,
+    "brier": 0.4757020955974247,
+    "ece": 0.5224513252563543,
     "score_as_white": 0.5,
-    "score_as_black": 0.5,
-    "avg_plies": 75.83333333333333,
-    "adjudicated_frac": 0.8571428571428571,
-    "cost_per_game": 0.0025088928571428567,
-    "latency_p50": 287,
-    "latency_p95": 1130.8,
-    "avg_input_tokens": 664.8170347003155
+    "score_as_black": 0.5227272727272727,
+    "avg_plies": 74.81395348837209,
+    "adjudicated_frac": 0.8604651162790697,
+    "cost_per_game": 0.002479790697674418,
+    "latency_p50": 283,
+    "latency_p95": 1130,
+    "avg_input_tokens": 666.0274828232355
   },
   "created_at": "2026-10-30T22:33:02.065Z"
 }
