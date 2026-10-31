@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 10,
-    "finished": 9,
-    "games": 476,
+    "finished": 10,
+    "games": 500,
     "aborted": 0,
-    "cost_usd": 0.38923923800000004
+    "cost_usd": 0.401459096
   },
   "cells": [
     {
@@ -870,24 +870,24 @@
         "seriesName": "spread-v1/microsoft/microsoft-decision-1#hinted"
       },
       "seriesId": "01M6819C6PJ3C1DKAX0CK8FCKY",
-      "state": "running",
-      "status": "running",
-      "statusReason": null,
-      "games": 26,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.013763988,
+      "costUsd": 0.025983846,
       "elo": {
-        "mean": 688.0513770170109,
-        "lo": 538,
-        "hi": 843,
-        "games": 26
+        "mean": 709.2952716654486,
+        "lo": 605,
+        "hi": 816,
+        "games": 50
       },
-      "w": 11,
-      "d": 3,
-      "l": 12,
-      "acpl": 141.4537607891492,
-      "acceptableRate": 0.8175092478421702,
-      "blunderRate": 0.1344019728729963,
+      "w": 23,
+      "d": 5,
+      "l": 22,
+      "acpl": 140.34278350515464,
+      "acceptableRate": 0.7983247422680413,
+      "blunderRate": 0.14175257731958762,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -922,13 +922,37 @@
         {
           "levelId": "eps50",
           "levelElo": 614,
-          "games": 3,
-          "score": 1
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.2
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-31T03:50:37.526Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T04:53:46.963Z"
     }
   ],
   "pairs": [
@@ -997,6 +1021,14 @@
       "diffHi": 152
     },
     {
+      "a": "Elephant 1 · clean",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.0024339391925831,
+      "diffMean": -213.66876450633893,
+      "diffLo": -366,
+      "diffHi": -64
+    },
+    {
       "a": "Elephant 1 · hinted",
       "b": "Mammoth 1 · clean",
       "pAGtB": 0.9923676835864955,
@@ -1053,6 +1085,14 @@
       "diffHi": 473
     },
     {
+      "a": "Elephant 1 · hinted",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.9253403637671959,
+      "diffMean": 109.28166380446714,
+      "diffLo": -40,
+      "diffHi": 257
+    },
+    {
       "a": "Mammoth 1 · clean",
       "b": "Mammoth 1 · hinted",
       "pAGtB": 0.00045509666929011535,
@@ -1101,6 +1141,14 @@
       "diffHi": 290
     },
     {
+      "a": "Mammoth 1 · clean",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.1624347965911222,
+      "diffMean": -74.2842618791507,
+      "diffLo": -223,
+      "diffHi": 74
+    },
+    {
       "a": "Mammoth 1 · hinted",
       "b": "D1 · clean",
       "pAGtB": 0.999989839362134,
@@ -1141,6 +1189,14 @@
       "diffHi": 541
     },
     {
+      "a": "Mammoth 1 · hinted",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.9900921608717391,
+      "diffMean": 176.76236103662973,
+      "diffLo": 28,
+      "diffHi": 324
+    },
+    {
       "a": "D1 · clean",
       "b": "D1 · hinted",
       "pAGtB": 0.006834935867864964,
@@ -1173,6 +1229,14 @@
       "diffHi": 218
     },
     {
+      "a": "D1 · clean",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.026470651610430555,
+      "diffMean": -146.5393173469667,
+      "diffLo": -296,
+      "diffHi": 2
+    },
+    {
       "a": "D1 · hinted",
       "b": "D1.1 · clean",
       "pAGtB": 0.9992986056587413,
@@ -1197,6 +1261,14 @@
       "diffHi": 408
     },
     {
+      "a": "D1 · hinted",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.715353572345433,
+      "diffMean": 43.107004698909336,
+      "diffLo": -108,
+      "diffHi": 192
+    },
+    {
       "a": "D1.1 · clean",
       "b": "D1.1 · hinted",
       "pAGtB": 0.003023699567995399,
@@ -1213,12 +1285,36 @@
       "diffHi": 160
     },
     {
+      "a": "D1.1 · clean",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.0035075599722160277,
+      "diffMean": -205.96119916679552,
+      "diffLo": -357,
+      "diffHi": -56
+    },
+    {
       "a": "D1.1 · hinted",
       "b": "Microsoft Decision 1 · clean",
       "pAGtB": 0.9977987009671307,
       "diffMean": 221.9534204104554,
       "diffLo": 70,
       "diffHi": 374
+    },
+    {
+      "a": "D1.1 · hinted",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.5332614553686013,
+      "diffMean": 6.502804540991938,
+      "diffLo": -145,
+      "diffHi": 158
+    },
+    {
+      "a": "Microsoft Decision 1 · clean",
+      "b": "Microsoft Decision 1 · hinted",
+      "pAGtB": 0.0025535927575068723,
+      "diffMean": -215.45061586946375,
+      "diffLo": -365,
+      "diffHi": -65
     }
   ],
   "leaderboard": [
@@ -1361,29 +1457,32 @@
       "model": "microsoft/microsoft-decision-1",
       "arm": "hinted",
       "series_id": "01M6819C6PJ3C1DKAX0CK8FCKY",
-      "status": "running",
-      "games": 26,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 688.0513770170109,
-        "lo": 538,
-        "hi": 843,
-        "half_width": 152.5,
-        "games": 26,
-        "w": 11,
-        "d": 3,
-        "l": 12,
-        "score_pct": 0.4807692307692308
+        "mean": 709.2952716654486,
+        "lo": 605,
+        "hi": 816,
+        "half_width": 105.5,
+        "games": 50,
+        "w": 23,
+        "d": 5,
+        "l": 22,
+        "score_pct": 0.51
       },
-      "w": 11,
-      "d": 3,
-      "l": 12,
-      "score_pct": 0.4807692307692308,
-      "acpl": 141.4537607891492,
-      "acceptable_rate": 0.8175092478421702,
-      "blunder_rate": 0.1344019728729963,
-      "cost_usd": 0.013763988,
-      "cost_per_game": 0.0005293841538461538,
-      "separated_from": []
+      "w": 23,
+      "d": 5,
+      "l": 22,
+      "score_pct": 0.51,
+      "acpl": 140.34278350515464,
+      "acceptable_rate": 0.7983247422680413,
+      "blunder_rate": 0.14175257731958762,
+      "cost_usd": 0.025983846,
+      "cost_per_game": 0.0005196769200000001,
+      "separated_from": [
+        "baseten/elephant-1#clean",
+        "microsoft/microsoft-decision-1#clean"
+      ]
     },
     {
       "arm_id": "baseten/mammoth-1#clean",
@@ -1512,7 +1611,8 @@
         "liquid/d1#hinted",
         "baseten/elephant-1#hinted",
         "baseten/mammoth-1#hinted",
-        "liquid/d1.1#hinted"
+        "liquid/d1.1#hinted",
+        "microsoft/microsoft-decision-1#hinted"
       ]
     },
     {
@@ -1546,7 +1646,8 @@
         "liquid/d1#hinted",
         "baseten/elephant-1#hinted",
         "baseten/mammoth-1#hinted",
-        "liquid/d1.1#hinted"
+        "liquid/d1.1#hinted",
+        "microsoft/microsoft-decision-1#hinted"
       ]
     }
   ]
