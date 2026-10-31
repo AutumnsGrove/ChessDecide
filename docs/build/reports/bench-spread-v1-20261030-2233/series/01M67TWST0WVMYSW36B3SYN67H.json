@@ -3,14 +3,15 @@
   "name": "spread-v1/liquid/d1.1#clean",
   "model": "liquid/d1.1",
   "arm": "clean",
-  "status": "running",
+  "status": "paused",
+  "status_reason": "paused",
   "size": {
     "preset": "standard"
   },
   "ladder_version": 2,
   "seed": 20261031,
   "budget_usd": 1.9741924000000006,
-  "cost_usd": 0,
+  "cost_usd": 0.00131664,
   "games": [
     {
       "game_id": "01M67TWVJ0151NWJHT59NEC8VR",
@@ -19,13 +20,14 @@
       "level_id": "uci1320",
       "level_elo": 1320,
       "model_color": "white",
-      "status": "running",
-      "result": "*",
-      "termination": "",
-      "adjudicated": false,
-      "plies": 22,
-      "acpl_model": 94.72727272727273,
-      "cost_usd": 0.00008215999999999999
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 30,
+      "acpl_model": 89.93333333333334,
+      "cost_usd": 0.00011156
     },
     {
       "game_id": "01M67TWVMNYJWX7EGDACS45M0M",
@@ -34,13 +36,141 @@
       "level_id": "uci1320",
       "level_elo": 1320,
       "model_color": "black",
-      "status": "running",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 27,
+      "acpl_model": 150.16666666666666,
+      "cost_usd": 0.00010678
+    },
+    {
+      "game_id": "01M67TZNDGNH41MT51TJMXNFSA",
+      "index": 2,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 38,
+      "acpl_model": 108.42105263157895,
+      "cost_usd": 0.00016371999999999998
+    },
+    {
+      "game_id": "01M67V0JAFG2QWF43W3ZQD9C1A",
+      "index": 3,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 27,
+      "acpl_model": 98.46153846153847,
+      "cost_usd": 0.00010318
+    },
+    {
+      "game_id": "01M67V4578BPM6EBBH88BRRWBE",
+      "index": 4,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 30,
+      "acpl_model": 113,
+      "cost_usd": 0.00011182
+    },
+    {
+      "game_id": "01M67V6JD7MBZ39BEHCQ6MSA73",
+      "index": 5,
+      "block": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "black",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 42,
+      "acpl_model": 211.38095238095238,
+      "cost_usd": 0.00018888000000000005
+    },
+    {
+      "game_id": "01M67V6QT6TX7WPQSPY8YJAKBG",
+      "index": 6,
+      "block": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 68,
+      "acpl_model": 217.96969696969697,
+      "cost_usd": 0.000264
+    },
+    {
+      "game_id": "01M67VC42RMJ3YM10GZ3EST6V4",
+      "index": 7,
+      "block": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "black",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 36,
+      "acpl_model": 124.61111111111111,
+      "cost_usd": 0.00013714
+    },
+    {
+      "game_id": "01M67VFBARBGXWQJZPHTFM0KCK",
+      "index": 8,
+      "block": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 30,
+      "acpl_model": 199.46666666666667,
+      "cost_usd": 0.00012956000000000003
+    },
+    {
+      "game_id": "01M67VG73607XJR96C5CVFY444",
+      "index": 9,
+      "block": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "model_color": "black",
+      "status": "paused",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 23,
-      "acpl_model": 180.2,
-      "cost_usd": 0.00009184
+      "plies": 94,
+      "acpl_model": 255.29787234042553,
+      "cost_usd": 0.00034902
     }
   ],
   "blocks": [
@@ -48,34 +178,108 @@
       "index": 0,
       "level_id": "uci1320",
       "level_elo": 1320,
-      "games": 2,
+      "games": 5,
       "score": 0,
       "posterior_before": 1200,
-      "posterior_after": 1200
+      "posterior_after": 667.8866329468782
+    },
+    {
+      "index": 1,
+      "level_id": "eps50",
+      "level_elo": 614,
+      "games": 5,
+      "score": 0.5,
+      "posterior_before": 667.8866329468782,
+      "posterior_after": 639.2135244442201
     }
   ],
-  "elo": null,
-  "elo_history": [],
+  "elo": {
+    "mean": 639.2135244442201,
+    "lo": 297,
+    "hi": 968,
+    "half_width": 335.5,
+    "games": 9,
+    "w": 2,
+    "d": 0,
+    "l": 7,
+    "score_pct": 0.2222222222222222
+  },
+  "elo_history": [
+    {
+      "games": 1,
+      "mean": 876.1208007363231,
+      "lo": 124,
+      "hi": 1595
+    },
+    {
+      "games": 2,
+      "mean": 780.9057619777763,
+      "lo": 104,
+      "hi": 1391
+    },
+    {
+      "games": 3,
+      "mean": 729.4708958622144,
+      "lo": 93,
+      "hi": 1293
+    },
+    {
+      "games": 4,
+      "mean": 694.4331014798493,
+      "lo": 86,
+      "hi": 1231
+    },
+    {
+      "games": 5,
+      "mean": 667.8866329468782,
+      "lo": 81,
+      "hi": 1186
+    },
+    {
+      "games": 6,
+      "mean": 823.6655540183064,
+      "lo": 334,
+      "hi": 1230
+    },
+    {
+      "games": 7,
+      "mean": 649.0553629216446,
+      "lo": 203,
+      "hi": 1057
+    },
+    {
+      "games": 8,
+      "mean": 744.3257223694012,
+      "lo": 375,
+      "hi": 1101
+    },
+    {
+      "games": 9,
+      "mean": 639.2135244442201,
+      "lo": 297,
+      "hi": 968
+    }
+  ],
   "secondary": {
-    "games": 0,
-    "model_plies": 0,
-    "acpl": null,
-    "acpl_median": null,
-    "acceptable_rate": null,
-    "mistake_rate": null,
-    "blunder_rate": null,
-    "mean_p_acceptable": null,
-    "mean_e_win_loss": null,
-    "brier": null,
-    "ece": null,
-    "score_as_white": null,
-    "score_as_black": null,
-    "avg_plies": null,
-    "adjudicated_frac": null,
-    "cost_per_game": null,
-    "latency_p50": null,
-    "latency_p95": null,
-    "avg_input_tokens": null
+    "games": 9,
+    "model_plies": 161,
+    "acpl": 155.6086956521739,
+    "acpl_median": 78,
+    "acceptable_rate": 0.7142857142857143,
+    "mistake_rate": 0.2236024844720497,
+    "blunder_rate": 0.17391304347826086,
+    "mean_p_acceptable": 0.6514405402831605,
+    "mean_e_win_loss": 14.858194055542898,
+    "brier": 0.5140854451727243,
+    "ece": 0.5606172274252261,
+    "score_as_white": 0,
+    "score_as_black": 0.5,
+    "avg_plies": 36.44444444444444,
+    "adjudicated_frac": 0.6666666666666666,
+    "cost_per_game": 0.00014629333333333332,
+    "latency_p50": 174,
+    "latency_p95": 694,
+    "avg_input_tokens": 408.8944099378882
   },
   "created_at": "2026-10-31T01:58:54.016Z"
 }
