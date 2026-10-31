@@ -19,9 +19,9 @@
   "totals": {
     "cells": 13,
     "finished": 1,
-    "games": 164,
-    "aborted": 0,
-    "cost_usd": 0.06296844
+    "games": 165,
+    "aborted": 3,
+    "cost_usd": 0.063751554
   },
   "cells": [
     {
@@ -123,21 +123,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 39,
+      "games": 40,
       "target": 50,
-      "costUsd": 0.00706702,
+      "costUsd": 0.0074576700000000004,
       "elo": {
-        "mean": 352.5870462623131,
-        "lo": 227,
-        "hi": 476,
-        "games": 39
+        "mean": 353.8107182047933,
+        "lo": 231,
+        "hi": 475,
+        "games": 40
       },
       "w": 13,
-      "d": 4,
+      "d": 5,
       "l": 22,
-      "acpl": 269.6981004070556,
-      "acceptableRate": 0.6913161465400272,
-      "blunderRate": 0.24559023066485752,
+      "acpl": 270.22759059122694,
+      "acceptableRate": 0.680864589955499,
+      "blunderRate": 0.25683407501589317,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -186,6 +186,12 @@
           "levelElo": 391,
           "games": 5,
           "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 2,
+          "score": 0
         }
       ],
       "abortedGames": 0,
@@ -374,13 +380,13 @@
         "repeat": 1,
         "seriesName": "rest-clean-v1/cloudflare/clef-flash#clean"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
-      "statusReason": null,
+      "seriesId": "01M68D2E928PEWTNYJS9T7KK4X",
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
-      "costUsd": 0,
+      "costUsd": 0.000392464,
       "elo": null,
       "w": 0,
       "d": 0,
@@ -388,10 +394,17 @@
       "acpl": null,
       "acceptableRate": null,
       "blunderRate": null,
-      "blocks": [],
-      "abortedGames": 0,
-      "startedAt": null,
-      "finishedAt": null
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 4,
+          "score": 0
+        }
+      ],
+      "abortedGames": 3,
+      "startedAt": "2026-10-31T07:16:33.186Z",
+      "finishedAt": "2026-10-31T07:19:00.282Z"
     },
     {
       "cell": {
@@ -649,27 +662,27 @@
       "arm": "clean",
       "series_id": "01M68501S1KKSMFBVMYEGXG68Z",
       "status": "running",
-      "games": 39,
+      "games": 40,
       "elo": {
-        "mean": 352.5870462623131,
-        "lo": 227,
-        "hi": 476,
-        "half_width": 124.5,
-        "games": 39,
+        "mean": 353.8107182047933,
+        "lo": 231,
+        "hi": 475,
+        "half_width": 122,
+        "games": 40,
         "w": 13,
-        "d": 4,
+        "d": 5,
         "l": 22,
-        "score_pct": 0.38461538461538464
+        "score_pct": 0.3875
       },
       "w": 13,
-      "d": 4,
+      "d": 5,
       "l": 22,
-      "score_pct": 0.38461538461538464,
-      "acpl": 269.6981004070556,
-      "acceptable_rate": 0.6913161465400272,
-      "blunder_rate": 0.24559023066485752,
-      "cost_usd": 0.00706702,
-      "cost_per_game": 0.00018120564102564103,
+      "score_pct": 0.3875,
+      "acpl": 270.22759059122694,
+      "acceptable_rate": 0.680864589955499,
+      "blunder_rate": 0.25683407501589317,
+      "cost_usd": 0.0074576700000000004,
+      "cost_per_game": 0.00018644175,
       "separated_from": []
     },
     {
