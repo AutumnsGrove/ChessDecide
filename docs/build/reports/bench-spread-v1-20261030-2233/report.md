@@ -3,7 +3,7 @@
 Plan `bench/plans/spread-v1.json` (sha256 e9137c4db88a2d9d…) · seed spread-v1-20261030-2233 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $3.0000 per series, $8.0000 per run
 Ran 2026-10-30 22:33 UTC → 2026-10-31 00:23 UTC (1 h 51 min) · node 22.22.0 · Stockfish Stockfish 16 · git 23abef0
-**Spend $0.3024 of $8.0000** · 10 cells: 5 finished · 309 games · 0 aborted
+**Spend $0.3030 of $8.0000** · 10 cells: 5 finished · 310 games · 0 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
 | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -15,7 +15,7 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 00:23 UTC (1 h 51 min) · node 22.22.0 �
 | **D1 · hinted** | `01M67NNKRT…` | **752 ± 106** (645–857) | 17-3-30 | 37 % | 139.4 | 79.2 % | 14.3 % | $0.0111 | 50 |
 | **D1.1 · clean** | `01M67TWST0…` | **639 ± 336** (297–968) | 2-0-7 | 22 % | 155.6 | 71.4 % | 17.4 % | $0.0013 | 9 |
 | **D1.1 · hinted** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
-| **Microsoft Decision 1 · clean** | `01M67TZGW7…` | **283 ± 308** (17–633) | 0-0-9 | 0 % | 185.0 | 71.8 % | 21.8 % | $0.0031 | 9 |
+| **Microsoft Decision 1 · clean** | `01M67TZGW7…` | **414 ± 328** (75–730) | 1-0-9 | 10 % | 192.5 | 71.7 % | 22.2 % | $0.0038 | 10 |
 | **Microsoft Decision 1 · hinted** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
 
 ## Separated pairs (METRICS.md B6)
@@ -45,7 +45,7 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 00:23 UTC (1 h 51 min) · node 22.22.0 �
 | D1 · hinted | 0 % | 100 % | — | 20 % | 20 % |
 | D1.1 · clean | 0 % | 50 % | — | — | — |
 | D1.1 · hinted | — | — | — | — | — |
-| Microsoft Decision 1 · clean | 0 % | 0 % | — | — | — |
+| Microsoft Decision 1 · clean | 0 % | 20 % | — | — | — |
 | Microsoft Decision 1 · hinted | — | — | — | — | — |
 
 ## Not finished
@@ -53,7 +53,7 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 00:23 UTC (1 h 51 min) · node 22.22.0 �
 - cell 3 (baseten/mammoth-1#hinted, running) paused at 41/50 games, $0.0770 — paused
 - cell 6 (liquid/d1.1#clean, running) paused at 9/50 games, $0.0013 — paused
 - cell 7 (liquid/d1.1#hinted, pending) created at 0/50 games, $0.0000
-- cell 8 (microsoft/microsoft-decision-1#clean, running) running at 9/50 games, $0.0031
+- cell 8 (microsoft/microsoft-decision-1#clean, running) paused at 10/50 games, $0.0038 — paused
 - cell 9 (microsoft/microsoft-decision-1#hinted, pending) created at 0/50 games, $0.0000
 
 ## Provenance
