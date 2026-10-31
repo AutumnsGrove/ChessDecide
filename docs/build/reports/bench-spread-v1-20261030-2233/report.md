@@ -2,7 +2,7 @@
 
 Plan `bench/plans/spread-v1.json` (sha256 e9137c4db88a2d9d…) · seed spread-v1-20261030-2233 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $3.0000 per series, $8.0000 per run
-Ran 2026-10-30 22:33 UTC → 2026-10-31 04:07 UTC (5 h 34 min) · node 22.22.0 · Stockfish Stockfish 16 · git 23abef0
+Ran 2026-10-30 22:33 UTC → 2026-10-31 04:54 UTC (6 h 21 min) · node 22.22.0 · Stockfish Stockfish 16 · git 23abef0
 **Spend $0.4015 of $8.0000** · 10 cells: 10 finished · 500 games · 0 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
@@ -86,4 +86,4 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 04:07 UTC (5 h 34 min) · node 22.22.0 �
 ## Provenance
 
 - plan: `bench/plans/spread-v1.json` sha256 e9137c4db88a2d9d78bd7d68c0d2fd1f7d1cb9b1b707c6709a0a7bfa65edd277 · seed spread-v1-20261030-2233 · host `vm`
-- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: sliced
+- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: completed
