@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 13,
-    "finished": 4,
-    "games": 252,
+    "finished": 5,
+    "games": 335,
     "aborted": 11,
-    "cost_usd": 0.132171902
+    "cost_usd": 0.238548092
   },
   "cells": [
     {
@@ -439,24 +439,24 @@
         "seriesName": "rest-clean-v1/nace-ai/drex-v1.5#clean"
       },
       "seriesId": "01M68D7NXHFAX6VY0MVTTT9BEB",
-      "state": "running",
-      "status": "paused",
-      "statusReason": "paused",
-      "games": 24,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.017055320000000002,
+      "costUsd": 0.0362594,
       "elo": {
-        "mean": 460.3964959005137,
-        "lo": 297,
-        "hi": 625,
-        "games": 24
+        "mean": 411.3443831435073,
+        "lo": 307,
+        "hi": 515,
+        "games": 50
       },
-      "w": 9,
-      "d": 1,
-      "l": 14,
-      "acpl": 235.49564134495643,
-      "acceptableRate": 0.6961394769613948,
-      "blunderRate": 0.22166874221668742,
+      "w": 21,
+      "d": 2,
+      "l": 27,
+      "acpl": 266.7588092345079,
+      "acceptableRate": 0.6688942891859052,
+      "blunderRate": 0.2515188335358445,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -486,12 +486,42 @@
           "levelId": "eps75",
           "levelElo": 391,
           "games": 5,
-          "score": 0.625
+          "score": 0.7
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-31T07:19:24.850Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T10:04:38.908Z"
     },
     {
       "cell": {
@@ -503,23 +533,23 @@
       },
       "seriesId": "01M68ERA3B2586RHMXVMX3CN59",
       "state": "running",
-      "status": "paused",
-      "statusReason": "paused",
-      "games": 14,
+      "status": "running",
+      "statusReason": null,
+      "games": 28,
       "target": 50,
-      "costUsd": 0.019740042,
+      "costUsd": 0.05123143199999999,
       "elo": {
-        "mean": 495.54273161609035,
-        "lo": 251,
-        "hi": 735,
-        "games": 14
+        "mean": 348.4766968307367,
+        "lo": 194,
+        "hi": 497,
+        "games": 28
       },
-      "w": 3,
-      "d": 2,
-      "l": 9,
-      "acpl": 209.5867446393762,
-      "acceptableRate": 0.7699805068226121,
-      "blunderRate": 0.17348927875243664,
+      "w": 5,
+      "d": 7,
+      "l": 16,
+      "acpl": 219.51778093883357,
+      "acceptableRate": 0.7731152204836416,
+      "blunderRate": 0.1906116642958748,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -537,7 +567,25 @@
           "levelId": "eps75",
           "levelElo": 391,
           "games": 5,
-          "score": 0.625
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.8333333333333334
         }
       ],
       "abortedGames": 0,
@@ -627,23 +675,23 @@
       },
       "seriesId": "01M68FHS04VZ7TJPM4FERQV3PX",
       "state": "running",
-      "status": "paused",
-      "statusReason": "paused",
-      "games": 12,
+      "status": "running",
+      "statusReason": null,
+      "games": 32,
       "target": 50,
-      "costUsd": 0.012637319999999999,
+      "costUsd": 0.04525073999999999,
       "elo": {
-        "mean": 472.1735553516544,
-        "lo": 173,
-        "hi": 737,
-        "games": 12
+        "mean": 451.3621318572478,
+        "lo": 309,
+        "hi": 590,
+        "games": 32
       },
-      "w": 2,
-      "d": 0,
-      "l": 10,
-      "acpl": 159.1818181818182,
-      "acceptableRate": 0.7302052785923754,
-      "blunderRate": 0.17888563049853373,
+      "w": 10,
+      "d": 2,
+      "l": 20,
+      "acpl": 205.13212221304707,
+      "acceptableRate": 0.7324525185796862,
+      "blunderRate": 0.19900908340214699,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -660,8 +708,32 @@
         {
           "levelId": "eps50",
           "levelElo": 614,
-          "games": 4,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
           "score": 0
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 4,
+          "score": 0.5
         }
       ],
       "abortedGames": 0,
@@ -678,28 +750,52 @@
       },
       "seriesId": "01M68HG3JK6YJ2BCZVSARBDZNA",
       "state": "running",
-      "status": "paused",
-      "statusReason": "paused",
-      "games": 1,
+      "status": "running",
+      "statusReason": null,
+      "games": 24,
       "target": 50,
-      "costUsd": 0.00060666,
+      "costUsd": 0.023673960000000004,
       "elo": {
-        "mean": 876.1208007363231,
-        "lo": 124,
-        "hi": 1595,
-        "games": 1
+        "mean": 465.51561374516274,
+        "lo": 292,
+        "hi": 630,
+        "games": 24
       },
-      "w": 0,
-      "d": 0,
-      "l": 1,
-      "acpl": 94.4,
-      "acceptableRate": 0.75,
-      "blunderRate": 0.05,
+      "w": 6,
+      "d": 2,
+      "l": 16,
+      "acpl": 165.95543905635648,
+      "acceptableRate": 0.7706422018348624,
+      "blunderRate": 0.15465268676277852,
       "blocks": [
         {
           "levelId": "uci1320",
           "levelElo": 1320,
-          "games": 3,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
           "score": 0
         }
       ],
@@ -788,6 +884,14 @@
       "diffHi": -40
     },
     {
+      "a": "Pplx Decider Flash V1.2 · clean",
+      "b": "Drex V1.5 · clean",
+      "pAGtB": 0.0770436220620666,
+      "diffMean": -108.95203703461802,
+      "diffLo": -260,
+      "diffHi": 41
+    },
+    {
       "a": "Span 02 · clean",
       "b": "Mercury Decide · clean",
       "pAGtB": 0.5743784896363877,
@@ -804,12 +908,36 @@
       "diffHi": -32
     },
     {
+      "a": "Span 02 · clean",
+      "b": "Drex V1.5 · clean",
+      "pAGtB": 0.09472679223210627,
+      "diffMean": -100.1185076617444,
+      "diffLo": -251,
+      "diffHi": 49
+    },
+    {
       "a": "Mercury Decide · clean",
       "b": "Pplx Decider V1.2 · clean",
       "pAGtB": 0.006446840189036867,
       "diffMean": -197.59069437136435,
       "diffLo": -352,
       "diffHi": -42
+    },
+    {
+      "a": "Mercury Decide · clean",
+      "b": "Drex V1.5 · clean",
+      "pAGtB": 0.07073521462436669,
+      "diffMean": -114.48986335457305,
+      "diffLo": -266,
+      "diffHi": 39
+    },
+    {
+      "a": "Pplx Decider V1.2 · clean",
+      "b": "Drex V1.5 · clean",
+      "pAGtB": 0.8630648663423043,
+      "diffMean": 83.10083101679164,
+      "diffLo": -66,
+      "diffHi": 232
     }
   ],
   "leaderboard": [
@@ -843,64 +971,6 @@
       "separated_from": []
     },
     {
-      "arm_id": "nace-ai/drex-v2.0#clean",
-      "model": "nace-ai/drex-v2.0",
-      "arm": "clean",
-      "series_id": "01M68HG3JK6YJ2BCZVSARBDZNA",
-      "status": "paused",
-      "games": 1,
-      "elo": {
-        "mean": 876.1208007363231,
-        "lo": 124,
-        "hi": 1595,
-        "half_width": 735.5,
-        "games": 1,
-        "w": 0,
-        "d": 0,
-        "l": 1,
-        "score_pct": 0
-      },
-      "w": 0,
-      "d": 0,
-      "l": 1,
-      "score_pct": 0,
-      "acpl": 94.4,
-      "acceptable_rate": 0.75,
-      "blunder_rate": 0.05,
-      "cost_usd": 0.00060666,
-      "cost_per_game": 0.00060666,
-      "separated_from": []
-    },
-    {
-      "arm_id": "typesafe/jev-1.13#clean",
-      "model": "typesafe/jev-1.13",
-      "arm": "clean",
-      "series_id": "01M68ERA3B2586RHMXVMX3CN59",
-      "status": "paused",
-      "games": 14,
-      "elo": {
-        "mean": 495.54273161609035,
-        "lo": 251,
-        "hi": 735,
-        "half_width": 242,
-        "games": 14,
-        "w": 3,
-        "d": 2,
-        "l": 9,
-        "score_pct": 0.2857142857142857
-      },
-      "w": 3,
-      "d": 2,
-      "l": 9,
-      "score_pct": 0.2857142857142857,
-      "acpl": 209.5867446393762,
-      "acceptable_rate": 0.7699805068226121,
-      "blunder_rate": 0.17348927875243664,
-      "cost_usd": 0.019740042,
-      "cost_per_game": 0.0014100030000000002,
-      "separated_from": []
-    },
-    {
       "arm_id": "perplexity/pplx-decider-v1.2#clean",
       "model": "perplexity/pplx-decider-v1.2",
       "arm": "clean",
@@ -930,32 +1000,61 @@
       "separated_from": []
     },
     {
+      "arm_id": "nace-ai/drex-v2.0#clean",
+      "model": "nace-ai/drex-v2.0",
+      "arm": "clean",
+      "series_id": "01M68HG3JK6YJ2BCZVSARBDZNA",
+      "status": "running",
+      "games": 24,
+      "elo": {
+        "mean": 465.51561374516274,
+        "lo": 292,
+        "hi": 630,
+        "half_width": 169,
+        "games": 24,
+        "w": 6,
+        "d": 2,
+        "l": 16,
+        "score_pct": 0.2916666666666667
+      },
+      "w": 6,
+      "d": 2,
+      "l": 16,
+      "score_pct": 0.2916666666666667,
+      "acpl": 165.95543905635648,
+      "acceptable_rate": 0.7706422018348624,
+      "blunder_rate": 0.15465268676277852,
+      "cost_usd": 0.023673960000000004,
+      "cost_per_game": 0.0009864150000000003,
+      "separated_from": []
+    },
+    {
       "arm_id": "nace-ai/drex-max#clean",
       "model": "nace-ai/drex-max",
       "arm": "clean",
       "series_id": "01M68FHS04VZ7TJPM4FERQV3PX",
-      "status": "paused",
-      "games": 12,
+      "status": "running",
+      "games": 32,
       "elo": {
-        "mean": 472.1735553516544,
-        "lo": 173,
-        "hi": 737,
-        "half_width": 282,
-        "games": 12,
-        "w": 2,
-        "d": 0,
-        "l": 10,
-        "score_pct": 0.16666666666666666
+        "mean": 451.3621318572478,
+        "lo": 309,
+        "hi": 590,
+        "half_width": 140.5,
+        "games": 32,
+        "w": 10,
+        "d": 2,
+        "l": 20,
+        "score_pct": 0.34375
       },
-      "w": 2,
-      "d": 0,
-      "l": 10,
-      "score_pct": 0.16666666666666666,
-      "acpl": 159.1818181818182,
-      "acceptable_rate": 0.7302052785923754,
-      "blunder_rate": 0.17888563049853373,
-      "cost_usd": 0.012637319999999999,
-      "cost_per_game": 0.0010531100000000001,
+      "w": 10,
+      "d": 2,
+      "l": 20,
+      "score_pct": 0.34375,
+      "acpl": 205.13212221304707,
+      "acceptable_rate": 0.7324525185796862,
+      "blunder_rate": 0.19900908340214699,
+      "cost_usd": 0.04525073999999999,
+      "cost_per_game": 0.0014140856249999997,
       "separated_from": []
     },
     {
@@ -963,28 +1062,57 @@
       "model": "nace-ai/drex-v1.5",
       "arm": "clean",
       "series_id": "01M68D7NXHFAX6VY0MVTTT9BEB",
-      "status": "paused",
-      "games": 24,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 460.3964959005137,
-        "lo": 297,
-        "hi": 625,
-        "half_width": 164,
-        "games": 24,
-        "w": 9,
-        "d": 1,
-        "l": 14,
-        "score_pct": 0.3958333333333333
+        "mean": 411.3443831435073,
+        "lo": 307,
+        "hi": 515,
+        "half_width": 104,
+        "games": 50,
+        "w": 21,
+        "d": 2,
+        "l": 27,
+        "score_pct": 0.44
       },
-      "w": 9,
-      "d": 1,
-      "l": 14,
-      "score_pct": 0.3958333333333333,
-      "acpl": 235.49564134495643,
-      "acceptable_rate": 0.6961394769613948,
-      "blunder_rate": 0.22166874221668742,
-      "cost_usd": 0.017055320000000002,
-      "cost_per_game": 0.0007106383333333335,
+      "w": 21,
+      "d": 2,
+      "l": 27,
+      "score_pct": 0.44,
+      "acpl": 266.7588092345079,
+      "acceptable_rate": 0.6688942891859052,
+      "blunder_rate": 0.2515188335358445,
+      "cost_usd": 0.0362594,
+      "cost_per_game": 0.000725188,
+      "separated_from": []
+    },
+    {
+      "arm_id": "typesafe/jev-1.13#clean",
+      "model": "typesafe/jev-1.13",
+      "arm": "clean",
+      "series_id": "01M68ERA3B2586RHMXVMX3CN59",
+      "status": "running",
+      "games": 28,
+      "elo": {
+        "mean": 348.4766968307367,
+        "lo": 194,
+        "hi": 497,
+        "half_width": 151.5,
+        "games": 28,
+        "w": 5,
+        "d": 7,
+        "l": 16,
+        "score_pct": 0.30357142857142855
+      },
+      "w": 5,
+      "d": 7,
+      "l": 16,
+      "score_pct": 0.30357142857142855,
+      "acpl": 219.51778093883357,
+      "acceptable_rate": 0.7731152204836416,
+      "blunder_rate": 0.1906116642958748,
+      "cost_usd": 0.05123143199999999,
+      "cost_per_game": 0.001829694,
       "separated_from": []
     },
     {
