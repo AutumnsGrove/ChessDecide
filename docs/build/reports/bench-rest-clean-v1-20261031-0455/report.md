@@ -57,12 +57,12 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 08:38 UTC (3 h 43 min) · node 22.22.0 �
 ## Not finished
 
 - cell 4 (cloudflare/clef-flash#clean, failed) stopped_error at 0/50 games, $0.0005 — too_many_aborts
-- cell 6 (typesafe/jev-1.13#clean, running) running at 33/50 games, $0.0606
+- cell 6 (typesafe/jev-1.13#clean, running) paused at 33/50 games, $0.0606 — paused
 - cell 7 (upstage/solar-decide#clean, failed) stopped_error at 1/50 games, $0.0011 — too_many_aborts
 - cell 8 (upstage/solar-decide-flash#clean, failed) stopped_error at 0/50 games, $0.0002 — too_many_aborts
 - cell 9 (nace-ai/drex-max#clean, running) paused at 40/50 games, $0.0563 — paused
-- cell 10 (nace-ai/drex-v2.0#clean, running) running at 29/50 games, $0.0285
-- cell 11 (typesafe/jev-1.14#clean, running) running at 11/50 games, $0.0082
+- cell 10 (nace-ai/drex-v2.0#clean, running) paused at 29/50 games, $0.0285 — paused
+- cell 11 (typesafe/jev-1.14#clean, running) paused at 11/50 games, $0.0082 — paused
 - cell 12 (liquid/d1-ultra#clean, pending) created at 0/50 games, $0.0000
 
 ## Provenance
