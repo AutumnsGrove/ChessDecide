@@ -1,0 +1,700 @@
+{
+  "run": "rest-clean-v1-20261031-0455",
+  "environment": {
+    "node": "22.22.0",
+    "stockfish": "Stockfish 16",
+    "gitSha": "bad648d53a1a899b7c073599362c270cd3ac031f",
+    "host": "vm",
+    "mock": false
+  },
+  "ladder": {
+    "version": 2,
+    "calibrated": true,
+    "file": "/home/user/ChessDecide/data/ladder/ladder-v2.json"
+  },
+  "caps": {
+    "series_usd": 1,
+    "run_usd": 6
+  },
+  "totals": {
+    "cells": 13,
+    "finished": 0,
+    "games": 134,
+    "aborted": 0,
+    "cost_usd": 0.049140750000000004
+  },
+  "cells": [
+    {
+      "cell": {
+        "index": 0,
+        "model": "perplexity/pplx-decider-flash-v1.2",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/perplexity/pplx-decider-flash-v1.2#clean"
+      },
+      "seriesId": "01M68501M3Y374ZP1HW4YF17QP",
+      "state": "running",
+      "status": "running",
+      "statusReason": null,
+      "games": 32,
+      "target": 50,
+      "costUsd": 0.008083930000000001,
+      "elo": {
+        "mean": 325.9972121321738,
+        "lo": 181,
+        "hi": 467,
+        "games": 32
+      },
+      "w": 10,
+      "d": 2,
+      "l": 20,
+      "acpl": 321.91270459859703,
+      "acceptableRate": 0.6523772408417771,
+      "blunderRate": 0.2930631332813718,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 4,
+          "score": 0.5
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T04:55:26.084Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 1,
+        "model": "respan/span-02",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/respan/span-02#clean"
+      },
+      "seriesId": "01M68501S1KKSMFBVMYEGXG68Z",
+      "state": "running",
+      "status": "paused",
+      "statusReason": "paused",
+      "games": 33,
+      "target": 50,
+      "costUsd": 0.005988220000000001,
+      "elo": {
+        "mean": 343.15692606206534,
+        "lo": 203,
+        "hi": 481,
+        "games": 33
+      },
+      "w": 10,
+      "d": 4,
+      "l": 19,
+      "acpl": 275.96923076923076,
+      "acceptableRate": 0.6882591093117408,
+      "blunderRate": 0.24534412955465587,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6666666666666666
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T04:55:26.241Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 2,
+        "model": "inception/mercury-decide",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/inception/mercury-decide#clean"
+      },
+      "seriesId": "01M68501ZV83FPVVXKJQHFWSK8",
+      "state": "running",
+      "status": "running",
+      "statusReason": null,
+      "games": 29,
+      "target": 50,
+      "costUsd": 0.01840206,
+      "elo": {
+        "mean": 225.14511113167387,
+        "lo": 68,
+        "hi": 381,
+        "games": 29
+      },
+      "w": 8,
+      "d": 1,
+      "l": 20,
+      "acpl": 308.7269595176572,
+      "acceptableRate": 0.6864771748492678,
+      "blunderRate": 0.2739018087855297,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T04:55:26.459Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 3,
+        "model": "perplexity/pplx-decider-v1.2",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/perplexity/pplx-decider-v1.2#clean"
+      },
+      "seriesId": "01M6850260QG831N3Y5HE79M5H",
+      "state": "running",
+      "status": "paused",
+      "statusReason": "paused",
+      "games": 40,
+      "target": 50,
+      "costUsd": 0.01666654,
+      "elo": {
+        "mean": 514.3274273049703,
+        "lo": 393,
+        "hi": 637,
+        "games": 40
+      },
+      "w": 18,
+      "d": 1,
+      "l": 21,
+      "acpl": 237.41692546583852,
+      "acceptableRate": 0.7313664596273292,
+      "blunderRate": 0.21195652173913043,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 2,
+          "score": 0
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T04:55:26.656Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 4,
+        "model": "cloudflare/clef-flash",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/cloudflare/clef-flash#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 5,
+        "model": "nace-ai/drex-v1.5",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/nace-ai/drex-v1.5#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 6,
+        "model": "typesafe/jev-1.13",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/typesafe/jev-1.13#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 7,
+        "model": "upstage/solar-decide",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/upstage/solar-decide#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 8,
+        "model": "upstage/solar-decide-flash",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/upstage/solar-decide-flash#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 9,
+        "model": "nace-ai/drex-max",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/nace-ai/drex-max#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 10,
+        "model": "nace-ai/drex-v2.0",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/nace-ai/drex-v2.0#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 11,
+        "model": "typesafe/jev-1.14",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/typesafe/jev-1.14#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 12,
+        "model": "liquid/d1-ultra",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "rest-clean-v1/liquid/d1-ultra#clean"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    }
+  ],
+  "pairs": [],
+  "leaderboard": [
+    {
+      "arm_id": "perplexity/pplx-decider-v1.2#clean",
+      "model": "perplexity/pplx-decider-v1.2",
+      "arm": "clean",
+      "series_id": "01M6850260QG831N3Y5HE79M5H",
+      "status": "paused",
+      "games": 40,
+      "elo": {
+        "mean": 514.3274273049703,
+        "lo": 393,
+        "hi": 637,
+        "half_width": 122,
+        "games": 40,
+        "w": 18,
+        "d": 1,
+        "l": 21,
+        "score_pct": 0.4625
+      },
+      "w": 18,
+      "d": 1,
+      "l": 21,
+      "score_pct": 0.4625,
+      "acpl": 237.41692546583852,
+      "acceptable_rate": 0.7313664596273292,
+      "blunder_rate": 0.21195652173913043,
+      "cost_usd": 0.01666654,
+      "cost_per_game": 0.0004166635,
+      "separated_from": [
+        "inception/mercury-decide#clean"
+      ]
+    },
+    {
+      "arm_id": "respan/span-02#clean",
+      "model": "respan/span-02",
+      "arm": "clean",
+      "series_id": "01M68501S1KKSMFBVMYEGXG68Z",
+      "status": "paused",
+      "games": 33,
+      "elo": {
+        "mean": 343.15692606206534,
+        "lo": 203,
+        "hi": 481,
+        "half_width": 139,
+        "games": 33,
+        "w": 10,
+        "d": 4,
+        "l": 19,
+        "score_pct": 0.36363636363636365
+      },
+      "w": 10,
+      "d": 4,
+      "l": 19,
+      "score_pct": 0.36363636363636365,
+      "acpl": 275.96923076923076,
+      "acceptable_rate": 0.6882591093117408,
+      "blunder_rate": 0.24534412955465587,
+      "cost_usd": 0.005988220000000001,
+      "cost_per_game": 0.00018146121212121215,
+      "separated_from": []
+    },
+    {
+      "arm_id": "perplexity/pplx-decider-flash-v1.2#clean",
+      "model": "perplexity/pplx-decider-flash-v1.2",
+      "arm": "clean",
+      "series_id": "01M68501M3Y374ZP1HW4YF17QP",
+      "status": "running",
+      "games": 32,
+      "elo": {
+        "mean": 325.9972121321738,
+        "lo": 181,
+        "hi": 467,
+        "half_width": 143,
+        "games": 32,
+        "w": 10,
+        "d": 2,
+        "l": 20,
+        "score_pct": 0.34375
+      },
+      "w": 10,
+      "d": 2,
+      "l": 20,
+      "score_pct": 0.34375,
+      "acpl": 321.91270459859703,
+      "acceptable_rate": 0.6523772408417771,
+      "blunder_rate": 0.2930631332813718,
+      "cost_usd": 0.008083930000000001,
+      "cost_per_game": 0.00025262281250000004,
+      "separated_from": []
+    },
+    {
+      "arm_id": "inception/mercury-decide#clean",
+      "model": "inception/mercury-decide",
+      "arm": "clean",
+      "series_id": "01M68501ZV83FPVVXKJQHFWSK8",
+      "status": "running",
+      "games": 29,
+      "elo": {
+        "mean": 225.14511113167387,
+        "lo": 68,
+        "hi": 381,
+        "half_width": 156.5,
+        "games": 29,
+        "w": 8,
+        "d": 1,
+        "l": 20,
+        "score_pct": 0.29310344827586204
+      },
+      "w": 8,
+      "d": 1,
+      "l": 20,
+      "score_pct": 0.29310344827586204,
+      "acpl": 308.7269595176572,
+      "acceptable_rate": 0.6864771748492678,
+      "blunder_rate": 0.2739018087855297,
+      "cost_usd": 0.01840206,
+      "cost_per_game": 0.0006345537931034483,
+      "separated_from": [
+        "perplexity/pplx-decider-v1.2#clean"
+      ]
+    }
+  ]
+}
