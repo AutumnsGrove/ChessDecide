@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 10,
-    "finished": 2,
-    "games": 155,
+    "finished": 3,
+    "games": 164,
     "aborted": 0,
-    "cost_usd": 0.18056939499999997
+    "cost_usd": 0.18710740999999995
   },
   "cells": [
     {
@@ -125,23 +125,35 @@
         "repeat": 1,
         "seriesName": "spread-v1/baseten/elephant-1#hinted"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
+      "seriesId": "01M67PB605PBG1XS19GHY6XQTT",
+      "state": "running",
+      "status": "running",
       "statusReason": null,
-      "games": 0,
+      "games": 4,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
+      "costUsd": 0.001176875,
+      "elo": {
+        "mean": 694.4331014798493,
+        "lo": 86,
+        "hi": 1231,
+        "games": 4
+      },
       "w": 0,
       "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "l": 4,
+      "acpl": 99.75,
+      "acceptableRate": 0.85,
+      "blunderRate": 0.1,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-10-31T00:39:22.373Z",
       "finishedAt": null
     },
     {
@@ -153,24 +165,24 @@
         "seriesName": "spread-v1/baseten/mammoth-1#clean"
       },
       "seriesId": "01M67F3VBHXMFYEX1V1KSFPQ6K",
-      "state": "running",
-      "status": "running",
-      "statusReason": null,
-      "games": 47,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.11937619999999997,
+      "costUsd": 0.12410379999999997,
       "elo": {
-        "mean": 636.60995576839,
-        "lo": 529,
-        "hi": 745,
-        "games": 47
+        "mean": 635.0110097863038,
+        "lo": 532,
+        "hi": 740,
+        "games": 50
       },
-      "w": 21,
-      "d": 5,
-      "l": 21,
-      "acpl": 214.61835478455512,
-      "acceptableRate": 0.7269166200335758,
-      "blunderRate": 0.19473978735310576,
+      "w": 22,
+      "d": 6,
+      "l": 22,
+      "acpl": 212.10804970286333,
+      "acceptableRate": 0.7239330091842248,
+      "blunderRate": 0.19611021069692058,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -229,13 +241,13 @@
         {
           "levelId": "eps50",
           "levelElo": 614,
-          "games": 4,
+          "games": 5,
           "score": 0.5
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-30T22:33:02.065Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T00:42:47.108Z"
     },
     {
       "cell": {
@@ -369,21 +381,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 8,
+      "games": 10,
       "target": 50,
-      "costUsd": 0.00118524,
+      "costUsd": 0.0018187799999999999,
       "elo": {
-        "mean": 933.1030020504397,
-        "lo": 579,
-        "hi": 1268,
-        "games": 8
+        "mean": 983.1412748364846,
+        "lo": 675,
+        "hi": 1290,
+        "games": 10
       },
-      "w": 3,
+      "w": 5,
       "d": 0,
       "l": 5,
-      "acpl": 119.44604316546763,
-      "acceptableRate": 0.7769784172661871,
-      "blunderRate": 0.1366906474820144,
+      "acpl": 126.32558139534883,
+      "acceptableRate": 0.7953488372093023,
+      "blunderRate": 0.13488372093023257,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -396,6 +408,12 @@
           "levelElo": 614,
           "games": 5,
           "score": 1
+        },
+        {
+          "levelId": "eps15",
+          "levelElo": 1037,
+          "games": 2,
+          "score": 0
         }
       ],
       "abortedGames": 0,
@@ -514,11 +532,27 @@
   "pairs": [
     {
       "a": "Elephant 1 · clean",
+      "b": "Mammoth 1 · clean",
+      "pAGtB": 0.03292941963940147,
+      "diffMean": -139.38450262718797,
+      "diffLo": -291,
+      "diffHi": 9
+    },
+    {
+      "a": "Elephant 1 · clean",
       "b": "D1 · clean",
       "pAGtB": 0.19082048550844424,
       "diffMean": -67.1294471593727,
       "diffLo": -219,
       "diffHi": 83
+    },
+    {
+      "a": "Mammoth 1 · clean",
+      "b": "D1 · clean",
+      "pAGtB": 0.8311785725221159,
+      "diffMean": 72.25505546781525,
+      "diffLo": -75,
+      "diffHi": 221
     }
   ],
   "leaderboard": [
@@ -528,27 +562,59 @@
       "arm": "hinted",
       "series_id": "01M67NNKRTBTRQWT2S0WJ6DKS5",
       "status": "running",
-      "games": 8,
+      "games": 10,
       "elo": {
-        "mean": 933.1030020504397,
-        "lo": 579,
-        "hi": 1268,
-        "half_width": 344.5,
-        "games": 8,
-        "w": 3,
+        "mean": 983.1412748364846,
+        "lo": 675,
+        "hi": 1290,
+        "half_width": 307.5,
+        "games": 10,
+        "w": 5,
         "d": 0,
         "l": 5,
-        "score_pct": 0.375
+        "score_pct": 0.5
       },
-      "w": 3,
+      "w": 5,
       "d": 0,
       "l": 5,
-      "score_pct": 0.375,
-      "acpl": 119.44604316546763,
-      "acceptable_rate": 0.7769784172661871,
-      "blunder_rate": 0.1366906474820144,
-      "cost_usd": 0.00118524,
-      "cost_per_game": 0.000148155,
+      "score_pct": 0.5,
+      "acpl": 126.32558139534883,
+      "acceptable_rate": 0.7953488372093023,
+      "blunder_rate": 0.13488372093023257,
+      "cost_usd": 0.0018187799999999999,
+      "cost_per_game": 0.00018187799999999998,
+      "separated_from": [
+        "baseten/elephant-1#clean",
+        "liquid/d1#clean"
+      ]
+    },
+    {
+      "arm_id": "baseten/elephant-1#hinted",
+      "model": "baseten/elephant-1",
+      "arm": "hinted",
+      "series_id": "01M67PB605PBG1XS19GHY6XQTT",
+      "status": "running",
+      "games": 4,
+      "elo": {
+        "mean": 694.4331014798493,
+        "lo": 86,
+        "hi": 1231,
+        "half_width": 572.5,
+        "games": 4,
+        "w": 0,
+        "d": 0,
+        "l": 4,
+        "score_pct": 0
+      },
+      "w": 0,
+      "d": 0,
+      "l": 4,
+      "score_pct": 0,
+      "acpl": 99.75,
+      "acceptable_rate": 0.85,
+      "blunder_rate": 0.1,
+      "cost_usd": 0.001176875,
+      "cost_per_game": 0.00029421875,
       "separated_from": []
     },
     {
@@ -556,28 +622,28 @@
       "model": "baseten/mammoth-1",
       "arm": "clean",
       "series_id": "01M67F3VBHXMFYEX1V1KSFPQ6K",
-      "status": "running",
-      "games": 47,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 636.60995576839,
-        "lo": 529,
-        "hi": 745,
-        "half_width": 108,
-        "games": 47,
-        "w": 21,
-        "d": 5,
-        "l": 21,
+        "mean": 635.0110097863038,
+        "lo": 532,
+        "hi": 740,
+        "half_width": 104,
+        "games": 50,
+        "w": 22,
+        "d": 6,
+        "l": 22,
         "score_pct": 0.5
       },
-      "w": 21,
-      "d": 5,
-      "l": 21,
+      "w": 22,
+      "d": 6,
+      "l": 22,
       "score_pct": 0.5,
-      "acpl": 214.61835478455512,
-      "acceptable_rate": 0.7269166200335758,
-      "blunder_rate": 0.19473978735310576,
-      "cost_usd": 0.11937619999999997,
-      "cost_per_game": 0.0025399191489361697,
+      "acpl": 212.10804970286333,
+      "acceptable_rate": 0.7239330091842248,
+      "blunder_rate": 0.19611021069692058,
+      "cost_usd": 0.12410379999999997,
+      "cost_per_game": 0.0024820759999999993,
       "separated_from": []
     },
     {
@@ -607,7 +673,9 @@
       "blunder_rate": 0.23499433748584372,
       "cost_usd": 0.014728699999999996,
       "cost_per_game": 0.0002945739999999999,
-      "separated_from": []
+      "separated_from": [
+        "liquid/d1#hinted"
+      ]
     },
     {
       "arm_id": "baseten/elephant-1#clean",
@@ -636,7 +704,9 @@
       "blunder_rate": 0.21202695697252463,
       "cost_usd": 0.045279255000000004,
       "cost_per_game": 0.0009055851000000001,
-      "separated_from": []
+      "separated_from": [
+        "liquid/d1#hinted"
+      ]
     }
   ]
 }
