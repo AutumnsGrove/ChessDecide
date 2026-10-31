@@ -3,7 +3,7 @@
 Plan `bench/plans/rest-clean-v1.json` (sha256 f62e8be7c8e9abe8…) · seed rest-clean-v1-20261031-0455 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $1.0000 per series, $6.0000 per run
 Ran 2026-10-31 04:55 UTC → 2026-10-31 06:46 UTC (1 h 51 min) · node 22.22.0 · Stockfish Stockfish 16 · git bad648d
-**Spend $0.1278 of $6.0000** · 13 cells: 4 finished · 249 games · 11 aborted
+**Spend $0.1322 of $6.0000** · 13 cells: 4 finished · 252 games · 11 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
 | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -13,11 +13,11 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 06:46 UTC (1 h 51 min) · node 22.22.0 �
 | **Pplx Decider V1.2 · clean** | `01M6850260…` | **494 ± 108** (387–602) | 22-1-27 | 45 % | 253.0 | 72.3 % | 22.2 % | $0.0220 | 50 |
 | **Clef Flash · clean** | `01M68D2E92…` | — | 0-0-0 | — | — | — | — | $0.0005 | 0 |
 | **Drex V1.5 · clean** | `01M68D7NXH…` | **460 ± 164** (297–625) | 9-1-14 | 40 % | 235.5 | 69.6 % | 22.2 % | $0.0171 | 24 |
-| **Jev 1.13 · clean** | `01M68ERA3B…` | **459 ± 260** (191–711) | 2-2-9 | 23 % | 208.2 | 77.1 % | 17.4 % | $0.0180 | 13 |
+| **Jev 1.13 · clean** | `01M68ERA3B…` | **496 ± 242** (251–735) | 3-2-9 | 29 % | 209.6 | 77.0 % | 17.3 % | $0.0197 | 14 |
 | **Solar Decide · clean** | `01M68F4P58…` | **876 ± 736** (124–1595) | 0-0-1 | 0 % | 94.4 | 83.3 % | 0.0 % | $0.0011 | 1 |
 | **Solar Decide Flash · clean** | `01M68FF57E…` | — | 0-0-0 | — | — | — | — | $0.0002 | 0 |
-| **Drex Max · clean** | `01M68FHS04…` | **513 ± 295** (204–793) | 2-0-9 | 18 % | 149.7 | 73.2 % | 17.5 % | $0.0106 | 11 |
-| **Drex V2.0 · clean** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
+| **Drex Max · clean** | `01M68FHS04…` | **472 ± 282** (173–737) | 2-0-10 | 17 % | 159.2 | 73.0 % | 17.9 % | $0.0126 | 12 |
+| **Drex V2.0 · clean** | `01M68HG3JK…` | **876 ± 736** (124–1595) | 0-0-1 | 0 % | 94.4 | 75.0 % | 5.0 % | $0.0006 | 1 |
 | **Jev 1.14 · clean** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
 | **D1 Ultra · clean** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
 
@@ -42,11 +42,11 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 06:46 UTC (1 h 51 min) · node 22.22.0 �
 | Pplx Decider V1.2 · clean | 0 % | 20 % | — | 60 % |
 | Clef Flash · clean | 0 % | — | — | — |
 | Drex V1.5 · clean | 0 % | 20 % | — | 63 % |
-| Jev 1.13 · clean | 0 % | 30 % | — | 50 % |
+| Jev 1.13 · clean | 0 % | 30 % | — | 63 % |
 | Solar Decide · clean | 0 % | — | — | — |
 | Solar Decide Flash · clean | 0 % | — | — | — |
 | Drex Max · clean | 0 % | 0 % | — | — |
-| Drex V2.0 · clean | — | — | — | — |
+| Drex V2.0 · clean | 0 % | — | — | — |
 | Jev 1.14 · clean | — | — | — | — |
 | D1 Ultra · clean | — | — | — | — |
 
@@ -54,11 +54,11 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 06:46 UTC (1 h 51 min) · node 22.22.0 �
 
 - cell 4 (cloudflare/clef-flash#clean, failed) stopped_error at 0/50 games, $0.0005 — too_many_aborts
 - cell 5 (nace-ai/drex-v1.5#clean, running) running at 24/50 games, $0.0171
-- cell 6 (typesafe/jev-1.13#clean, running) running at 13/50 games, $0.0180
+- cell 6 (typesafe/jev-1.13#clean, running) running at 14/50 games, $0.0197
 - cell 7 (upstage/solar-decide#clean, failed) stopped_error at 1/50 games, $0.0011 — too_many_aborts
 - cell 8 (upstage/solar-decide-flash#clean, failed) stopped_error at 0/50 games, $0.0002 — too_many_aborts
-- cell 9 (nace-ai/drex-max#clean, running) running at 11/50 games, $0.0106
-- cell 10 (nace-ai/drex-v2.0#clean, pending) created at 0/50 games, $0.0000
+- cell 9 (nace-ai/drex-max#clean, running) paused at 12/50 games, $0.0126 — paused
+- cell 10 (nace-ai/drex-v2.0#clean, running) paused at 1/50 games, $0.0006 — paused
 - cell 11 (typesafe/jev-1.14#clean, pending) created at 0/50 games, $0.0000
 - cell 12 (liquid/d1-ultra#clean, pending) created at 0/50 games, $0.0000
 

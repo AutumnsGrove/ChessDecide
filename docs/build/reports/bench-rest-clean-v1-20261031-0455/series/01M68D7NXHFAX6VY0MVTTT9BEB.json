@@ -3,7 +3,8 @@
   "name": "rest-clean-v1/nace-ai/drex-v1.5#clean",
   "model": "nace-ai/drex-v1.5",
   "arm": "clean",
-  "status": "running",
+  "status": "paused",
+  "status_reason": "paused",
   "size": {
     "preset": "standard"
   },
@@ -403,13 +404,13 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "white",
-      "status": "running",
+      "status": "paused",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 11,
-      "acpl_model": 584,
-      "cost_usd": 0.0001402
+      "plies": 56,
+      "acpl_model": 338.82142857142856,
+      "cost_usd": 0.00068224
     }
   ],
   "blocks": [
