@@ -39,7 +39,7 @@ Ran 2026-10-30 22:33 UTC → 2026-10-30 22:33 UTC (0 h 00 min) · node 22.22.0 �
 - cell 1 (baseten/elephant-1#hinted, pending) created at 0/50 games, $0.0000
 - cell 2 (baseten/mammoth-1#clean, running) paused at 42/50 games, $0.1054 — paused
 - cell 3 (baseten/mammoth-1#hinted, pending) created at 0/50 games, $0.0000
-- cell 4 (liquid/d1#clean, running) running at 48/50 games, $0.0139
+- cell 4 (liquid/d1#clean, running) paused at 48/50 games, $0.0139 — paused
 - cell 5 (liquid/d1#hinted, pending) created at 0/50 games, $0.0000
 - cell 6 (liquid/d1.1#clean, pending) created at 0/50 games, $0.0000
 - cell 7 (liquid/d1.1#hinted, pending) created at 0/50 games, $0.0000
