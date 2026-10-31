@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 13,
-    "finished": 2,
-    "games": 196,
+    "finished": 3,
+    "games": 206,
     "aborted": 4,
-    "cost_usd": 0.07751079000000001
+    "cost_usd": 0.08301020199999999
   },
   "cells": [
     {
@@ -33,24 +33,24 @@
         "seriesName": "rest-clean-v1/perplexity/pplx-decider-flash-v1.2#clean"
       },
       "seriesId": "01M68501M3Y374ZP1HW4YF17QP",
-      "state": "running",
-      "status": "running",
-      "statusReason": null,
-      "games": 47,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0.011873390000000001,
+      "costUsd": 0.01276876,
       "elo": {
-        "mean": 265.68740025332033,
-        "lo": 147,
-        "hi": 379,
-        "games": 47
+        "mean": 302.39234611206217,
+        "lo": 192,
+        "hi": 410,
+        "games": 50
       },
-      "w": 13,
+      "w": 16,
       "d": 2,
       "l": 32,
-      "acpl": 316.9761399787911,
-      "acceptableRate": 0.6489925768822906,
-      "blunderRate": 0.2916224814422057,
+      "acpl": 320.2983234714004,
+      "acceptableRate": 0.6489151873767258,
+      "blunderRate": 0.29142011834319526,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -109,13 +109,13 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 4,
-          "score": 0
+          "games": 5,
+          "score": 0.6
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-10-31T04:55:26.084Z",
-      "finishedAt": null
+      "finishedAt": "2026-10-31T07:52:15.794Z"
     },
     {
       "cell": {
@@ -222,21 +222,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 39,
+      "games": 40,
       "target": 50,
-      "costUsd": 0.028951020000000008,
+      "costUsd": 0.03043700000000001,
       "elo": {
-        "mean": 260.17138550336375,
-        "lo": 131,
-        "hi": 389,
-        "games": 39
+        "mean": 268.90240878447855,
+        "lo": 142,
+        "hi": 396,
+        "games": 40
       },
-      "w": 13,
+      "w": 14,
       "d": 5,
       "l": 21,
-      "acpl": 299.7430593358737,
-      "acceptableRate": 0.7065868263473054,
-      "blunderRate": 0.25857376156777356,
+      "acpl": 304.3045738045738,
+      "acceptableRate": 0.7089397089397089,
+      "blunderRate": 0.25727650727650725,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -284,7 +284,13 @@
           "levelId": "random",
           "levelElo": 160,
           "games": 5,
-          "score": 0.75
+          "score": 0.8
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 2,
+          "score": 0
         }
       ],
       "abortedGames": 0,
@@ -430,21 +436,21 @@
       "state": "running",
       "status": "running",
       "statusReason": null,
-      "games": 10,
+      "games": 12,
       "target": 50,
-      "costUsd": 0.00532868,
+      "costUsd": 0.006311,
       "elo": {
-        "mean": 414.0538776579395,
-        "lo": 75,
-        "hi": 730,
-        "games": 10
+        "mean": 409.36730810278743,
+        "lo": 114,
+        "hi": 682,
+        "games": 12
       },
-      "w": 1,
+      "w": 2,
       "d": 0,
-      "l": 9,
-      "acpl": 210.00749063670412,
-      "acceptableRate": 0.7303370786516854,
-      "blunderRate": 0.20973782771535582,
+      "l": 10,
+      "acpl": 209.73139158576052,
+      "acceptableRate": 0.7119741100323624,
+      "blunderRate": 0.2168284789644013,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -461,8 +467,8 @@
         {
           "levelId": "eps75",
           "levelElo": 391,
-          "games": 2,
-          "score": 0
+          "games": 4,
+          "score": 0.5
         }
       ],
       "abortedGames": 0,
@@ -477,23 +483,35 @@
         "repeat": 1,
         "seriesName": "rest-clean-v1/typesafe/jev-1.13#clean"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
+      "seriesId": "01M68ERA3B2586RHMXVMX3CN59",
+      "state": "running",
+      "status": "running",
       "statusReason": null,
-      "games": 0,
+      "games": 4,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
+      "costUsd": 0.002135742,
+      "elo": {
+        "mean": 694.4331014798493,
+        "lo": 86,
+        "hi": 1231,
+        "games": 4
+      },
       "w": 0,
       "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "l": 4,
+      "acpl": 97.51785714285714,
+      "acceptableRate": 0.75,
+      "blunderRate": 0.10714285714285714,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-10-31T07:45:58.380Z",
       "finishedAt": null
     },
     {
@@ -661,6 +679,22 @@
   ],
   "pairs": [
     {
+      "a": "Pplx Decider Flash V1.2 · clean",
+      "b": "Span 02 · clean",
+      "pAGtB": 0.455159811045043,
+      "diffMean": -8.833529372873407,
+      "diffLo": -163,
+      "diffHi": 145
+    },
+    {
+      "a": "Pplx Decider Flash V1.2 · clean",
+      "b": "Pplx Decider V1.2 · clean",
+      "pAGtB": 0.006538990392368025,
+      "diffMean": -192.05286805140923,
+      "diffLo": -346,
+      "diffHi": -40
+    },
+    {
       "a": "Span 02 · clean",
       "b": "Pplx Decider V1.2 · clean",
       "pAGtB": 0.008860260686611537,
@@ -670,6 +704,35 @@
     }
   ],
   "leaderboard": [
+    {
+      "arm_id": "typesafe/jev-1.13#clean",
+      "model": "typesafe/jev-1.13",
+      "arm": "clean",
+      "series_id": "01M68ERA3B2586RHMXVMX3CN59",
+      "status": "running",
+      "games": 4,
+      "elo": {
+        "mean": 694.4331014798493,
+        "lo": 86,
+        "hi": 1231,
+        "half_width": 572.5,
+        "games": 4,
+        "w": 0,
+        "d": 0,
+        "l": 4,
+        "score_pct": 0
+      },
+      "w": 0,
+      "d": 0,
+      "l": 4,
+      "score_pct": 0,
+      "acpl": 97.51785714285714,
+      "acceptable_rate": 0.75,
+      "blunder_rate": 0.10714285714285714,
+      "cost_usd": 0.002135742,
+      "cost_per_game": 0.0005339355,
+      "separated_from": []
+    },
     {
       "arm_id": "perplexity/pplx-decider-v1.2#clean",
       "model": "perplexity/pplx-decider-v1.2",
@@ -697,9 +760,7 @@
       "blunder_rate": 0.22176227084565345,
       "cost_usd": 0.021964319999999996,
       "cost_per_game": 0.0004392863999999999,
-      "separated_from": [
-        "perplexity/pplx-decider-flash-v1.2#clean"
-      ]
+      "separated_from": []
     },
     {
       "arm_id": "nace-ai/drex-v1.5#clean",
@@ -707,27 +768,27 @@
       "arm": "clean",
       "series_id": "01M68D7NXHFAX6VY0MVTTT9BEB",
       "status": "running",
-      "games": 10,
+      "games": 12,
       "elo": {
-        "mean": 414.0538776579395,
-        "lo": 75,
-        "hi": 730,
-        "half_width": 327.5,
-        "games": 10,
-        "w": 1,
+        "mean": 409.36730810278743,
+        "lo": 114,
+        "hi": 682,
+        "half_width": 284,
+        "games": 12,
+        "w": 2,
         "d": 0,
-        "l": 9,
-        "score_pct": 0.1
+        "l": 10,
+        "score_pct": 0.16666666666666666
       },
-      "w": 1,
+      "w": 2,
       "d": 0,
-      "l": 9,
-      "score_pct": 0.1,
-      "acpl": 210.00749063670412,
-      "acceptable_rate": 0.7303370786516854,
-      "blunder_rate": 0.20973782771535582,
-      "cost_usd": 0.00532868,
-      "cost_per_game": 0.0005328679999999999,
+      "l": 10,
+      "score_pct": 0.16666666666666666,
+      "acpl": 209.73139158576052,
+      "acceptable_rate": 0.7119741100323624,
+      "blunder_rate": 0.2168284789644013,
+      "cost_usd": 0.006311,
+      "cost_per_game": 0.0005259166666666666,
       "separated_from": []
     },
     {
@@ -764,31 +825,29 @@
       "model": "perplexity/pplx-decider-flash-v1.2",
       "arm": "clean",
       "series_id": "01M68501M3Y374ZP1HW4YF17QP",
-      "status": "running",
-      "games": 47,
+      "status": "finished",
+      "games": 50,
       "elo": {
-        "mean": 265.68740025332033,
-        "lo": 147,
-        "hi": 379,
-        "half_width": 116,
-        "games": 47,
-        "w": 13,
+        "mean": 302.39234611206217,
+        "lo": 192,
+        "hi": 410,
+        "half_width": 109,
+        "games": 50,
+        "w": 16,
         "d": 2,
         "l": 32,
-        "score_pct": 0.2978723404255319
+        "score_pct": 0.34
       },
-      "w": 13,
+      "w": 16,
       "d": 2,
       "l": 32,
-      "score_pct": 0.2978723404255319,
-      "acpl": 316.9761399787911,
-      "acceptable_rate": 0.6489925768822906,
-      "blunder_rate": 0.2916224814422057,
-      "cost_usd": 0.011873390000000001,
-      "cost_per_game": 0.0002526253191489362,
-      "separated_from": [
-        "perplexity/pplx-decider-v1.2#clean"
-      ]
+      "score_pct": 0.34,
+      "acpl": 320.2983234714004,
+      "acceptable_rate": 0.6489151873767258,
+      "blunder_rate": 0.29142011834319526,
+      "cost_usd": 0.01276876,
+      "cost_per_game": 0.00025537520000000003,
+      "separated_from": []
     },
     {
       "arm_id": "inception/mercury-decide#clean",
@@ -796,27 +855,27 @@
       "arm": "clean",
       "series_id": "01M68501ZV83FPVVXKJQHFWSK8",
       "status": "running",
-      "games": 39,
+      "games": 40,
       "elo": {
-        "mean": 260.17138550336375,
-        "lo": 131,
-        "hi": 389,
-        "half_width": 129,
-        "games": 39,
-        "w": 13,
+        "mean": 268.90240878447855,
+        "lo": 142,
+        "hi": 396,
+        "half_width": 127,
+        "games": 40,
+        "w": 14,
         "d": 5,
         "l": 21,
-        "score_pct": 0.3974358974358974
+        "score_pct": 0.4125
       },
-      "w": 13,
+      "w": 14,
       "d": 5,
       "l": 21,
-      "score_pct": 0.3974358974358974,
-      "acpl": 299.7430593358737,
-      "acceptable_rate": 0.7065868263473054,
-      "blunder_rate": 0.25857376156777356,
-      "cost_usd": 0.028951020000000008,
-      "cost_per_game": 0.0007423338461538464,
+      "score_pct": 0.4125,
+      "acpl": 304.3045738045738,
+      "acceptable_rate": 0.7089397089397089,
+      "blunder_rate": 0.25727650727650725,
+      "cost_usd": 0.03043700000000001,
+      "cost_per_game": 0.0007609250000000002,
       "separated_from": []
     }
   ]

@@ -3,14 +3,15 @@
   "name": "rest-clean-v1/perplexity/pplx-decider-flash-v1.2#clean",
   "model": "perplexity/pplx-decider-flash-v1.2",
   "arm": "clean",
-  "status": "running",
+  "status": "finished",
+  "status_reason": "target_reached",
   "size": {
     "preset": "standard"
   },
   "ladder_version": 2,
   "seed": 20261031,
   "budget_usd": 1,
-  "cost_usd": 0.011873390000000001,
+  "cost_usd": 0.01276876,
   "games": [
     {
       "game_id": "01M685026DD8ZNEJC6Z88A8C8R",
@@ -755,13 +756,14 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "white",
-      "status": "running",
-      "result": "*",
-      "termination": "",
-      "adjudicated": false,
-      "plies": 136,
-      "acpl_model": 362.5,
-      "cost_usd": 0.0004084300000000001
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 163,
+      "acpl_model": 323.4268292682927,
+      "cost_usd": 0.00048207000000000013
     },
     {
       "game_id": "01M68E9TAX7BBHKER57M985TTJ",
@@ -786,13 +788,30 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "white",
-      "status": "running",
-      "result": "*",
-      "termination": "",
-      "adjudicated": false,
-      "plies": 6,
-      "acpl_model": 243.33333333333334,
-      "cost_usd": 0.00001513
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 77,
+      "acpl_model": 529.9230769230769,
+      "cost_usd": 0.00026738999999999995
+    },
+    {
+      "game_id": "01M68EVXHF3ASKA0NGN0AZ4A05",
+      "index": 49,
+      "block": 9,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "black",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 42,
+      "acpl_model": 217.14285714285714,
+      "cost_usd": 0.00014590999999999996
     }
   ],
   "blocks": [
@@ -881,22 +900,22 @@
       "index": 9,
       "level_id": "eps75",
       "level_elo": 391,
-      "games": 4,
-      "score": 0,
+      "games": 5,
+      "score": 0.6,
       "posterior_before": 279.45470620148103,
-      "posterior_after": 265.68740025332033
+      "posterior_after": 302.39234611206217
     }
   ],
   "elo": {
-    "mean": 265.68740025332033,
-    "lo": 147,
-    "hi": 379,
-    "half_width": 116,
-    "games": 47,
-    "w": 13,
+    "mean": 302.39234611206217,
+    "lo": 192,
+    "hi": 410,
+    "half_width": 109,
+    "games": 50,
+    "w": 16,
     "d": 2,
     "l": 32,
-    "score_pct": 0.2978723404255319
+    "score_pct": 0.34
   },
   "elo_history": [
     {
@@ -1177,31 +1196,49 @@
     },
     {
       "games": 47,
-      "mean": 265.68740025332033,
-      "lo": 147,
-      "hi": 379
+      "mean": 285.51950231893863,
+      "lo": 169,
+      "hi": 398
+    },
+    {
+      "games": 48,
+      "mean": 278.75216377761814,
+      "lo": 163,
+      "hi": 390
+    },
+    {
+      "games": 49,
+      "mean": 290.95358667654455,
+      "lo": 178,
+      "hi": 400
+    },
+    {
+      "games": 50,
+      "mean": 302.39234611206217,
+      "lo": 192,
+      "hi": 410
     }
   ],
   "secondary": {
-    "games": 47,
-    "model_plies": 1886,
-    "acpl": 316.9761399787911,
-    "acpl_median": 216.5,
-    "acceptable_rate": 0.6489925768822906,
-    "mistake_rate": 0.3138918345705196,
-    "blunder_rate": 0.2916224814422057,
-    "mean_p_acceptable": 0.612551058762092,
-    "mean_e_win_loss": 24.715692368455016,
-    "brier": 0.5241437957629664,
-    "ece": 0.5504940566026577,
-    "score_as_white": 0.34782608695652173,
-    "score_as_black": 0.25,
-    "avg_plies": 80.80851063829788,
-    "adjudicated_frac": 0.851063829787234,
-    "cost_per_game": 0.0002526253191489362,
-    "latency_p50": 138,
-    "latency_p95": 438.75,
-    "avg_input_tokens": 629.5540827147402
+    "games": 50,
+    "model_plies": 2028,
+    "acpl": 320.2983234714004,
+    "acpl_median": 215,
+    "acceptable_rate": 0.6489151873767258,
+    "mistake_rate": 0.3131163708086785,
+    "blunder_rate": 0.29142011834319526,
+    "mean_p_acceptable": 0.6096842839156474,
+    "mean_e_win_loss": 25.07763122592987,
+    "brier": 0.5239205952805469,
+    "ece": 0.5507250540258328,
+    "score_as_white": 0.4,
+    "score_as_black": 0.28,
+    "avg_plies": 81.6,
+    "adjudicated_frac": 0.86,
+    "cost_per_game": 0.00025537520000000003,
+    "latency_p50": 136,
+    "latency_p95": 442,
+    "avg_input_tokens": 629.6232741617357
   },
   "created_at": "2026-10-31T04:55:26.084Z"
 }
