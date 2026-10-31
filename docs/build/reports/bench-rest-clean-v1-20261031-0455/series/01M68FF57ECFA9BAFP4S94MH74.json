@@ -11,7 +11,7 @@
   "ladder_version": 2,
   "seed": 20261031,
   "budget_usd": 1,
-  "cost_usd": 0.00010879999999999999,
+  "cost_usd": 0.00021725,
   "games": [
     {
       "game_id": "01M68FF7STDDBMB5SRPZKMXE3K",
@@ -49,13 +49,13 @@
       "level_id": "uci1320",
       "level_elo": 1320,
       "model_color": "white",
-      "status": "running",
+      "status": "aborted",
       "result": "*",
-      "termination": "",
+      "termination": "aborted",
       "adjudicated": false,
-      "plies": 5,
-      "acpl_model": 274,
-      "cost_usd": 0.00007145
+      "plies": 6,
+      "acpl_model": 182.66666666666666,
+      "cost_usd": 0.00010845000000000001
     },
     {
       "game_id": "01M68FG3EGN7QWBDPHVEWWV7CH",
