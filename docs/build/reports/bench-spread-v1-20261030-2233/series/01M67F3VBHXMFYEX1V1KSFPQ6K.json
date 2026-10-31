@@ -692,13 +692,13 @@
       "level_id": "eps50",
       "level_elo": 614,
       "model_color": "white",
-      "status": "running",
+      "status": "paused",
       "result": "*",
       "termination": "",
       "adjudicated": false,
       "plies": 19,
-      "acpl_model": 157.55555555555554,
-      "cost_usd": 0.0006904000000000001
+      "acpl_model": 170.1,
+      "cost_usd": 0.0007752000000000001
     },
     {
       "game_id": "01M67NBCPHBHNWHD050GSR77TM",
