@@ -1,0 +1,42 @@
+{
+  "name": "rest-clean-v1",
+  "models": [
+    "perplexity/pplx-decider-flash-v1.2",
+    "respan/span-02",
+    "inception/mercury-decide",
+    "perplexity/pplx-decider-v1.2",
+    "cloudflare/clef-flash",
+    "nace-ai/drex-v1.5",
+    "scaledown/classify-1",
+    "jaredpalmer/kev-4b",
+    "togethercomputer/tev1-4b-experimental",
+    "typesafe/jev-1.13",
+    "upstage/solar-decide",
+    "upstage/solar-decide-flash",
+    "nace-ai/drex-max",
+    "nace-ai/drex-v2.0",
+    "typesafe/jev-1.14",
+    "liquid/d1-ultra"
+  ],
+  "arms": [
+    "clean"
+  ],
+  "size": {
+    "preset": "standard"
+  },
+  "ladder": {
+    "mode": "adaptive"
+  },
+  "ladder_version": 2,
+  "series_cap_usd": 1,
+  "run_cap_usd": 6,
+  "repeat": 1,
+  "concurrency": 2,
+  "judge_depth": 14,
+  "max_hours": 48,
+  "cell_timeout_min": 120,
+  "artifacts": {
+    "sql": true
+  },
+  "parallel_models": 4
+}
