@@ -3,14 +3,15 @@
   "name": "rest-clean-v1/nace-ai/drex-max#clean",
   "model": "nace-ai/drex-max",
   "arm": "clean",
-  "status": "running",
+  "status": "paused",
+  "status_reason": "paused",
   "size": {
     "preset": "standard"
   },
   "ladder_version": 2,
   "seed": 20261031,
   "budget_usd": 1,
-  "cost_usd": 0.04525073999999999,
+  "cost_usd": 0.056252699999999996,
   "games": [
     {
       "game_id": "01M68FHX4WDVK2JA3F3V0DQ1AX",
@@ -531,13 +532,14 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "white",
-      "status": "running",
-      "result": "*",
-      "termination": "",
-      "adjudicated": false,
-      "plies": 49,
-      "acpl_model": 192.08333333333334,
-      "cost_usd": 0.0008066999999999998
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 74,
+      "acpl_model": 163.6216216216216,
+      "cost_usd": 0.0012190199999999997
     },
     {
       "game_id": "01M68PGHHKFTJWE27J96S30FXZ",
@@ -546,13 +548,140 @@
       "level_id": "eps75",
       "level_elo": 391,
       "model_color": "black",
-      "status": "running",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 35,
+      "acpl_model": 360.7647058823529,
+      "cost_usd": 0.0006468
+    },
+    {
+      "game_id": "01M68PRBBVYEX6T696KF19FVE4",
+      "index": 34,
+      "block": 6,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 32,
+      "acpl_model": 287.46666666666664,
+      "cost_usd": 0.00060732
+    },
+    {
+      "game_id": "01M68PWRKA6S09D54SJ1EYTC2D",
+      "index": 35,
+      "block": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "black",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 172,
+      "acpl_model": 317.06976744186045,
+      "cost_usd": 0.0028521600000000003
+    },
+    {
+      "game_id": "01M68PWZF14P6534FPK4FHN6KV",
+      "index": 36,
+      "block": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "white",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 99,
+      "acpl_model": 105.52,
+      "cost_usd": 0.0022918800000000005
+    },
+    {
+      "game_id": "01M68QCXJ3REJY00MJ8P94Z3WR",
+      "index": 37,
+      "block": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "black",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 1,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 32,
+      "acpl_model": 56.8125,
+      "cost_usd": 0.0006338399999999999
+    },
+    {
+      "game_id": "01M68QHQYB46TJ32ATQWWGD6JD",
+      "index": 38,
+      "block": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "white",
+      "status": "finished",
+      "result": "0-1",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 88,
+      "acpl_model": 234.27906976744185,
+      "cost_usd": 0.0015958199999999995
+    },
+    {
+      "game_id": "01M68QR6YR9E3W2101XD4SWDV9",
+      "index": 39,
+      "block": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "black",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 0,
+      "termination": "adjudicated",
+      "adjudicated": true,
+      "plies": 53,
+      "acpl_model": 220.23076923076923,
+      "cost_usd": 0.0011551200000000001
+    },
+    {
+      "game_id": "01M68QZVHATBN3SXMK6S06P9B8",
+      "index": 40,
+      "block": 8,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "white",
+      "status": "paused",
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 32,
-      "acpl_model": 273.46666666666664,
-      "cost_usd": 0.00057966
+      "plies": 31,
+      "acpl_model": 271.6875,
+      "cost_usd": 0.0006535800000000001
+    },
+    {
+      "game_id": "01M68QZWJ76596QAF7DT75JRN0",
+      "index": 41,
+      "block": 8,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "model_color": "black",
+      "status": "paused",
+      "result": "*",
+      "termination": "",
+      "adjudicated": false,
+      "plies": 30,
+      "acpl_model": 260.53333333333336,
+      "cost_usd": 0.0006236399999999998
     }
   ],
   "blocks": [
@@ -614,22 +743,40 @@
       "index": 6,
       "level_id": "eps75",
       "level_elo": 391,
-      "games": 4,
-      "score": 0.5,
+      "games": 5,
+      "score": 0.2,
       "posterior_before": 456.44643026248036,
-      "posterior_after": 451.3621318572478
+      "posterior_after": 404.7639567711511
+    },
+    {
+      "index": 7,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "games": 5,
+      "score": 0.6,
+      "posterior_before": 404.7639567711511,
+      "posterior_after": 414.348770946802
+    },
+    {
+      "index": 8,
+      "level_id": "eps75",
+      "level_elo": 391,
+      "games": 2,
+      "score": 0,
+      "posterior_before": 414.348770946802,
+      "posterior_after": 414.348770946802
     }
   ],
   "elo": {
-    "mean": 451.3621318572478,
-    "lo": 309,
-    "hi": 590,
-    "half_width": 140.5,
-    "games": 32,
-    "w": 10,
+    "mean": 414.348770946802,
+    "lo": 289,
+    "hi": 536,
+    "half_width": 123.5,
+    "games": 40,
+    "w": 13,
     "d": 2,
-    "l": 20,
-    "score_pct": 0.34375
+    "l": 25,
+    "score_pct": 0.35
   },
   "elo_history": [
     {
@@ -823,28 +970,76 @@
       "mean": 451.3621318572478,
       "lo": 309,
       "hi": 590
+    },
+    {
+      "games": 33,
+      "mean": 434.82170123169686,
+      "lo": 294,
+      "hi": 571
+    },
+    {
+      "games": 34,
+      "mean": 419.3208183828615,
+      "lo": 280,
+      "hi": 554
+    },
+    {
+      "games": 35,
+      "mean": 404.7639567711511,
+      "lo": 267,
+      "hi": 538
+    },
+    {
+      "games": 36,
+      "mean": 417.4510041341784,
+      "lo": 283,
+      "hi": 547
+    },
+    {
+      "games": 37,
+      "mean": 429.0839945663218,
+      "lo": 299,
+      "hi": 556
+    },
+    {
+      "games": 38,
+      "mean": 439.8239098183463,
+      "lo": 312,
+      "hi": 565
+    },
+    {
+      "games": 39,
+      "mean": 426.72930660732914,
+      "lo": 301,
+      "hi": 550
+    },
+    {
+      "games": 40,
+      "mean": 414.348770946802,
+      "lo": 289,
+      "hi": 536
     }
   ],
   "secondary": {
-    "games": 32,
-    "model_plies": 1211,
-    "acpl": 205.13212221304707,
-    "acpl_median": 108,
-    "acceptable_rate": 0.7324525185796862,
-    "mistake_rate": 0.2254335260115607,
-    "blunder_rate": 0.19900908340214699,
-    "mean_p_acceptable": 0.6684107347216938,
-    "mean_e_win_loss": 17.73300367445193,
-    "brier": 0.556546873867813,
-    "ece": 0.598332645283254,
+    "games": 40,
+    "model_plies": 1501,
+    "acpl": 209.30512991339108,
+    "acpl_median": 119,
+    "acceptable_rate": 0.7288474350433045,
+    "mistake_rate": 0.23117921385742837,
+    "blunder_rate": 0.20386409060626248,
+    "mean_p_acceptable": 0.6656485582770413,
+    "mean_e_win_loss": 17.978336538607103,
+    "brier": 0.5601126739680643,
+    "ece": 0.6004846157158097,
     "score_as_white": 0.25,
-    "score_as_black": 0.4375,
-    "avg_plies": 76.34375,
-    "adjudicated_frac": 0.78125,
-    "cost_per_game": 0.0014140856249999997,
+    "score_as_black": 0.45,
+    "avg_plies": 75.7,
+    "adjudicated_frac": 0.775,
+    "cost_per_game": 0.0014063175,
     "latency_p50": 540,
-    "latency_p95": 1253.5,
-    "avg_input_tokens": 622.7737407101569
+    "latency_p95": 1259,
+    "avg_input_tokens": 624.6135909393738
   },
   "created_at": "2026-10-31T07:59:52.836Z"
 }
