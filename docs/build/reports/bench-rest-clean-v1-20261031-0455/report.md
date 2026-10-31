@@ -2,7 +2,7 @@
 
 Plan `bench/plans/rest-clean-v1.json` (sha256 f62e8be7c8e9abe8…) · seed rest-clean-v1-20261031-0455 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $1.0000 per series, $6.0000 per run
-Ran 2026-10-31 04:55 UTC → 2026-10-31 04:55 UTC (0 h 00 min) · node 22.22.0 · Stockfish Stockfish 16 · git bad648d
+Ran 2026-10-31 04:55 UTC → 2026-10-31 06:46 UTC (1 h 51 min) · node 22.22.0 · Stockfish Stockfish 16 · git bad648d
 **Spend $0.0491 of $6.0000** · 13 cells: 0 finished · 134 games · 0 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
@@ -58,4 +58,4 @@ Ran 2026-10-31 04:55 UTC → 2026-10-31 04:55 UTC (0 h 00 min) · node 22.22.0 �
 ## Provenance
 
 - plan: `bench/plans/rest-clean-v1.json` sha256 f62e8be7c8e9abe8e8c3fdbc149181499709f0e55810b66dd5a12ee4283f3cc3 · seed rest-clean-v1-20261031-0455 · host `vm`
-- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: completed
+- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: sliced
