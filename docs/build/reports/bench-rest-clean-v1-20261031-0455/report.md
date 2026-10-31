@@ -2,7 +2,7 @@
 
 Plan `bench/plans/rest-clean-v1.json` (sha256 f62e8be7c8e9abe8…) · seed rest-clean-v1-20261031-0455 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $1.0000 per series, $6.0000 per run
-Ran 2026-10-31 04:55 UTC → 2026-10-31 10:32 UTC (5 h 37 min) · node 22.22.0 · Stockfish Stockfish 16 · git bad648d
+Ran 2026-10-31 04:55 UTC → 2026-10-31 12:24 UTC (7 h 29 min) · node 22.22.0 · Stockfish Stockfish 16 · git bad648d
 **Spend $0.4165 of $6.0000** · 13 cells: 8 finished · 480 games · 11 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
