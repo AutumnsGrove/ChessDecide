@@ -3,7 +3,7 @@
 Plan `bench/plans/spread-v1.json` (sha256 e9137c4db88a2d9d…) · seed spread-v1-20261030-2233 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $3.0000 per series, $8.0000 per run
 Ran 2026-10-30 22:33 UTC → 2026-10-31 02:15 UTC (3 h 42 min) · node 22.22.0 · Stockfish Stockfish 16 · git 23abef0
-**Spend $0.3684 of $8.0000** · 10 cells: 8 finished · 417 games · 0 aborted
+**Spend $0.3753 of $8.0000** · 10 cells: 8 finished · 445 games · 0 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
 | --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -14,9 +14,9 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 02:15 UTC (3 h 42 min) · node 22.22.0 �
 | **D1 · clean** | `01M67F3VNG…` | **563 ± 106** (457–668) | 22-0-28 | 44 % | 242.7 | 69.3 % | 23.5 % | $0.0147 | 50 |
 | **D1 · hinted** | `01M67NNKRT…` | **752 ± 106** (645–857) | 17-3-30 | 37 % | 139.4 | 79.2 % | 14.3 % | $0.0111 | 50 |
 | **D1.1 · clean** | `01M67TWST0…` | **503 ± 107** (396–610) | 21-1-28 | 43 % | 236.5 | 72.0 % | 22.0 % | $0.0126 | 50 |
-| **D1.1 · hinted** | `01M6803T92…` | **604 ± 211** (397–818) | 7-0-10 | 41 % | 150.1 | 78.8 % | 14.8 % | $0.0029 | 17 |
+| **D1.1 · hinted** | `01M6803T92…` | **686 ± 138** (550–825) | 17-0-16 | 52 % | 137.8 | 78.3 % | 14.5 % | $0.0056 | 33 |
 | **Microsoft Decision 1 · clean** | `01M67TZGW7…` | **494 ± 107** (388–602) | 24-3-23 | 51 % | 286.8 | 68.7 % | 25.9 % | $0.0399 | 50 |
-| **Microsoft Decision 1 · hinted** | — | — | 0-0-0 | — | — | — | — | $0.0000 | 0 |
+| **Microsoft Decision 1 · hinted** | `01M6819C6P…` | **581 ± 264** (311–838) | 3-0-9 | 25 % | 132.2 | 84.4 % | 11.0 % | $0.0042 | 12 |
 
 ## Separated pairs (METRICS.md B6)
 
@@ -62,14 +62,14 @@ Ran 2026-10-30 22:33 UTC → 2026-10-31 02:15 UTC (3 h 42 min) · node 22.22.0 �
 | D1 · clean | 0 % | 80 % | 100 % | — | — |
 | D1 · hinted | 0 % | 100 % | — | 20 % | 20 % |
 | D1.1 · clean | 0 % | 0 % | 80 % | — | — |
-| D1.1 · hinted | 0 % | 50 % | 100 % | — | — |
+| D1.1 · hinted | 0 % | 80 % | 100 % | — | 0 % |
 | Microsoft Decision 1 · clean | 0 % | 10 % | 80 % | — | — |
-| Microsoft Decision 1 · hinted | — | — | — | — | — |
+| Microsoft Decision 1 · hinted | 0 % | 0 % | — | — | — |
 
 ## Not finished
 
-- cell 7 (liquid/d1.1#hinted, running) running at 17/50 games, $0.0029
-- cell 9 (microsoft/microsoft-decision-1#hinted, pending) created at 0/50 games, $0.0000
+- cell 7 (liquid/d1.1#hinted, running) paused at 33/50 games, $0.0056 — paused
+- cell 9 (microsoft/microsoft-decision-1#hinted, running) running at 12/50 games, $0.0042
 
 ## Provenance
 
