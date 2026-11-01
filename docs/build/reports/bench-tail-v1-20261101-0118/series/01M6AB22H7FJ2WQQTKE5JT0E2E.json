@@ -1,0 +1,108 @@
+{
+  "id": "01M6AB22H7FJ2WQQTKE5JT0E2E",
+  "name": "tail-v1/togethercomputer/tev1-4b-experimental#hinted",
+  "model": "togethercomputer/tev1-4b-experimental",
+  "arm": "hinted",
+  "status": "running",
+  "size": {
+    "preset": "standard"
+  },
+  "ladder_version": 2,
+  "seed": 20261101,
+  "budget_usd": 1.9999713140000002,
+  "cost_usd": 0,
+  "games": [
+    {
+      "game_id": "01M6AB2690JW1TEPBXBRZRH4KP",
+      "index": 0,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB26J1BQRY1CKVY4CAHAJ6",
+      "index": 1,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "running",
+      "result": "*",
+      "termination": "",
+      "adjudicated": false,
+      "plies": 6,
+      "acpl_model": 345,
+      "cost_usd": 0.000020033999999999998
+    },
+    {
+      "game_id": "01M6AB2EHZQ1MSCWX29RAQEG62",
+      "index": 2,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB3905D5RXQA3QS1ZC5X3Z",
+      "index": 3,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "ready",
+      "result": "*",
+      "termination": "",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    }
+  ],
+  "blocks": [
+    {
+      "index": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "games": 4,
+      "score": 0,
+      "posterior_before": 1200,
+      "posterior_after": 1200
+    }
+  ],
+  "elo": null,
+  "elo_history": [],
+  "secondary": {
+    "games": 0,
+    "model_plies": 0,
+    "acpl": null,
+    "acpl_median": null,
+    "acceptable_rate": null,
+    "mistake_rate": null,
+    "blunder_rate": null,
+    "mean_p_acceptable": null,
+    "mean_e_win_loss": null,
+    "brier": null,
+    "ece": null,
+    "score_as_white": null,
+    "score_as_black": null,
+    "avg_plies": null,
+    "adjudicated_frac": null,
+    "cost_per_game": null,
+    "latency_p50": null,
+    "latency_p95": null,
+    "avg_input_tokens": null
+  },
+  "created_at": "2026-11-01T01:19:52.871Z"
+}

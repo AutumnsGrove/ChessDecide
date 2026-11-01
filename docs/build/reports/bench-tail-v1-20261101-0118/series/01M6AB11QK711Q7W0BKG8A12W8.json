@@ -3,7 +3,8 @@
   "name": "tail-v1/scaledown/classify-1#hinted",
   "model": "scaledown/classify-1",
   "arm": "hinted",
-  "status": "running",
+  "status": "stopped_error",
+  "status_reason": "too_many_aborts",
   "size": {
     "preset": "standard"
   },
@@ -33,9 +34,37 @@
       "level_id": "uci1320",
       "level_elo": 1320,
       "model_color": "black",
-      "status": "running",
+      "status": "aborted",
       "result": "*",
-      "termination": "",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 1,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB2644RT7ZBM4Y0Y5ZGEBB",
+      "index": 2,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB269GD52G9YEZY2V6V5KC",
+      "index": 3,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
       "adjudicated": false,
       "plies": 1,
       "cost_usd": 0
@@ -46,7 +75,7 @@
       "index": 0,
       "level_id": "uci1320",
       "level_elo": 1320,
-      "games": 2,
+      "games": 4,
       "score": 0,
       "posterior_before": 1200,
       "posterior_after": 1200
