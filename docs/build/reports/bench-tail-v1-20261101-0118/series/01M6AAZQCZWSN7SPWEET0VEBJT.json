@@ -11,7 +11,7 @@
   "ladder_version": 2,
   "seed": 20261101,
   "budget_usd": 2,
-  "cost_usd": 0,
+  "cost_usd": 0.000028686,
   "games": [
     {
       "game_id": "01M6AAZR0XF9KDSAJ2HCAZX7PB",
@@ -34,9 +34,9 @@
       "level_id": "uci1320",
       "level_elo": 1320,
       "model_color": "black",
-      "status": "running",
+      "status": "aborted",
       "result": "*",
-      "termination": "",
+      "termination": "aborted",
       "adjudicated": false,
       "plies": 7,
       "acpl_model": 230,

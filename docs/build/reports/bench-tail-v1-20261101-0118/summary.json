@@ -20,7 +20,7 @@
     "cells": 6,
     "finished": 0,
     "games": 0,
-    "aborted": 5,
+    "aborted": 7,
     "cost_usd": 0
   },
   "cells": [
@@ -94,9 +94,9 @@
         "seriesName": "tail-v1/togethercomputer/tev1-4b-experimental#clean"
       },
       "seriesId": "01M6AAZQCZWSN7SPWEET0VEBJT",
-      "state": "pending",
-      "status": "running",
-      "statusReason": null,
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
       "costUsd": 0,
@@ -115,9 +115,9 @@
           "score": 0
         }
       ],
-      "abortedGames": 2,
+      "abortedGames": 3,
       "startedAt": "2026-11-01T01:18:35.935Z",
-      "finishedAt": null
+      "finishedAt": "2026-11-01T01:19:18.433Z"
     },
     {
       "cell": {
@@ -176,7 +176,7 @@
           "score": 0
         }
       ],
-      "abortedGames": 3,
+      "abortedGames": 4,
       "startedAt": "2026-11-01T01:18:36.442Z",
       "finishedAt": "2026-11-01T01:18:45.604Z"
     },
@@ -188,9 +188,9 @@
         "repeat": 1,
         "seriesName": "tail-v1/scaledown/classify-1#hinted"
       },
-      "seriesId": null,
+      "seriesId": "01M6AB11QK711Q7W0BKG8A12W8",
       "state": "pending",
-      "status": "created",
+      "status": "running",
       "statusReason": null,
       "games": 0,
       "target": 50,
@@ -204,7 +204,7 @@
       "blunderRate": null,
       "blocks": [],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-11-01T01:19:19.283Z",
       "finishedAt": null
     }
   ],

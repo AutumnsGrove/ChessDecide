@@ -23,9 +23,9 @@
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 5,
-      "acpl_model": 55.5,
-      "cost_usd": 0.000040656
+      "plies": 7,
+      "acpl_model": 78,
+      "cost_usd": 0.000066066
     },
     {
       "game_id": "01M6AAZQW4S39GBZ3KASVCZ5N4",
@@ -38,9 +38,9 @@
       "result": "*",
       "termination": "",
       "adjudicated": false,
-      "plies": 6,
-      "acpl_model": 85,
-      "cost_usd": 0.000025872
+      "plies": 8,
+      "acpl_model": 93.33333333333333,
+      "cost_usd": 0.000046788
     }
   ],
   "blocks": [
