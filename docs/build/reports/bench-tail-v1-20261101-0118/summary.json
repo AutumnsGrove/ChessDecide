@@ -1,0 +1,213 @@
+{
+  "run": "tail-v1-20261101-0118",
+  "environment": {
+    "node": "22.22.0",
+    "stockfish": "Stockfish 16",
+    "gitSha": "a022fe5f9eb32a6560bf976898a965191f32d04d",
+    "host": "vm",
+    "mock": false
+  },
+  "ladder": {
+    "version": 2,
+    "calibrated": true,
+    "file": "/home/user/ChessDecide/data/ladder/ladder-v2.json"
+  },
+  "caps": {
+    "series_usd": 2,
+    "run_usd": 5
+  },
+  "totals": {
+    "cells": 6,
+    "finished": 0,
+    "games": 0,
+    "aborted": 5,
+    "cost_usd": 0
+  },
+  "cells": [
+    {
+      "cell": {
+        "index": 0,
+        "model": "jaredpalmer/kev-4b",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "tail-v1/jaredpalmer/kev-4b#clean"
+      },
+      "seriesId": "01M6AAZQ4FNTM6NFXCDN53G45Z",
+      "state": "pending",
+      "status": "running",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 2,
+          "score": 0
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-11-01T01:18:35.664Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 1,
+        "model": "jaredpalmer/kev-4b",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "tail-v1/jaredpalmer/kev-4b#hinted"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 2,
+        "model": "togethercomputer/tev1-4b-experimental",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "tail-v1/togethercomputer/tev1-4b-experimental#clean"
+      },
+      "seriesId": "01M6AAZQCZWSN7SPWEET0VEBJT",
+      "state": "pending",
+      "status": "running",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 4,
+          "score": 0
+        }
+      ],
+      "abortedGames": 2,
+      "startedAt": "2026-11-01T01:18:35.935Z",
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 3,
+        "model": "togethercomputer/tev1-4b-experimental",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "tail-v1/togethercomputer/tev1-4b-experimental#hinted"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    },
+    {
+      "cell": {
+        "index": 4,
+        "model": "scaledown/classify-1",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "tail-v1/scaledown/classify-1#clean"
+      },
+      "seriesId": "01M6AAZQWTPKWN0FT904QYXQ6P",
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 4,
+          "score": 0
+        }
+      ],
+      "abortedGames": 3,
+      "startedAt": "2026-11-01T01:18:36.442Z",
+      "finishedAt": "2026-11-01T01:18:45.604Z"
+    },
+    {
+      "cell": {
+        "index": 5,
+        "model": "scaledown/classify-1",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "tail-v1/scaledown/classify-1#hinted"
+      },
+      "seriesId": null,
+      "state": "pending",
+      "status": "created",
+      "statusReason": null,
+      "games": 0,
+      "target": 50,
+      "costUsd": 0,
+      "elo": null,
+      "w": 0,
+      "d": 0,
+      "l": 0,
+      "acpl": null,
+      "acceptableRate": null,
+      "blunderRate": null,
+      "blocks": [],
+      "abortedGames": 0,
+      "startedAt": null,
+      "finishedAt": null
+    }
+  ],
+  "pairs": [],
+  "leaderboard": []
+}
