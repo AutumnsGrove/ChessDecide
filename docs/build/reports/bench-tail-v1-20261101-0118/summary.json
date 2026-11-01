@@ -18,10 +18,10 @@
   },
   "totals": {
     "cells": 6,
-    "finished": 0,
-    "games": 0,
+    "finished": 1,
+    "games": 51,
     "aborted": 15,
-    "cost_usd": 0.000028686
+    "cost_usd": 0.07267524600000001
   },
   "cells": [
     {
@@ -33,30 +33,89 @@
         "seriesName": "tail-v1/jaredpalmer/kev-4b#clean"
       },
       "seriesId": "01M6AAZQ4FNTM6NFXCDN53G45Z",
-      "state": "pending",
-      "status": "running",
-      "statusReason": null,
-      "games": 0,
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
+      "costUsd": 0.07258612200000002,
+      "elo": {
+        "mean": 121.6855662455494,
+        "lo": 23,
+        "hi": 227,
+        "games": 50
+      },
+      "w": 10,
+      "d": 15,
+      "l": 25,
+      "acpl": 472.2021031876438,
+      "acceptableRate": 0.5497863950049293,
+      "blunderRate": 0.3989484061781137,
       "blocks": [
         {
           "levelId": "uci1320",
           "levelElo": 1320,
-          "games": 2,
+          "games": 5,
           "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.5
         }
       ],
       "abortedGames": 0,
       "startedAt": "2026-11-01T01:18:35.664Z",
-      "finishedAt": null
+      "finishedAt": "2026-11-01T02:39:22.124Z"
     },
     {
       "cell": {
@@ -131,16 +190,21 @@
       "state": "failed",
       "status": "stopped_error",
       "statusReason": "too_many_aborts",
-      "games": 0,
+      "games": 1,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
+      "costUsd": 0.000060438000000000006,
+      "elo": {
+        "mean": 876.1208007363231,
+        "lo": 124,
+        "hi": 1595,
+        "games": 1
+      },
       "w": 0,
       "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
+      "l": 1,
+      "acpl": 212.2,
+      "acceptableRate": 0.8,
+      "blunderRate": 0.2,
       "blocks": [
         {
           "levelId": "uci1320",
@@ -223,5 +287,64 @@
     }
   ],
   "pairs": [],
-  "leaderboard": []
+  "leaderboard": [
+    {
+      "arm_id": "togethercomputer/tev1-4b-experimental#hinted",
+      "model": "togethercomputer/tev1-4b-experimental",
+      "arm": "hinted",
+      "series_id": "01M6AB22H7FJ2WQQTKE5JT0E2E",
+      "status": "stopped_error",
+      "games": 1,
+      "elo": {
+        "mean": 876.1208007363231,
+        "lo": 124,
+        "hi": 1595,
+        "half_width": 735.5,
+        "games": 1,
+        "w": 0,
+        "d": 0,
+        "l": 1,
+        "score_pct": 0
+      },
+      "w": 0,
+      "d": 0,
+      "l": 1,
+      "score_pct": 0,
+      "acpl": 212.2,
+      "acceptable_rate": 0.8,
+      "blunder_rate": 0.2,
+      "cost_usd": 0.000060438000000000006,
+      "cost_per_game": 0.000060438000000000006,
+      "separated_from": []
+    },
+    {
+      "arm_id": "jaredpalmer/kev-4b#clean",
+      "model": "jaredpalmer/kev-4b",
+      "arm": "clean",
+      "series_id": "01M6AAZQ4FNTM6NFXCDN53G45Z",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 121.6855662455494,
+        "lo": 23,
+        "hi": 227,
+        "half_width": 102,
+        "games": 50,
+        "w": 10,
+        "d": 15,
+        "l": 25,
+        "score_pct": 0.35
+      },
+      "w": 10,
+      "d": 15,
+      "l": 25,
+      "score_pct": 0.35,
+      "acpl": 472.2021031876438,
+      "acceptable_rate": 0.5497863950049293,
+      "blunder_rate": 0.3989484061781137,
+      "cost_usd": 0.07258612200000002,
+      "cost_per_game": 0.0014517224400000003,
+      "separated_from": []
+    }
+  ]
 }
