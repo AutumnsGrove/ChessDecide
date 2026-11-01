@@ -2,7 +2,7 @@
 
 Plan `bench/plans/tail-v1.json` (sha256 c2d690724d43f0c5…) · seed tail-v1-20261101-0118 · judge depth 14 · concurrency 2
 Ladder v2 (calibrated) · size standard (50) · caps $2.0000 per series, $5.0000 per run
-Ran 2026-11-01 01:18 UTC → 2026-11-01 01:18 UTC (0 h 00 min) · node 22.22.0 · Stockfish Stockfish 16 · git a022fe5
+Ran 2026-11-01 01:18 UTC → 2026-11-01 03:09 UTC (1 h 51 min) · node 22.22.0 · Stockfish Stockfish 16 · git a022fe5
 **Spend $0.0989 of $5.0000** · 6 cells: 1 finished · 82 games · 15 aborted
 
 | Model · arm | Series | Elo (95 %) | W-D-L | Score | ACPL | Acc. | Blunders | Cost | Games |
@@ -36,4 +36,4 @@ Ran 2026-11-01 01:18 UTC → 2026-11-01 01:18 UTC (0 h 00 min) · node 22.22.0 �
 ## Provenance
 
 - plan: `bench/plans/tail-v1.json` sha256 c2d690724d43f0c5459a6e973a7c758288aa1ccf13e988e49e927a14996f6533 · seed tail-v1-20261101-0118 · host `vm`
-- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: completed
+- ladder: /home/user/ChessDecide/data/ladder/ladder-v2.json · stop reason: sliced
