@@ -96,6 +96,14 @@ are in this plan too so the sweep stays uniform.
 
 Every time a **new** model appears: add its slug to a **new** plan (below). Do not edit an old plan.
 
+### Models that cannot play this protocol
+
+A model that caps a question at 26 answer options is rejected (HTTP 400/422) whenever a position has more
+than 26 legal moves, so its games abort (`transport`) and the cell ends `stopped_error` /
+`too_many_aborts`. Found on `cloudflare/clef-flash`, `upstage/solar-decide` and `upstage/solar-decide-flash`
+(see `bench/README.md`). A single `probe` call is **not** a safe test: `clef-flash` accepted a 48-option
+probe and still failed in real games. To vet a new model, play ~4 real games in a scratch checkout.
+
 ## 3. The plan
 
 `bench/plans/all-models-v1.json` (committed): 19 models × `clean` + `hinted` × standard 50 =
@@ -132,8 +140,11 @@ Variants:
 
 Expected wall clock on a box like the four `core-v1` series: ~40–50 s/game → **≈ 25–32 h** for the
 1,900-game sweep, less on a faster machine. Preflight estimates this plan at **$4.56 typical /
-$11.39 worst**; measured actuals run 2–8× below typical, so expect **$2–4**. The preflight estimate is
-the honest upper bound.
+$11.39 worst** (the original constants); measured actuals ran 2.6–3.9× below that, so the estimator was
+recalibrated on the first sweep (≈ 600 input tokens and 34 calls per game side; ~65 k real calls). The
+dry-run typical estimate now lands within about ±25 % of measured spend on the five sweep plans (it runs a
+little high on cheap models and ~24 % low on the premium ones, which also bill output tokens the estimator
+ignores). The worst case stays conservative.
 
 ## 4. Preflight and dry run (spends nothing)
 
@@ -220,6 +231,9 @@ done &
 Sanity signals: cells go `pending → running → finished`; spend per cell stays within a few dollars;
 `report.md` exists only after the run ends (or after each cell with `--commit-each-cell`).
 
+Poll `data/bench/<run>/run.log` or the sweep's own output rather than calling `bench status` in a tight
+loop: concurrent reads of the local D1 produced `SQLITE_BUSY` stalls (a few minutes each) on a 4-model sweep.
+
 Do **not** run `pnpm verify`, `pnpm e2e` or a ladder calibration while the sweep runs — they compete
 for the Stockfish workers and the bench will report timeouts.
 
@@ -286,6 +300,8 @@ Publish the `core-v1` bundle too: it is the source for `typesafe/jev-1.14` and `
 | a cell is `timeout` | model too slow; the run continues, the cell stays paused and is recorded |
 | cell `stopped_budget` | only if a cell spent `series_cap_usd` (set high above); raise it and resume |
 | many `429` retries | `DecisionsClient` backs off by itself; if it persists, lower `concurrency` to 1 |
+| `commit failed … fetch failed` / `SocketError: other side closed` | the report blocks the event loop long enough for workerd to drop the idle D1 socket; fixed by the read-retry in `d1-retry.ts`. If an old checkout hits it, `pnpm cli bench report --run <id>` after the run rebuilds the bundle |
+| `ladder_levels missing for vN` | fresh DB on an adaptive plan with an old checkout: run any fixed-ladder plan once (`smoke.json --mock`) to seed it |
 | disk filling | `du -sh data/benc* data/d1 docs/build/reports`; `--no-sql` skips the SQL bundle |
 | nothing in `docs/build/reports` | the bundle is written when the run ends (or per cell with `--commit-each-cell`) |
 

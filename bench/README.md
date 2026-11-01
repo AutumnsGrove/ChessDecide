@@ -17,6 +17,7 @@ pnpm cli bench run --plan bench/plans/core-v1.json --for 8   # attached slice; e
 | --- | --- | --- |
 | `plans/core-v1.json` | 2 models × 2 arms, standard 50, adaptive ladder v2, caps $0.50 / $2.00 | ≈ $0.15–0.25, ≈ 2 h 20 min |
 | `plans/all-models-v1.json` | 19 models (≤ $0.06/M, minus the two core-v1 arms) × `clean` + `hinted` × 50 games (38 cells, 1,900 games) | ≈ $2–4, ≈ 25–32 h |
+| `plans/spread-v1.json`, `rest-clean-v1.json`, `rest-hinted-v2.json`, `premium-v1.json` | the sweep as it was actually run (see `docs/build/reports/bench-*`) | $0.03–1.3 each |
 | `plans/smoke.json` | 1 cell, 3 games, fixed `eps50`, for `--mock` | $0 |
 
 Running a sweep on a remote box (no wrangler, commit the bundle, publish later):
