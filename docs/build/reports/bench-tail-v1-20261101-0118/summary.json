@@ -19,9 +19,9 @@
   "totals": {
     "cells": 6,
     "finished": 1,
-    "games": 51,
+    "games": 82,
     "aborted": 15,
-    "cost_usd": 0.07267524600000001
+    "cost_usd": 0.09891369600000001
   },
   "cells": [
     {
@@ -125,23 +125,71 @@
         "repeat": 1,
         "seriesName": "tail-v1/jaredpalmer/kev-4b#hinted"
       },
-      "seriesId": null,
-      "state": "pending",
-      "status": "created",
-      "statusReason": null,
-      "games": 0,
+      "seriesId": "01M6AFMQ671D41EGH5CHPCCXG2",
+      "state": "running",
+      "status": "paused",
+      "statusReason": "paused",
+      "games": 31,
       "target": 50,
-      "costUsd": 0,
-      "elo": null,
-      "w": 0,
-      "d": 0,
-      "l": 0,
-      "acpl": null,
-      "acceptableRate": null,
-      "blunderRate": null,
-      "blocks": [],
+      "costUsd": 0.02623845,
+      "elo": {
+        "mean": 276.82791589440893,
+        "lo": 130,
+        "hi": 429,
+        "games": 31
+      },
+      "w": 11,
+      "d": 6,
+      "l": 14,
+      "acpl": 286.8646671543526,
+      "acceptableRate": 0.6847110460863204,
+      "blunderRate": 0.2655449890270666,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 3,
+          "score": 1
+        }
+      ],
       "abortedGames": 0,
-      "startedAt": null,
+      "startedAt": "2026-11-01T02:39:58.152Z",
       "finishedAt": null
     },
     {
@@ -315,6 +363,35 @@
       "blunder_rate": 0.2,
       "cost_usd": 0.000060438000000000006,
       "cost_per_game": 0.000060438000000000006,
+      "separated_from": []
+    },
+    {
+      "arm_id": "jaredpalmer/kev-4b#hinted",
+      "model": "jaredpalmer/kev-4b",
+      "arm": "hinted",
+      "series_id": "01M6AFMQ671D41EGH5CHPCCXG2",
+      "status": "paused",
+      "games": 31,
+      "elo": {
+        "mean": 276.82791589440893,
+        "lo": 130,
+        "hi": 429,
+        "half_width": 149.5,
+        "games": 31,
+        "w": 11,
+        "d": 6,
+        "l": 14,
+        "score_pct": 0.45161290322580644
+      },
+      "w": 11,
+      "d": 6,
+      "l": 14,
+      "score_pct": 0.45161290322580644,
+      "acpl": 286.8646671543526,
+      "acceptable_rate": 0.6847110460863204,
+      "blunder_rate": 0.2655449890270666,
+      "cost_usd": 0.02623845,
+      "cost_per_game": 0.0008464016129032258,
       "separated_from": []
     },
     {
