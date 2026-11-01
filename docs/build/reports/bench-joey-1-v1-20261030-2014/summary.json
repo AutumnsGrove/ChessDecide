@@ -1,0 +1,288 @@
+{
+  "run": "joey-1-v1-20261030-2014",
+  "environment": {
+    "node": "22.22.0",
+    "stockfish": "Stockfish 16",
+    "gitSha": "a69d6707e5a2aacbe0786a955c91057015e2efe5",
+    "host": "vm",
+    "mock": false
+  },
+  "ladder": {
+    "version": 2,
+    "calibrated": true,
+    "file": "/home/user/ChessDecide/data/ladder/ladder-v2.json"
+  },
+  "caps": {
+    "series_usd": 1,
+    "run_usd": 2
+  },
+  "totals": {
+    "cells": 2,
+    "finished": 2,
+    "games": 100,
+    "aborted": 0,
+    "cost_usd": 0.02697877
+  },
+  "cells": [
+    {
+      "cell": {
+        "index": 0,
+        "model": "baseten/joey-1",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "joey-1-v1/baseten/joey-1#clean"
+      },
+      "seriesId": "01M677729MRFX1CQ18661CNVE5",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.017793930000000003,
+      "elo": {
+        "mean": 378.9753453877093,
+        "lo": 274,
+        "hi": 483,
+        "games": 50
+      },
+      "w": 15,
+      "d": 10,
+      "l": 25,
+      "acpl": 266.0538606403013,
+      "acceptableRate": 0.6666666666666666,
+      "blunderRate": 0.25536723163841807,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.7
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-30T20:14:58.869Z",
+      "finishedAt": "2026-10-30T21:31:45.812Z"
+    },
+    {
+      "cell": {
+        "index": 1,
+        "model": "baseten/joey-1",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "joey-1-v1/baseten/joey-1#hinted"
+      },
+      "seriesId": "01M67BKVN8H1692V9JM4S2GM8S",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.009184839999999998,
+      "elo": {
+        "mean": 721.1507113076325,
+        "lo": 613,
+        "hi": 830,
+        "games": 50
+      },
+      "w": 23,
+      "d": 3,
+      "l": 24,
+      "acpl": 134.89223638470452,
+      "acceptableRate": 0.8215527230590962,
+      "blunderRate": 0.11703360370799537,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-30T21:31:52.360Z",
+      "finishedAt": "2026-10-30T22:04:46.952Z"
+    }
+  ],
+  "pairs": [
+    {
+      "a": "Joey 1 · clean",
+      "b": "Joey 1 · hinted",
+      "pAGtB": 0.000004551163080035813,
+      "diffMean": -342.17536592299615,
+      "diffLo": -493,
+      "diffHi": -192
+    }
+  ],
+  "leaderboard": [
+    {
+      "arm_id": "baseten/joey-1#hinted",
+      "model": "baseten/joey-1",
+      "arm": "hinted",
+      "series_id": "01M67BKVN8H1692V9JM4S2GM8S",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 721.1507113076325,
+        "lo": 613,
+        "hi": 830,
+        "half_width": 108.5,
+        "games": 50,
+        "w": 23,
+        "d": 3,
+        "l": 24,
+        "score_pct": 0.49
+      },
+      "w": 23,
+      "d": 3,
+      "l": 24,
+      "score_pct": 0.49,
+      "acpl": 134.89223638470452,
+      "acceptable_rate": 0.8215527230590962,
+      "blunder_rate": 0.11703360370799537,
+      "cost_usd": 0.009184839999999998,
+      "cost_per_game": 0.00018369679999999999,
+      "separated_from": [
+        "baseten/joey-1#clean"
+      ]
+    },
+    {
+      "arm_id": "baseten/joey-1#clean",
+      "model": "baseten/joey-1",
+      "arm": "clean",
+      "series_id": "01M677729MRFX1CQ18661CNVE5",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 378.9753453877093,
+        "lo": 274,
+        "hi": 483,
+        "half_width": 104.5,
+        "games": 50,
+        "w": 15,
+        "d": 10,
+        "l": 25,
+        "score_pct": 0.4
+      },
+      "w": 15,
+      "d": 10,
+      "l": 25,
+      "score_pct": 0.4,
+      "acpl": 266.0538606403013,
+      "acceptable_rate": 0.6666666666666666,
+      "blunder_rate": 0.25536723163841807,
+      "cost_usd": 0.017793930000000003,
+      "cost_per_game": 0.00035587860000000005,
+      "separated_from": [
+        "baseten/joey-1#hinted"
+      ]
+    }
+  ]
+}

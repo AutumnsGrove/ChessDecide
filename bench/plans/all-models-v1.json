@@ -19,7 +19,9 @@
     "upstage/solar-decide",
     "upstage/solar-decide-flash",
     "nace-ai/drex-max",
-    "nace-ai/drex-v2.0"
+    "nace-ai/drex-v2.0",
+    "typesafe/jev-1.14",
+    "liquid/d1-ultra"
   ],
   "arms": [
     "clean",
@@ -33,7 +35,7 @@
   },
   "ladder_version": 2,
   "series_cap_usd": 10,
-  "run_cap_usd": 50,
+  "run_cap_usd": 14,
   "repeat": 1,
   "concurrency": 2,
   "judge_depth": 14,

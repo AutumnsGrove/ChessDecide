@@ -238,7 +238,8 @@ async function openCtx(o: BenchRunOptions): Promise<{ ctx: Ctx; checks: Prefligh
     checks.push({ ok: false, name: 'ladder', detail: `fixed level ${fixedLevel} is not in ladder v${ladder.version}` });
   else checks.push({ ok: true, name: 'ladder', detail: `v${ladder.version}${ladder.calibrated ? '' : ' (UNcalibrated)'}${ladderFile ? ` · ${ladderFile}` : ''}` });
 
-  if (ladder && fixedLevel !== null && ladder.levels.some((l) => l.id === fixedLevel)) {
+  // Seed ladder_levels for every mode: the publish bundle (and --commit-each-cell) refuses an empty ruler.
+  if (ladder && ladder.version === plan.ladder_version && (fixedLevel === null || ladder.levels.some((l) => l.id === fixedLevel))) {
     try {
       const rows = await loadLadderLevels(db, plan.ladder_version);
       if (rows.length === 0) { await saveLadderLevels(db, ladder); checks.push({ ok: true, name: 'ladder rows', detail: `imported ${ladder.levels.length} levels into ladder_levels` }); }
@@ -382,14 +383,21 @@ async function readCells(ctx: Ctx, manifest: Manifest): Promise<CellsAndPairs> {
 }
 
 export async function writeBenchArtifacts(o: BenchRunOptions, runId: string): Promise<{ dir: string; cells: BenchCellResult[] }> {
+  const opened = o.db ? null : await openLocalDb();
+  try {
+    return await writeBenchArtifactsOn(o, o.db ?? opened!.db, runId);
+  } finally {
+    await opened?.close();   // a throw mid-report must still dispose the workerd child, or the process never exits
+  }
+}
+
+async function writeBenchArtifactsOn(o: BenchRunOptions, db: Db, runId: string): Promise<{ dir: string; cells: BenchCellResult[] }> {
   const dataRoot = o.dataDir ?? defaultDataDir();
   const manifest = JSON.parse(readFileSync(join(runDir(dataRoot, runId), 'manifest.json'), 'utf8')) as Manifest;
   const raw = readFileSync(repoPath(manifest.plan_path), 'utf8');
   const plan = parseBenchPlan(JSON.parse(raw));
   const ladderCheck = loadLadderVersion(dataRoot, plan.ladder_version);
   const ladder = o.ladder ?? ladderCheck?.file ?? { version: plan.ladder_version, calibrated: false, movetime_ms: 50, sf_version: 'unknown', anchor: { level: 'uci1320', elo: 1320 }, levels: [] };
-  const opened = o.db ? null : await openLocalDb();
-  const db = o.db ?? opened!.db;
   const rt = o.rt ?? ({ judge: { async oracle() { throw new Error('no runtime'); }, async evalPosition() { throw new Error('no runtime'); } }, engines: [], close: async () => {} } as unknown as Runtime);
   const ctx: Ctx = {
     o, plan, sha: manifest.plan_sha256, mock: manifest.env.mock, log: o.log ?? (() => {}), dataRoot, db, rt,
@@ -418,7 +426,6 @@ export async function writeBenchArtifacts(o: BenchRunOptions, runId: string): Pr
     const outBase = join(dir, 'sql', 'part.sql');
     await runPublish({ db, seriesIds: cells.flatMap((c) => (c.seriesId ? [c.seriesId] : [])), outBase, log: () => {} });
   }
-  await opened?.close();
   return { dir, cells };
 }
 
@@ -672,7 +679,12 @@ export async function benchStatus(o: { runId?: string; json?: boolean; db?: Db; 
 
   const opened = o.db ? null : await openLocalDb();
   const db = o.db ?? opened!.db;
-  const live = await buildStatus({ o: {} as BenchRunOptions, plan: m.plan, sha: m.plan_sha256, mock: m.env.mock, log: () => {}, dataRoot, db, rt: {} as Runtime, ownDb: false, ownRt: false, ladder: {} as LadderFile, ladderFile: m.ladder.file, env: m.env }, m.run_id, m.prefix, m.stop_reason);
+  let live: Awaited<ReturnType<typeof buildStatus>>;
+  try {
+    live = await buildStatus({ o: {} as BenchRunOptions, plan: m.plan, sha: m.plan_sha256, mock: m.env.mock, log: () => {}, dataRoot, db, rt: {} as Runtime, ownDb: false, ownRt: false, ladder: {} as LadderFile, ladderFile: m.ladder.file, env: m.env }, m.run_id, m.prefix, m.stop_reason);
+  } finally {
+    await opened?.close();
+  }
   const elapsedMin = Math.max(0, Math.round((Date.parse(m.finished_at ?? new Date().toISOString()) - Date.parse(m.started_at)) / 60_000));
   const done = live.totals.games;
   const perGame = done ? live.totals.cost_usd / done : 0;
@@ -686,7 +698,6 @@ export async function benchStatus(o: { runId?: string; json?: boolean; db?: Db; 
       return `${mascot(c.state === 'finished' ? 'finished' : c.state === 'budget' ? 'stopped_budget' : c.state)} ${c.state.padEnd(8)} ${String(c.games).padStart(3)}/${String(c.target ?? '?').padEnd(3)} $${c.cost_usd.toFixed(4)}${elo}  ${c.name}`;
     }),
   ];
-  await opened?.close();
   const logPath = join(runDir(dataRoot, m.run_id), 'run.log');
   if (existsSync(logPath)) {
     const tail = readFileSync(logPath, 'utf8').trimEnd().split('\n').slice(-5);

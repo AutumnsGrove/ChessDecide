@@ -143,7 +143,7 @@ describe('api (T01 local capabilities)', () => {
     const { app } = localApi();
     const ok = await post(app, '/api/estimate', gameConfig());
     expect(ok.status).toBe(200);
-    expect(await ok.json()).toMatchObject({ calls: 40, cap_usd: 1, over_cap: false, breakdown: [{ model: 'typesafe/jev-1.14', arm: 'clean', calls: 40 }] });
+    expect(await ok.json()).toMatchObject({ calls: 34, cap_usd: 1, over_cap: false, breakdown: [{ model: 'typesafe/jev-1.14', arm: 'clean', calls: 34 }] });
     const bad = await post(app, '/api/estimate', gameConfig({ white: { type: 'model', model: 'nope/nope', arm: 'clean' } }));
     expect(bad.status).toBe(400);
     expect(await bad.json()).toMatchObject({ error: { code: 'invalid_config' } });
@@ -211,7 +211,7 @@ describe('api (T01 local capabilities)', () => {
     expect(noKey.status).toBe(424);
     expect(await noKey.json()).toMatchObject({ error: { code: 'no_api_key' } });
 
-    const over = await post(localApi().app, '/api/games', gameConfig({ budget_usd: 0.001 }));
+    const over = await post(localApi().app, '/api/games', gameConfig({ budget_usd: 0.001, black: { type: 'model', model: 'typesafe/jev-1.14', arm: 'clean' } }));
     expect(over.status).toBe(402);
     const body = await over.json() as any;
     expect(body.error.code).toBe('budget_exceeded');

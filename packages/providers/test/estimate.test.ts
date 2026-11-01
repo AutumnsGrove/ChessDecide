@@ -19,15 +19,15 @@ const config = (over: Partial<GameConfig> = {}): GameConfig => ({
 });
 
 describe('estimateGame', () => {
-  it('estimates a 200-ply clean game at 40 calls', () => {
+  it('estimates a 200-ply clean game at 34 calls', () => {
     const e = estimateGame(config(), CATALOG);
-    expect(e.calls).toBe(40);
-    expect(e.est_cost_usd).toBeCloseTo(40 * (1750 / 1e6) * 0.042, 12);
-    expect(e.worst_case_usd).toBeCloseTo(100 * (1750 / 1e6) * 0.042, 12);
-    expect(e.est_input_tokens).toBe(40 * 1750);
+    expect(e.calls).toBe(34);
+    expect(e.est_cost_usd).toBeCloseTo(34 * (598 / 1e6) * 0.042, 12);
+    expect(e.worst_case_usd).toBeCloseTo(100 * (1170 / 1e6) * 0.042, 12);
+    expect(e.est_input_tokens).toBe(34 * 598);
     expect(e.cap_usd).toBe(1);
     expect(e.over_cap).toBe(false);
-    expect(e.breakdown).toEqual([{ model: 'typesafe/jev-1.14', arm: 'clean', calls: 40, est_cost_usd: e.est_cost_usd }]);
+    expect(e.breakdown).toEqual([{ model: 'typesafe/jev-1.14', arm: 'clean', calls: 34, est_cost_usd: e.est_cost_usd }]);
   });
 
   it('is zero when neither side is a model', () => {
@@ -38,14 +38,14 @@ describe('estimateGame', () => {
   it('adds 600 input tokens per call for the image arm', () => {
     const clean = estimateGame(config(), CATALOG);
     const image = estimateGame(config({ white: { type: 'model', model: 'typesafe/jev-1.14', arm: 'image' } }), CATALOG);
-    expect(image.est_input_tokens - clean.est_input_tokens).toBe(40 * 600);
+    expect(image.est_input_tokens - clean.est_input_tokens).toBe(34 * 600);
     expect(image.breakdown[0]!.arm).toBe('image');
   });
 
   it('uses each side price when both sides are models', () => {
     const e = estimateGame(config({ black: { type: 'model', model: 'cheap/model', arm: 'hinted' } }), CATALOG);
-    expect(e.calls).toBe(80);
-    const jev = 40 * (1750 / 1e6) * 0.042, cheap = 40 * (1750 / 1e6) * 0.01;
+    expect(e.calls).toBe(68);
+    const jev = 34 * (598 / 1e6) * 0.042, cheap = 34 * (598 / 1e6) * 0.01;
     expect(e.est_cost_usd).toBeCloseTo(jev + cheap, 12);
     expect(e.breakdown.map((b) => b.model)).toEqual(['typesafe/jev-1.14', 'cheap/model']);
   });

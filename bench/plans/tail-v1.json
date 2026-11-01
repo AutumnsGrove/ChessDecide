@@ -1,0 +1,30 @@
+{
+  "name": "tail-v1",
+  "models": [
+    "jaredpalmer/kev-4b",
+    "togethercomputer/tev1-4b-experimental",
+    "scaledown/classify-1"
+  ],
+  "arms": [
+    "clean",
+    "hinted"
+  ],
+  "size": {
+    "preset": "standard"
+  },
+  "ladder": {
+    "mode": "adaptive"
+  },
+  "ladder_version": 2,
+  "series_cap_usd": 2,
+  "run_cap_usd": 5,
+  "repeat": 1,
+  "concurrency": 2,
+  "judge_depth": 14,
+  "max_hours": 48,
+  "cell_timeout_min": 120,
+  "artifacts": {
+    "sql": true
+  },
+  "parallel_models": 3
+}

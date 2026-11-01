@@ -17,6 +17,7 @@ pnpm cli bench run --plan bench/plans/core-v1.json --for 8   # attached slice; e
 | --- | --- | --- |
 | `plans/core-v1.json` | 2 models × 2 arms, standard 50, adaptive ladder v2, caps $0.50 / $2.00 | ≈ $0.15–0.25, ≈ 2 h 20 min |
 | `plans/all-models-v1.json` | 19 models (≤ $0.06/M, minus the two core-v1 arms) × `clean` + `hinted` × 50 games (38 cells, 1,900 games) | ≈ $2–4, ≈ 25–32 h |
+| `plans/spread-v1.json`, `rest-clean-v1.json`, `rest-hinted-v2.json`, `premium-v1.json` | the sweep as it was actually run (see `docs/build/reports/bench-*`) | $0.03–1.3 each |
 | `plans/smoke.json` | 1 cell, 3 games, fixed `eps50`, for `--mock` | $0 |
 
 Running a sweep on a remote box (no wrangler, commit the bundle, publish later):
@@ -52,3 +53,20 @@ wrangler.production.jsonc --file <file>` per chunk, in filename order. See `docs
 - The per-series cap is `min(series_cap_usd, run_cap_usd − spent)`. If a run stops on budget, raise
   `run_cap_usd` and re-run the same command — finished cells are skipped.
 - Do not run `pnpm verify` or `pnpm e2e` while a bench run is going.
+
+## Unsupported models
+
+The bench sends every legal move as a labelled option. These models reject that, so their games abort
+(`transport`) and the cell ends `stopped_error` (`too_many_aborts`) at about $0. They have no results at
+this protocol, and some of their failed cells are listed under "Not finished" in the run reports:
+
+| model | error |
+| --- | --- |
+| `cloudflare/clef-flash` | 400 `at most 26 options for this model` |
+| `upstage/solar-decide` | 422 `N candidates exceed the 26 single-token labels this route supports` |
+| `upstage/solar-decide-flash` | 422 (same) |
+| `togethercomputer/tev1-4b-experimental` | 400 `Tev1 needs between 2 and 20 options per question` (fails once a position has more than 20 legal moves) |
+| `scaledown/classify-1` | 400 `state must be a string or an object with only text, document, and document_mime_type` (rejects the structured state from move one) |
+
+Supporting them needs a candidate cap (which changes what is measured), so it is a methodology
+decision, not a retry. Their failed `clean` cells are in `bench-rest-clean-v1-*/report.md` under "Not finished".

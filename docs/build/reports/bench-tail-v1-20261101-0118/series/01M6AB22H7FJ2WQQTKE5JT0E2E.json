@@ -1,0 +1,127 @@
+{
+  "id": "01M6AB22H7FJ2WQQTKE5JT0E2E",
+  "name": "tail-v1/togethercomputer/tev1-4b-experimental#hinted",
+  "model": "togethercomputer/tev1-4b-experimental",
+  "arm": "hinted",
+  "status": "stopped_error",
+  "status_reason": "too_many_aborts",
+  "size": {
+    "preset": "standard"
+  },
+  "ladder_version": 2,
+  "seed": 20261101,
+  "budget_usd": 1.9999713140000002,
+  "cost_usd": 0.000060438000000000006,
+  "games": [
+    {
+      "game_id": "01M6AB2690JW1TEPBXBRZRH4KP",
+      "index": 0,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB26J1BQRY1CKVY4CAHAJ6",
+      "index": 1,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "finished",
+      "result": "1-0",
+      "model_score": 0,
+      "termination": "checkmate",
+      "adjudicated": false,
+      "plies": 13,
+      "acpl_model": 212.2,
+      "cost_usd": 0.000060438000000000006
+    },
+    {
+      "game_id": "01M6AB2EHZQ1MSCWX29RAQEG62",
+      "index": 2,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "white",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 0,
+      "cost_usd": 0
+    },
+    {
+      "game_id": "01M6AB3905D5RXQA3QS1ZC5X3Z",
+      "index": 3,
+      "block": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "model_color": "black",
+      "status": "aborted",
+      "result": "*",
+      "termination": "aborted",
+      "adjudicated": false,
+      "plies": 1,
+      "cost_usd": 0
+    }
+  ],
+  "blocks": [
+    {
+      "index": 0,
+      "level_id": "uci1320",
+      "level_elo": 1320,
+      "games": 4,
+      "score": 0,
+      "posterior_before": 1200,
+      "posterior_after": 876.1208007363231
+    }
+  ],
+  "elo": {
+    "mean": 876.1208007363231,
+    "lo": 124,
+    "hi": 1595,
+    "half_width": 735.5,
+    "games": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "score_pct": 0
+  },
+  "elo_history": [
+    {
+      "games": 1,
+      "mean": 876.1208007363231,
+      "lo": 124,
+      "hi": 1595
+    }
+  ],
+  "secondary": {
+    "games": 1,
+    "model_plies": 5,
+    "acpl": 212.2,
+    "acpl_median": 203,
+    "acceptable_rate": 0.8,
+    "mistake_rate": 0.2,
+    "blunder_rate": 0.2,
+    "mean_p_acceptable": 0.8332058105796321,
+    "mean_e_win_loss": 5.33681976240266,
+    "brier": 0.24828301222827123,
+    "ece": 0.47798903463657916,
+    "score_as_white": null,
+    "score_as_black": 0,
+    "avg_plies": 13,
+    "adjudicated_frac": 0,
+    "cost_per_game": 0.000060438000000000006,
+    "latency_p50": 292,
+    "latency_p95": 524.6,
+    "avg_input_tokens": 287.8
+  },
+  "created_at": "2026-11-01T01:19:52.871Z"
+}
