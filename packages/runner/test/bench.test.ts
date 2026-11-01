@@ -157,6 +157,15 @@ describe('bench runner (mock, in-process)', () => {
     await expect(writeBenchArtifacts(o, res.runId)).rejects.toThrow(/ladder_levels missing for v2/);
   }, 120_000);
 
+  it('seeds ladder_levels at preflight for an adaptive plan on a fresh database', async () => {
+    const o = opts({ dryRun: true, planPath: planFile({ ladder: { mode: 'adaptive' } }) });
+    expect(await db.select().from(schema.ladder_levels)).toHaveLength(0);
+    const res = await runBench(o);
+    expect(res.exitCode).toBe(0);
+    const rows = await db.select().from(schema.ladder_levels).where(eq(schema.ladder_levels.ladder_version, 2));
+    expect(rows).toHaveLength(LADDER.levels.length);
+  }, 60_000);
+
   it('stops on budget when the run cap leaves less than $0.05', async () => {
     const o = opts({ planPath: planFile({ series_cap_usd: 0.01, run_cap_usd: 0.01 }) });
     const res = await runBench(o);

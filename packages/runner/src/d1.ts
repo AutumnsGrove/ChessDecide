@@ -2,6 +2,7 @@ import { getPlatformProxy } from 'wrangler';
 import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '@chessdecide/db/schema';
 import { fileURLToPath } from 'node:url';
+import { withSocketRetry } from './d1-retry.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -11,5 +12,6 @@ export async function openLocalDb() {
     configPath: root + 'apps/web/wrangler.jsonc',
     persist: { path: process.env.CHESSDECIDE_D1_PATH ?? root + 'data/d1/v3' },   // wrangler CLI nests state under v3; the proxy does not,
   });
-  return { db: drizzle(proxy.env.DB, { schema }), raw: proxy.env.DB, close: () => proxy.dispose() };
+  const raw = withSocketRetry(proxy.env.DB);
+  return { db: drizzle(raw, { schema }), raw, close: () => proxy.dispose() };
 }
