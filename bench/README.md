@@ -56,10 +56,9 @@ wrangler.production.jsonc --file <file>` per chunk, in filename order. See `docs
 
 ## Unsupported models
 
-Several models cap a question at 20 or 26 answer options (or reject the structured state), so the bench's all-legal-moves prompt is rejected
-(HTTP 400/422) whenever a position has more than 26 legal moves. Games abort with `transport` and the
-cell ends `stopped_error` (`too_many_aborts`). They are left out of the hinted plan and have no
-results at this protocol:
+The bench sends every legal move as a labelled option. These models reject that, so their games abort
+(`transport`) and the cell ends `stopped_error` (`too_many_aborts`) at about $0. They have no results at
+this protocol, and some of their failed cells are listed under "Not finished" in the run reports:
 
 | model | error |
 | --- | --- |
