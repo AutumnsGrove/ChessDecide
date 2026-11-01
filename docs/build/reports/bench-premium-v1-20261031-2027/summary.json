@@ -1,0 +1,918 @@
+{
+  "run": "premium-v1-20261031-2027",
+  "environment": {
+    "node": "22.22.0",
+    "stockfish": "Stockfish 16",
+    "gitSha": "9123240d306ed7a5f620591ac85a0588cdc70825",
+    "host": "vm",
+    "mock": false
+  },
+  "ladder": {
+    "version": 2,
+    "calibrated": true,
+    "file": "/home/user/ChessDecide/data/ladder/ladder-v2.json"
+  },
+  "caps": {
+    "series_usd": 4,
+    "run_usd": 10
+  },
+  "totals": {
+    "cells": 6,
+    "finished": 6,
+    "games": 300,
+    "aborted": 2,
+    "cost_usd": 1.3044196700000001
+  },
+  "cells": [
+    {
+      "cell": {
+        "index": 0,
+        "model": "openai/gpt-6-luna-decisions",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "premium-v1/openai/gpt-6-luna-decisions#clean"
+      },
+      "seriesId": "01M69TBE75DFT83730S1XWWE9C",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.1372402,
+      "elo": {
+        "mean": 277.36097748892104,
+        "lo": 166,
+        "hi": 388,
+        "games": 50
+      },
+      "w": 17,
+      "d": 6,
+      "l": 27,
+      "acpl": 303.7158774373259,
+      "acceptableRate": 0.6935933147632312,
+      "blunderRate": 0.2520891364902507,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.75
+        },
+        {
+          "levelId": "random",
+          "levelElo": 160,
+          "games": 5,
+          "score": 0.9
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 1,
+          "score": 0
+        }
+      ],
+      "abortedGames": 1,
+      "startedAt": "2026-10-31T20:27:53.958Z",
+      "finishedAt": "2026-10-31T23:05:27.825Z"
+    },
+    {
+      "cell": {
+        "index": 1,
+        "model": "openai/gpt-6-luna-decisions",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "premium-v1/openai/gpt-6-luna-decisions#hinted"
+      },
+      "seriesId": "01M6A3D6GDT1QW3Y07J4QNK8C4",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.09488169999999997,
+      "elo": {
+        "mean": 740.8067366311501,
+        "lo": 635,
+        "hi": 845,
+        "games": 50
+      },
+      "w": 17,
+      "d": 9,
+      "l": 24,
+      "acpl": 125.21325051759834,
+      "acceptableRate": 0.8115942028985508,
+      "blunderRate": 0.13871635610766045,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.1
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.625
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 1,
+          "score": 0
+        }
+      ],
+      "abortedGames": 1,
+      "startedAt": "2026-10-31T23:06:08.781Z",
+      "finishedAt": "2026-11-01T00:44:58.598Z"
+    },
+    {
+      "cell": {
+        "index": 2,
+        "model": "cloudflare/clef-omni",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "premium-v1/cloudflare/clef-omni#clean"
+      },
+      "seriesId": "01M69TBEDDZNV2VXWMMFVJ3SS2",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.3049470000000001,
+      "elo": {
+        "mean": 385.11966442511687,
+        "lo": 278,
+        "hi": 490,
+        "games": 50
+      },
+      "w": 16,
+      "d": 6,
+      "l": 28,
+      "acpl": 285.6235687022901,
+      "acceptableRate": 0.6774809160305344,
+      "blunderRate": 0.2514312977099237,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps75",
+          "levelElo": 391,
+          "games": 5,
+          "score": 0.4
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T20:27:54.157Z",
+      "finishedAt": "2026-10-31T23:08:29.851Z"
+    },
+    {
+      "cell": {
+        "index": 3,
+        "model": "cloudflare/clef-omni",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "premium-v1/cloudflare/clef-omni#hinted"
+      },
+      "seriesId": "01M6A3JMSBSAJPWGMYHZ84E6VM",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.17992244999999998,
+      "elo": {
+        "mean": 812.7773044920933,
+        "lo": 710,
+        "hi": 916,
+        "games": 50
+      },
+      "w": 22,
+      "d": 3,
+      "l": 25,
+      "acpl": 115.82418260333128,
+      "acceptableRate": 0.8463911165946947,
+      "blunderRate": 0.10610734114743985,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.2
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.3
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.6
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T23:09:07.243Z",
+      "finishedAt": "2026-11-01T00:35:56.524Z"
+    },
+    {
+      "cell": {
+        "index": 4,
+        "model": "cloudflare/clef",
+        "arm": "clean",
+        "repeat": 1,
+        "seriesName": "premium-v1/cloudflare/clef#clean"
+      },
+      "seriesId": "01M69TBENKRPY8NJ1FP7WTZJMZ",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.29227819200000005,
+      "elo": {
+        "mean": 710.9152330450087,
+        "lo": 607,
+        "hi": 818,
+        "games": 50
+      },
+      "w": 27,
+      "d": 0,
+      "l": 23,
+      "acpl": 170.8075780089153,
+      "acceptableRate": 0.736998514115899,
+      "blunderRate": 0.17830609212481427,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.4
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 1
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T20:27:54.419Z",
+      "finishedAt": "2026-10-31T22:11:16.680Z"
+    },
+    {
+      "cell": {
+        "index": 5,
+        "model": "cloudflare/clef",
+        "arm": "hinted",
+        "repeat": 1,
+        "seriesName": "premium-v1/cloudflare/clef#hinted"
+      },
+      "seriesId": "01M6A09Q541BT7G97YE7G323P7",
+      "state": "finished",
+      "status": "finished",
+      "statusReason": "target_reached",
+      "games": 50,
+      "target": 50,
+      "costUsd": 0.29515012799999996,
+      "elo": {
+        "mean": 840.290778334823,
+        "lo": 736,
+        "hi": 946,
+        "games": 50
+      },
+      "w": 24,
+      "d": 5,
+      "l": 21,
+      "acpl": 109.20763723150358,
+      "acceptableRate": 0.8293556085918854,
+      "blunderRate": 0.11276849642004773,
+      "blocks": [
+        {
+          "levelId": "uci1320",
+          "levelElo": 1320,
+          "games": 5,
+          "score": 0
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps50",
+          "levelElo": 614,
+          "games": 5,
+          "score": 0.8
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.7
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.6
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        },
+        {
+          "levelId": "eps30",
+          "levelElo": 819,
+          "games": 5,
+          "score": 0.5
+        }
+      ],
+      "abortedGames": 0,
+      "startedAt": "2026-10-31T22:11:49.029Z",
+      "finishedAt": "2026-11-01T00:05:11.561Z"
+    }
+  ],
+  "pairs": [
+    {
+      "a": "Gpt 6 Luna Decisions · clean",
+      "b": "Gpt 6 Luna Decisions · hinted",
+      "pAGtB": 2.8741653140002535e-9,
+      "diffMean": -463.4457591464184,
+      "diffLo": -616,
+      "diffHi": -311
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · clean",
+      "b": "Clef Omni · clean",
+      "pAGtB": 0.08402029666579792,
+      "diffMean": -107.7586869363593,
+      "diffLo": -261,
+      "diffHi": 46
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · clean",
+      "b": "Clef Omni · hinted",
+      "pAGtB": 5.357519581935713e-12,
+      "diffMean": -535.4163270069452,
+      "diffLo": -687,
+      "diffHi": -385
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · clean",
+      "b": "Clef · clean",
+      "pAGtB": 1.2642909357204268e-8,
+      "diffMean": -433.5542555585318,
+      "diffLo": -587,
+      "diffHi": -282
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · clean",
+      "b": "Clef · hinted",
+      "pAGtB": 4.4026242320941567e-13,
+      "diffMean": -562.9298008488232,
+      "diffLo": -716,
+      "diffHi": -411
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · hinted",
+      "b": "Clef Omni · clean",
+      "pAGtB": 0.9999980698212698,
+      "diffMean": 355.6870722100576,
+      "diffLo": 207,
+      "diffHi": 505
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · hinted",
+      "b": "Clef Omni · hinted",
+      "pAGtB": 0.16794810455964884,
+      "diffMean": -71.97056786052781,
+      "diffLo": -219,
+      "diffHi": 75
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · hinted",
+      "b": "Clef · clean",
+      "pAGtB": 0.6548291105496463,
+      "diffMean": 29.89150358788554,
+      "diffLo": -120,
+      "diffHi": 178
+    },
+    {
+      "a": "Gpt 6 Luna Decisions · hinted",
+      "b": "Clef · hinted",
+      "pAGtB": 0.09374952841893563,
+      "diffMean": -99.48404170240421,
+      "diffLo": -249,
+      "diffHi": 48
+    },
+    {
+      "a": "Clef Omni · clean",
+      "b": "Clef Omni · hinted",
+      "pAGtB": 9.72816062105838e-9,
+      "diffMean": -427.6576400705866,
+      "diffLo": -576,
+      "diffHi": -281
+    },
+    {
+      "a": "Clef Omni · clean",
+      "b": "Clef · clean",
+      "pAGtB": 0.000008213129703896858,
+      "diffMean": -325.79556862217277,
+      "diffLo": -477,
+      "diffHi": -177
+    },
+    {
+      "a": "Clef Omni · clean",
+      "b": "Clef · hinted",
+      "pAGtB": 1.1767947297723425e-9,
+      "diffMean": -455.1711139124619,
+      "diffLo": -605,
+      "diffHi": -307
+    },
+    {
+      "a": "Clef Omni · hinted",
+      "b": "Clef · clean",
+      "pAGtB": 0.9123901400003129,
+      "diffMean": 101.8620714484133,
+      "diffLo": -46,
+      "diffHi": 248
+    },
+    {
+      "a": "Clef Omni · hinted",
+      "b": "Clef · hinted",
+      "pAGtB": 0.35683161410128,
+      "diffMean": -27.513473841876095,
+      "diffLo": -175,
+      "diffHi": 119
+    },
+    {
+      "a": "Clef · clean",
+      "b": "Clef · hinted",
+      "pAGtB": 0.04425448102015495,
+      "diffMean": -129.37554529028944,
+      "diffLo": -278,
+      "diffHi": 20
+    }
+  ],
+  "leaderboard": [
+    {
+      "arm_id": "cloudflare/clef#hinted",
+      "model": "cloudflare/clef",
+      "arm": "hinted",
+      "series_id": "01M6A09Q541BT7G97YE7G323P7",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 840.290778334823,
+        "lo": 736,
+        "hi": 946,
+        "half_width": 105,
+        "games": 50,
+        "w": 24,
+        "d": 5,
+        "l": 21,
+        "score_pct": 0.53
+      },
+      "w": 24,
+      "d": 5,
+      "l": 21,
+      "score_pct": 0.53,
+      "acpl": 109.20763723150358,
+      "acceptable_rate": 0.8293556085918854,
+      "blunder_rate": 0.11276849642004773,
+      "cost_usd": 0.29515012799999996,
+      "cost_per_game": 0.005903002559999999,
+      "separated_from": [
+        "openai/gpt-6-luna-decisions#clean",
+        "cloudflare/clef-omni#clean"
+      ]
+    },
+    {
+      "arm_id": "cloudflare/clef-omni#hinted",
+      "model": "cloudflare/clef-omni",
+      "arm": "hinted",
+      "series_id": "01M6A3JMSBSAJPWGMYHZ84E6VM",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 812.7773044920933,
+        "lo": 710,
+        "hi": 916,
+        "half_width": 103,
+        "games": 50,
+        "w": 22,
+        "d": 3,
+        "l": 25,
+        "score_pct": 0.47
+      },
+      "w": 22,
+      "d": 3,
+      "l": 25,
+      "score_pct": 0.47,
+      "acpl": 115.82418260333128,
+      "acceptable_rate": 0.8463911165946947,
+      "blunder_rate": 0.10610734114743985,
+      "cost_usd": 0.17992244999999998,
+      "cost_per_game": 0.003598449,
+      "separated_from": [
+        "openai/gpt-6-luna-decisions#clean",
+        "cloudflare/clef-omni#clean"
+      ]
+    },
+    {
+      "arm_id": "openai/gpt-6-luna-decisions#hinted",
+      "model": "openai/gpt-6-luna-decisions",
+      "arm": "hinted",
+      "series_id": "01M6A3D6GDT1QW3Y07J4QNK8C4",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 740.8067366311501,
+        "lo": 635,
+        "hi": 845,
+        "half_width": 105,
+        "games": 50,
+        "w": 17,
+        "d": 9,
+        "l": 24,
+        "score_pct": 0.43
+      },
+      "w": 17,
+      "d": 9,
+      "l": 24,
+      "score_pct": 0.43,
+      "acpl": 125.21325051759834,
+      "acceptable_rate": 0.8115942028985508,
+      "blunder_rate": 0.13871635610766045,
+      "cost_usd": 0.09488169999999997,
+      "cost_per_game": 0.0018649539999999992,
+      "separated_from": [
+        "openai/gpt-6-luna-decisions#clean",
+        "cloudflare/clef-omni#clean"
+      ]
+    },
+    {
+      "arm_id": "cloudflare/clef#clean",
+      "model": "cloudflare/clef",
+      "arm": "clean",
+      "series_id": "01M69TBENKRPY8NJ1FP7WTZJMZ",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 710.9152330450087,
+        "lo": 607,
+        "hi": 818,
+        "half_width": 105.5,
+        "games": 50,
+        "w": 27,
+        "d": 0,
+        "l": 23,
+        "score_pct": 0.54
+      },
+      "w": 27,
+      "d": 0,
+      "l": 23,
+      "score_pct": 0.54,
+      "acpl": 170.8075780089153,
+      "acceptable_rate": 0.736998514115899,
+      "blunder_rate": 0.17830609212481427,
+      "cost_usd": 0.29227819200000005,
+      "cost_per_game": 0.005845563840000001,
+      "separated_from": [
+        "openai/gpt-6-luna-decisions#clean",
+        "cloudflare/clef-omni#clean"
+      ]
+    },
+    {
+      "arm_id": "cloudflare/clef-omni#clean",
+      "model": "cloudflare/clef-omni",
+      "arm": "clean",
+      "series_id": "01M69TBEDDZNV2VXWMMFVJ3SS2",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 385.11966442511687,
+        "lo": 278,
+        "hi": 490,
+        "half_width": 106,
+        "games": 50,
+        "w": 16,
+        "d": 6,
+        "l": 28,
+        "score_pct": 0.38
+      },
+      "w": 16,
+      "d": 6,
+      "l": 28,
+      "score_pct": 0.38,
+      "acpl": 285.6235687022901,
+      "acceptable_rate": 0.6774809160305344,
+      "blunder_rate": 0.2514312977099237,
+      "cost_usd": 0.3049470000000001,
+      "cost_per_game": 0.0060989400000000015,
+      "separated_from": [
+        "cloudflare/clef#clean",
+        "cloudflare/clef#hinted",
+        "openai/gpt-6-luna-decisions#hinted",
+        "cloudflare/clef-omni#hinted"
+      ]
+    },
+    {
+      "arm_id": "openai/gpt-6-luna-decisions#clean",
+      "model": "openai/gpt-6-luna-decisions",
+      "arm": "clean",
+      "series_id": "01M69TBE75DFT83730S1XWWE9C",
+      "status": "finished",
+      "games": 50,
+      "elo": {
+        "mean": 277.36097748892104,
+        "lo": 166,
+        "hi": 388,
+        "half_width": 111,
+        "games": 50,
+        "w": 17,
+        "d": 6,
+        "l": 27,
+        "score_pct": 0.4
+      },
+      "w": 17,
+      "d": 6,
+      "l": 27,
+      "score_pct": 0.4,
+      "acpl": 303.7158774373259,
+      "acceptable_rate": 0.6935933147632312,
+      "blunder_rate": 0.2520891364902507,
+      "cost_usd": 0.1372402,
+      "cost_per_game": 0.002639178,
+      "separated_from": [
+        "cloudflare/clef#clean",
+        "cloudflare/clef#hinted",
+        "openai/gpt-6-luna-decisions#hinted",
+        "cloudflare/clef-omni#hinted"
+      ]
+    }
+  ]
+}
