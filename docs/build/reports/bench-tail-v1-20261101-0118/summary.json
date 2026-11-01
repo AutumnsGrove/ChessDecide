@@ -20,7 +20,7 @@
     "cells": 6,
     "finished": 0,
     "games": 0,
-    "aborted": 13,
+    "aborted": 15,
     "cost_usd": 0.000028686
   },
   "cells": [
@@ -128,9 +128,9 @@
         "seriesName": "tail-v1/togethercomputer/tev1-4b-experimental#hinted"
       },
       "seriesId": "01M6AB22H7FJ2WQQTKE5JT0E2E",
-      "state": "pending",
-      "status": "running",
-      "statusReason": null,
+      "state": "failed",
+      "status": "stopped_error",
+      "statusReason": "too_many_aborts",
       "games": 0,
       "target": 50,
       "costUsd": 0,
@@ -145,13 +145,13 @@
         {
           "levelId": "uci1320",
           "levelElo": 1320,
-          "games": 2,
+          "games": 4,
           "score": 0
         }
       ],
-      "abortedGames": 1,
+      "abortedGames": 3,
       "startedAt": "2026-11-01T01:19:52.871Z",
-      "finishedAt": null
+      "finishedAt": "2026-11-01T01:20:38.454Z"
     },
     {
       "cell": {
