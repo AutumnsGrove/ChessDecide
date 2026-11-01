@@ -56,7 +56,7 @@ wrangler.production.jsonc --file <file>` per chunk, in filename order. See `docs
 
 ## Unsupported models
 
-These models cap a question at 26 answer options, so the bench's all-legal-moves prompt is rejected
+Several models cap a question at 20 or 26 answer options (or reject the structured state), so the bench's all-legal-moves prompt is rejected
 (HTTP 400/422) whenever a position has more than 26 legal moves. Games abort with `transport` and the
 cell ends `stopped_error` (`too_many_aborts`). They are left out of the hinted plan and have no
 results at this protocol:
@@ -66,6 +66,8 @@ results at this protocol:
 | `cloudflare/clef-flash` | 400 `at most 26 options for this model` |
 | `upstage/solar-decide` | 422 `N candidates exceed the 26 single-token labels this route supports` |
 | `upstage/solar-decide-flash` | 422 (same) |
+| `togethercomputer/tev1-4b-experimental` | 400 `Tev1 needs between 2 and 20 options per question` (fails once a position has more than 20 legal moves) |
+| `scaledown/classify-1` | 400 `state must be a string or an object with only text, document, and document_mime_type` (rejects the structured state from move one) |
 
 Supporting them needs a candidate cap (which changes what is measured), so it is a methodology
 decision, not a retry. Their failed `clean` cells are in `bench-rest-clean-v1-*/report.md` under "Not finished".
