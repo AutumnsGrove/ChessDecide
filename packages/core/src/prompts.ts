@@ -12,7 +12,7 @@ export interface BuildInput {
   legal: Move[];                 // from legalMoves(); any order
   arm: Arm;
   order?: OrderSpec;             // default 'sorted'
-  imageDataUrl?: string;         // required when arm.interface === 'image'
+  imageDataUrl?: string;         // required when arm.interface is 'image' or 'text+image'
 }
 export interface Built {
   body: Record<string, unknown>;       // the exact object to JSON.stringify and POST
@@ -39,18 +39,18 @@ export function instructionsFor(arm: Arm, fen: string): string {
     case 'instructive': text = `${base} Avoid losing material; prioritize checks, captures, and threats.`; break;
     case 'minimal': text = 'Best move?'; break;
   }
-  return arm.interface === 'image' ? `This image shows the current position. ${text}` : text;
+  if (arm.interface === 'image') return `This image shows the current position. ${text}`;
+  if (arm.interface === 'text+image') return `The image shows the current position, as the FEN does. ${text}`;
+  return text;
 }
 
 function stateFor(i: BuildInput, moves: Move[]): unknown {
   const { position: p, arm } = i;
   const side = sideToMove(p.fen);
+  if (arm.interface !== 'text' && !i.imageDataUrl) throw new Error('imageDataUrl required for an image arm');
+  const picture = { type: 'image_url', image_url: { url: i.imageDataUrl } };
   if (arm.interface === 'image') {
-    if (!i.imageDataUrl) throw new Error('imageDataUrl required for the image arm');
-    return [
-      { game: 'chess', side_to_move: side, move_number: moveNumber(p.fen) },
-      { type: 'image_url', image_url: { url: i.imageDataUrl } },
-    ];
+    return [{ game: 'chess', side_to_move: side, move_number: moveNumber(p.fen) }, picture];
   }
   const hinted = arm.descriptor === 'annotated';
   const state: Record<string, unknown> = {
@@ -68,7 +68,7 @@ function stateFor(i: BuildInput, moves: Move[]): unknown {
       desc: hinted ? descAnnotated(m) : descPlain(m),
     }));
   }
-  return state;
+  return arm.interface === 'text+image' ? [state, picture] : state;
 }
 
 export function build(i: BuildInput): Built {

@@ -1,6 +1,6 @@
 import { ulid } from 'ulid';
 import {
-  ARM_PRESETS, DEFAULT_LADDER, START_FEN, legalMoves, lastFen, mulberry32,
+  ARM_PRESETS, DEFAULT_LADDER, START_FEN, legalMoves, lastFen, mulberry32, sendsImage,
   type BudgetPort, type Color, type Game, type GameConfig, type JudgePort, type LadderFile, type LadderLevel, type Player, type Ports, type PlayerDesc,
 } from '@chessdecide/core';
 import { EngineJudge, NativeUciEngine, makeOpponent, type Opponent } from '@chessdecide/engine';
@@ -53,7 +53,7 @@ export async function buildPorts(rt: Runtime, db: Db, game: Game, opts: {
     if (desc.type === 'model') {
       const arm = typeof desc.arm === 'string' ? ARM_PRESETS[desc.arm] : desc.arm;
       const armId = typeof desc.arm === 'string' ? desc.arm : 'custom';
-      const image = arm.interface === 'image';
+      const image = sendsImage(arm);
       const seed = game.config.seed + (side === 'white' ? 1 : 2);
       if (opts.mock) return new MockPlayer({ seed });
       const info = (await catalog.list()).find((m) => m.slug === desc.model);

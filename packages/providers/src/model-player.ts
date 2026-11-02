@@ -1,5 +1,5 @@
 import {
-  ARM_PRESETS, PROMPT_VERSION, build, parse, ParseError, requestHash, type Arm, type ArmName, type Decision,
+  ARM_PRESETS, PROMPT_VERSION, build, parse, ParseError, requestHash, sendsImage, type Arm, type ArmName, type Decision,
   type MoveContext, type OptionProb, type Player, type PlayerMove,
 } from '@chessdecide/core';
 import type { DecisionsClient, HttpResult } from './client.ts';
@@ -40,7 +40,7 @@ export class ModelPlayer implements Player {
 
   async move(ctx: MoveContext, signal?: AbortSignal): Promise<PlayerMove> {
     const d = this.d, arm = this.arm;
-    const imageDataUrl = arm.interface === 'image' ? await d.renderImage!(ctx.fen) : undefined;
+    const imageDataUrl = sendsImage(arm) ? await d.renderImage!(ctx.fen) : undefined;
     const built = build({ model: d.model, position: { fen: ctx.fen, historySan: ctx.historySan }, legal: ctx.legal, arm, ...(imageDataUrl ? { imageDataUrl } : {}) });
     const repeat = d.repeat ?? 0;
     const hash = await requestHash(d.model, built.json, repeat);

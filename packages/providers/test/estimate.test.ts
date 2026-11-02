@@ -40,6 +40,10 @@ describe('estimateGame', () => {
     const image = estimateGame(config({ white: { type: 'model', model: 'typesafe/jev-1.14', arm: 'image' } }), CATALOG);
     expect(image.est_input_tokens - clean.est_input_tokens).toBe(34 * 600);
     expect(image.breakdown[0]!.arm).toBe('image');
+    for (const arm of ['clean_image', 'hinted_image'] as const) {
+      const e = estimateGame(config({ white: { type: 'model', model: 'typesafe/jev-1.14', arm } }), CATALOG);
+      expect(e.est_input_tokens - clean.est_input_tokens).toBe(34 * 600);
+    }
   });
 
   it('uses each side price when both sides are models', () => {

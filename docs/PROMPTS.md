@@ -216,3 +216,16 @@ A separate arm; never merged with text arms.
 - **Caveats.** Jev switches to long-context mode for any image (slower, possibly less accurate), so
   the arm's rating is a measure of "picture + options", not of chess alone. Input tokens per image
   are measured in S2 and folded into the estimator.
+
+### 12.1 With-picture arms (`clean_image`, `hinted_image`; `interface: text+image`)
+
+The `clean` and `hinted` arms with the rendered board added, to test whether a picture *enhances* the
+text state. Nothing the text arms send is removed or reworded:
+
+- `state` is an array: `[ <exactly the clean/hinted state object, FEN, history and in_check included>, {"type":"image_url", ...} ]`.
+- `criteria` (option wording), keys (`uci` for clean, `san` for hinted), option order and the
+  `choice` question are byte-identical to the base arm.
+- The only wording change is one lead-in sentence on `instructions`:
+  `The image shows the current position, as the FEN does.`
+- Same renderer and image as §12. Compare each with its base arm (same model, same ladder), not with the image-only arm.
+

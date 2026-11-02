@@ -1,8 +1,9 @@
 #!/usr/bin/env -S pnpm exec tsx
+import { boardDataUrl } from '@chessdecide/render';
 import { parseArgs } from 'node:util';
 import { eq } from 'drizzle-orm';
 import {
-  ARM_PRESETS, START_FEN, legalMoves, playToEnd, sideToMove,
+  ARM_PRESETS, START_FEN, legalMoves, playToEnd, sendsImage, sideToMove,
   type ArmName, type Game, type GameConfig, type MoveContext,
 } from '@chessdecide/core';
 import { backfillSecondary, games, loadGame } from '@chessdecide/db';
@@ -46,8 +47,8 @@ async function probe() {
   } });
   const model = v.model!;
   const armName = v.arm as ArmName;
-  if (!(armName in ARM_PRESETS) || armName === 'image') {
-    console.error(`unknown or unsupported arm "${v.arm}" (use clean or hinted; image arrives in T12)`);
+  if (!(armName in ARM_PRESETS)) {
+    console.error(`unknown arm "${v.arm}" (use ${Object.keys(ARM_PRESETS).join(', ')})`);
     process.exit(2);
   }
   const key = openRouterKey();
@@ -67,7 +68,8 @@ async function probe() {
     opening: { type: 'startpos' }, pace_ms: 0, budget_usd: 1, judge_depth: 14, max_plies: 200, adjudicate: true, seed: 1,
   };
   const game: Game = { id: 'probe', status: 'running', config, start_fen: fen, adjudicated: false, plies: [], result: '*', termination: '', cost_usd: 0, created_at: new Date().toISOString() };
-  const player = new ModelPlayer({ client: new DecisionsClient({ apiKey: key }), sink, model, arm: armName, seed: 1 });
+  const player = new ModelPlayer({ client: new DecisionsClient({ apiKey: key }), sink, model, arm: armName, seed: 1,
+    ...(sendsImage(ARM_PRESETS[armName]) ? { renderImage: async (f: string) => boardDataUrl(f) } : {}) });
   const ctx: MoveContext = { game, fen, historySan: [], legal, ply: 1, side: sideToMove(fen) };
   const t0 = Date.now();
   const m = await player.move(ctx);

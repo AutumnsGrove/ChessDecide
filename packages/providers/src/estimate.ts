@@ -1,7 +1,7 @@
 /**
  * Cost estimate for one game, before any money is spent. Spec: docs/PROMPTS.md §10, D27.
  */
-import type { Arm, GameConfig, PlayerDesc } from '@chessdecide/core';
+import { ARM_PRESETS, sendsImage, type Arm, type ArmName, type GameConfig, type PlayerDesc } from '@chessdecide/core';
 import type { ModelInfo } from './catalog.ts';
 
 export interface GameEstimate {
@@ -24,7 +24,7 @@ const BASE_TOKENS = 130;
 const TOKENS_PER_OPTION = 26;
 export const IMAGE_EXTRA_TOKENS = 600;
 
-const isImage = (arm: Arm | string): boolean => (typeof arm === 'string' ? arm === 'image' : arm.interface === 'image');
+const isImage = (arm: Arm | string): boolean => sendsImage(typeof arm === 'string' ? ARM_PRESETS[arm as ArmName] ?? ARM_PRESETS.clean : arm);
 const armId = (arm: Arm | string): string => (typeof arm === 'string' ? arm : 'custom');
 const perCallTokens = (arm: Arm | string, options = TYPICAL_OPTIONS): number =>
   BASE_TOKENS + TOKENS_PER_OPTION * options + (isImage(arm) ? IMAGE_EXTRA_TOKENS : 0);

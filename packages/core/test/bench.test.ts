@@ -65,6 +65,11 @@ describe('parseBenchPlan', () => {
   it('accepts the image arm now that T12 is merged', () => {
     expect(parseBenchPlan({ ...base, arms: ['image'] }).arms).toEqual(['image']);
   });
+
+  it('accepts the with-picture arms next to the text arms', () => {
+    const arms = ['clean', 'hinted', 'clean_image', 'hinted_image'];
+    expect(parseBenchPlan({ ...base, arms }).arms).toEqual(arms);
+  });
 });
 
 describe('cells and caps', () => {

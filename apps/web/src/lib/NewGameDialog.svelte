@@ -158,9 +158,11 @@
       <div class="radios">
         <label><input type="radio" name="arm" value="clean" bind:group={arm} /> Clean</label>
         <label><input type="radio" name="arm" value="hinted" bind:group={arm} /> Hinted</label>
-        <label><input type="radio" name="arm" value="image" bind:group={arm} /> Image</label>
+        <label><input type="radio" name="arm" value="image" bind:group={arm} /> Image only</label>
+        <label><input type="radio" name="arm" value="clean_image" bind:group={arm} /> Clean + image</label>
+        <label><input type="radio" name="arm" value="hinted_image" bind:group={arm} /> Hinted + image</label>
       </div>
-      {#if arm === 'image'}<p class="caveat">Sends a picture of the board instead of text positions. Jev switches to a slower mode for images.</p>{/if}
+      {#if arm === 'image'}<p class="caveat">Sends a picture of the board instead of text positions. Jev switches to a slower mode for images.</p>{:else if arm === 'clean_image' || arm === 'hinted_image'}<p class="caveat">Same as {arm === 'clean_image' ? 'Clean' : 'Hinted'}, plus a picture of the board. Jev switches to a slower mode for images.</p>{/if}
     </fieldset>
 
     <div class="field">

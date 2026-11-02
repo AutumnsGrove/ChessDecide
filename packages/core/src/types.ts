@@ -27,18 +27,24 @@ export type Outcome =
   | 'checkmate' | 'stalemate' | 'insufficient' | 'threefold' | 'fifty_move' | 'none';
 
 export interface Arm {
-  interface: 'text' | 'image';
+  /** text = FEN + history; image = board picture only (no FEN); text+image = the text state AND the picture. */
+  interface: 'text' | 'image' | 'text+image';
   key_format: 'uci' | 'san';
   descriptor: 'plain' | 'annotated';
   state_variant: 'slim' | 'full';
   template: 'neutral' | 'instructive' | 'minimal';
 }
-export type ArmName = 'clean' | 'hinted' | 'image';
+export type ArmName = 'clean' | 'hinted' | 'image' | 'clean_image' | 'hinted_image';
 export const ARM_PRESETS: Record<ArmName, Arm> = {
   clean:  { interface: 'text',  key_format: 'uci', descriptor: 'plain',     state_variant: 'slim', template: 'neutral' },
   hinted: { interface: 'text',  key_format: 'san', descriptor: 'annotated', state_variant: 'slim', template: 'neutral' },
   image:  { interface: 'image', key_format: 'uci', descriptor: 'plain',     state_variant: 'slim', template: 'neutral' },
+  // Same as clean / hinted in every respect, plus the rendered board as an extra state part.
+  clean_image:  { interface: 'text+image', key_format: 'uci', descriptor: 'plain',     state_variant: 'slim', template: 'neutral' },
+  hinted_image: { interface: 'text+image', key_format: 'san', descriptor: 'annotated', state_variant: 'slim', template: 'neutral' },
 };
+/** True when the request carries a board picture (image-only or alongside the text state). */
+export const sendsImage = (arm: Arm): boolean => arm.interface !== 'text';
 
 export interface Usage { input_tokens: number; output_tokens: number; cost_usd: number | null }
 

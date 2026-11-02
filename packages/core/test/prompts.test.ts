@@ -45,6 +45,23 @@ describe('build', () => {
     expect((b.body.questions as any).move.instructions.startsWith('This image shows the current position.')).toBe(true);
     expect(() => build({ model: 'm', position: pos, legal, arm: ARM_PRESETS.image })).toThrow();
   });
+  it.each([['clean_image', 'clean'], ['hinted_image', 'hinted']] as const)(
+    '%s: identical text state and options to %s, plus the picture and one lead-in sentence', (withImg, base) => {
+      const url = 'data:image/png;base64,AAAA';
+      const a = build({ model: 'm', position: pos, legal, arm: ARM_PRESETS[base] });
+      const b = build({ model: 'm', position: pos, legal, arm: ARM_PRESETS[withImg], imageDataUrl: url });
+      const s = b.body.state as any[];
+      expect(s).toHaveLength(2);
+      expect(s[0]).toEqual(a.body.state);                       // FEN, history, in_check: untouched
+      expect(s[1]).toEqual({ type: 'image_url', image_url: { url } });
+      expect(b.json).toContain(FEN);
+      const qa = (a.body.questions as any).move, qb = (b.body.questions as any).move;
+      expect(qb.criteria).toEqual(qa.criteria);                 // same options, same descriptors
+      expect(b.order).toEqual(a.order);
+      expect(Object.keys(b.keyToUci)).toEqual(Object.keys(a.keyToUci));
+      expect(qb.instructions).toBe(`The image shows the current position, as the FEN does. ${qa.instructions}`);
+      expect(() => build({ model: 'm', position: pos, legal, arm: ARM_PRESETS[withImg] })).toThrow();
+    });
   it('refuses forced moves (<2 options)', () => {
     const one = legalMoves('8/2Q4p/p5pk/1ppbp3/3B2P1/P2P2bP/3P4/1R5K w - - 1 33');
     expect(one.length).toBe(1);
