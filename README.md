@@ -11,9 +11,14 @@ a model makes is judged by Stockfish, and any game can be replayed move by move.
 
 ## Disclosure: built by AI coding agents
 
-**The code in this repository was written by AI coding agents** (Claude Code, using Anthropic's Claude
-models), not by hand. Commits made by the agents are authored by `Claude` or carry a
-`Co-Authored-By: Claude` trailer in the git history.
+**The code in this repository was written by AI coding agents, not by hand.** Exactly two models wrote
+it, and no others:
+
+- **Claude Sonnet 5.5** (Anthropic), used through Claude Code.
+- **DeepSeek V4.1 Flash 1017**, used through the **Pi** coding harness.
+
+Commits made through Claude Code are authored by `Claude` or carry a `Co-Authored-By: Claude Sonnet 5.5`
+trailer in the git history.
 
 **The benchmark run was also done by an agent.** The full leaderboard sweep reported in the paper (20
 models, two arms each, 2,002 games) ran from this repository's own runner, headless, on a cloud Linux
