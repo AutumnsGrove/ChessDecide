@@ -11,14 +11,14 @@
   let { children } = $props();
 
   // The public pages are wide, the data-dense ones too; the older series/game screens keep the narrow column.
-  const WIDE = ['/', '/models', '/compare', '/method', '/series'];
+  const WIDE = ['/', '/models', '/compare', '/paper', '/series'];
   // `/games` is the browsable list, but `/games/<id>` is the viewer and keeps the narrow column.
   const WIDE_EXACT = ['/games'];
   const wide = $derived(WIDE_EXACT.includes(page.url.pathname) || WIDE.some((p) => (p === '/' ? page.url.pathname === '/' : page.url.pathname === p || page.url.pathname.startsWith(`${p}/`))));
   const here = (href: string) => (href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href));
   const links = [
     { href: '/', label: 'Leaderboard', short: 'Board' }, { href: '/models', label: 'Models' },
-    { href: '/games', label: 'Games' }, { href: '/method', label: 'Method' },
+    { href: '/games', label: 'Games' }, { href: '/paper', label: 'Paper' },
   ];
 
   onMount(() => {
@@ -63,13 +63,13 @@
 </div>
 
 <footer class="foot">
-  <span>Read-only research data. No generated commentary: every sentence is a template over a number.</span>
-  <span class="links">
+  <p>ChessDecide rates AI decision models at chess against a calibrated Stockfish ladder. The site is read-only and every number can be downloaded.</p>
+  <nav class="links" aria-label="Data and documents">
+    <a href="/paper">Paper</a>
     <a href="/api/leaderboard/export.csv" download>CSV</a>
     <a href="/api/leaderboard">JSON</a>
     <a href="/series">All series</a>
-    <a href="/method">Method</a>
-  </span>
+  </nav>
 </footer>
 
 {#if app.health?.control}<NewGameDialog />{/if}

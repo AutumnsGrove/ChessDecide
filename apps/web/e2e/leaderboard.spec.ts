@@ -134,7 +134,7 @@ test('400 px leaderboard and model pages do not scroll horizontally', async ({ p
   const many = Array.from({ length: 12 }, (_, i) => [modelRow(`p${i}/some-long-model-name-${i}`, 'clean', 300 + i * 20), modelRow(`p${i}/some-long-model-name-${i}`, 'hinted', 600 + i * 20)]).flat();
   await page.route('**/api/leaderboard', (route) => route.fulfill({ json: stubBoard(many) }));
   await page.route('**/api/series/*', (route) => route.fulfill({ status: 404, json: { error: { code: 'not_found', message: 'x', retryable: false, detail: {} } } }));
-  for (const path of ['/', '/models', '/models/p3/some-long-model-name-3', '/method']) {
+  for (const path of ['/', '/models', '/models/p3/some-long-model-name-3', '/paper']) {
     await page.goto(path);
     await expect(page.locator('h1').first()).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -151,4 +151,26 @@ test('the first phone screen shows the top five arms', async ({ page }, info) =>
   await expect(tier.locator('li')).toHaveCount(5);
   const last = await tier.locator('li').nth(4).boundingBox();
   expect(last!.y + last!.height).toBeLessThanOrEqual(800);
+});
+
+test('the paper tab shows the abstract, offers the PDF, and /method lands on its method section', async ({ page, request }) => {
+  await page.goto('/paper');
+  await expect(page.getByRole('heading', { name: /Benchmarking Decision Models at Chess/ })).toBeVisible();
+  await expect(page.getByText('20 catalog models this way, 50 games per model per arm')).toBeVisible();
+  const pdf = page.getByRole('link', { name: 'Download the paper (PDF)' });
+  await expect(pdf).toHaveAttribute('href', '/chessdecide-benchmark-report.pdf');
+  const res = await request.get('/chessdecide-benchmark-report.pdf');
+  expect(res.status()).toBe(200);
+  expect((await res.body()).subarray(0, 4).toString()).toBe('%PDF');
+  await page.goto('/method');
+  await expect(page).toHaveURL(/\/paper#method$/);
+  await expect(page.getByRole('heading', { name: 'How the numbers are produced' })).toBeVisible();
+});
+
+test('the footer says what the site is and links the data, with no internal jargon', async ({ page }) => {
+  await page.goto('/paper');
+  const foot = page.locator('footer.foot');
+  await expect(foot).toContainText('rates AI decision models at chess');
+  await expect(foot).not.toContainText('template over a number');
+  for (const name of ['Paper', 'CSV', 'JSON', 'All series']) await expect(foot.getByRole('link', { name, exact: true })).toBeVisible();
 });
