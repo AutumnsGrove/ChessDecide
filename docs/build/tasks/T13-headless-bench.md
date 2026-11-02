@@ -391,7 +391,7 @@ Expected wall clock and spend, from the four measured Quick 25 series (15–18 m
 | `core-v1` + 2 more models | 8 | 400 | ≈ 4 h 40 min | $1.18 | $0.15–0.50 |
 
 Do **not** run `pnpm verify` or `pnpm e2e` while a bench run is going (core perft timeouts under
-Stockfish workers — HANDOFF §4).
+Stockfish workers).
 
 ## 8. Tests (no network, no Stockfish, no spend)
 

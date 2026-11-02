@@ -9,6 +9,21 @@ a model makes is judged by Stockfish, and any game can be replayed move by move.
 &nbsp;·&nbsp; [Games](https://chessdecide-web.m7jv4v7npb.workers.dev/games)
 &nbsp;·&nbsp; [Paper](https://chessdecide-web.m7jv4v7npb.workers.dev/paper)
 
+## Disclosure: built by AI coding agents
+
+**The code in this repository was written by AI coding agents** (Claude Code, using Anthropic's Claude
+models), not by hand. Commits made by the agents are authored by `Claude` or carry a
+`Co-Authored-By: Claude` trailer in the git history.
+
+**The benchmark run was also done by an agent.** The full leaderboard sweep reported in the paper (20
+models, two arms each, 2,002 games) ran from this repository's own runner, headless, on a cloud Linux
+VM inside a **Claude Code on the web** session. It took about **30 hours** of wall-clock time in
+time-sliced runs, including restarts of the VM. The report describes the environment in detail.
+
+Treat the results accordingly: the protocol, the opponents and every raw series are in this repository
+so they can be checked and rerun, and there is a test suite (`pnpm verify`), but none of it should be
+taken on trust because of who wrote it.
+
 ## Results
 
 From the first full sweep ([report](docs/BENCHMARK-REPORT.md), [PDF](docs/BENCHMARK-REPORT.pdf), as of 2026-11-01):
@@ -102,7 +117,6 @@ that the runner publishes into.
 | [`docs/BENCH-RUNBOOK.md`](docs/BENCH-RUNBOOK.md) | Running a sweep on a remote machine |
 | [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | What changed, task by task |
 | [`docs/PLAN.md`](docs/PLAN.md), [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md), [`docs/build/README.md`](docs/build/README.md) | The original plan and build curriculum (historical) |
-| [`docs/HANDOFF.md`](docs/HANDOFF.md) | Working notes from the last build session (dated; may lag behind the code) |
 | [`docs/SPIKE.md`](docs/SPIKE.md), [`docs/RESEARCH.md`](docs/RESEARCH.md), [`docs/TEXT_ARM.md`](docs/TEXT_ARM.md) | M0 measurements, API and toolchain facts, a deferred text-model arm |
 
 ## Scope
@@ -113,3 +127,7 @@ that the runner publishes into.
 - **Budget:** a hard cap per run, default $1.00, with an estimate before anything is spent.
 - **Non-goals:** not a chess engine, no human-vs-model play, no auth, no per-model prompt tuning, and no
   generated commentary. Every sentence on the site is fixed wording filled in with numbers.
+
+## License
+
+[MIT](LICENSE). Copyright (c) 2026 Autumn Brown.
