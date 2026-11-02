@@ -172,5 +172,15 @@ test('the footer says what the site is and links the data, with no internal jarg
   const foot = page.locator('footer.foot');
   await expect(foot).toContainText('rates AI decision models at chess');
   await expect(foot).not.toContainText('template over a number');
+  await expect(foot.getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/AutumnsGrove/ChessDecide');
   for (const name of ['Paper', 'CSV', 'JSON', 'All series']) await expect(foot.getByRole('link', { name, exact: true })).toBeVisible();
+});
+
+test('the header links back to the repo on screens wide enough for it', async ({ page }, info) => {
+  await page.goto('/paper');
+  const gh = page.locator('header.top').getByRole('link', { name: 'ChessDecide on GitHub' });
+  if (info.project.name === 'phone') { await expect(gh).toBeHidden(); return; }   // the footer link covers phones
+  await expect(gh).toHaveAttribute('href', 'https://github.com/AutumnsGrove/ChessDecide');
+  const box = await gh.boundingBox();
+  expect(box!.width).toBeGreaterThanOrEqual(40);
 });
