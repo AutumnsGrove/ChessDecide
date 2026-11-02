@@ -102,3 +102,15 @@ export const getLeaderboard = (version?: number) =>
   getJson<Leaderboard>(`/api/leaderboard${version === undefined ? '' : `?ladder_version=${version}`}`);
 export const compareLeaderArms = (a: string, b: string) =>
   getJson<CompareResult>(`/api/leaderboard/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
+
+/** One row of `GET /api/games/browse`. The final position lets the list draw a thumbnail without loading plies. */
+export interface BrowsedGame {
+  id: string; status: Game['status']; result: Game['result']; termination: Game['termination']; adjudicated: boolean;
+  white: PlayerDesc; black: PlayerDesc; series_id: string | null; series_index: number | null;
+  level_id: string | null; level_elo: number | null; model_color: 'white' | 'black' | null; model_score: number | null;
+  plies: number; cost_usd: number | null; created_at: string; final_fen: string;
+}
+export interface BrowseResult {
+  total: number; page: number; per: number; tally: { w: number; d: number; l: number }; items: BrowsedGame[];
+}
+export const browseGames = (qs: string) => getJson<BrowseResult>(`/api/games/browse${qs}`);

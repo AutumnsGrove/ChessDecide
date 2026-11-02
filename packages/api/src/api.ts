@@ -5,7 +5,7 @@ import {
   type Game, type GameConfig, type GameEvent, type LadderFile, type Series, type SeriesConfig, type SeriesEvent,
 } from '@chessdecide/core';
 import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
-import { buildSeries, leaderboardInput, listGames, loadGame, loadPublishedLadder, seriesSummaries, type Db } from '@chessdecide/db';
+import { browseGames, buildSeries, leaderboardInput, listGames, loadGame, loadPublishedLadder, seriesSummaries, type Db } from '@chessdecide/db';
 import type { EventHub } from './hub.ts';
 import { ApiError } from './errors.ts';
 
@@ -292,6 +292,45 @@ export function createApi(deps: ApiDeps): Hono {
       id: g.id, status: g.status, result: g.result, termination: g.termination, white: JSON.parse(g.white_player), black: JSON.parse(g.black_player),
       series_id: g.series_id, level_id: g.level_id, cost_usd: g.cost_usd, created_at: g.created_at, plies: g.plies,
     })));
+  });
+
+  // Public, filterable, paged. Registered before `/games/:id` so "browse" is never read as an id.
+  app.get('/games/browse', async (c) => {
+    const one = (k: string, max = 200) => {
+      const v = c.req.query(k);
+      if (v === undefined || v === '') return undefined;
+      if (v.length > max) throw new ApiError('bad_request', `${k} is too long`);
+      return v;
+    };
+    const oneOf = <T extends string>(k: string, allowed: readonly T[]): T | undefined => {
+      const v = one(k);
+      if (v === undefined) return undefined;
+      if (!(allowed as readonly string[]).includes(v)) throw new ApiError('bad_request', `${k} must be one of ${allowed.join(', ')}`);
+      return v as T;
+    };
+    const int = (k: string, min: number, max: number, dflt: number) => {
+      const v = c.req.query(k);
+      if (v === undefined || v === '') return dflt;
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < min || n > max) throw new ApiError('bad_request', `${k} must be an integer in ${min}..${max}`);
+      return n;
+    };
+    const r = await browseGames(deps.db, {
+      model: one('model'), arm: one('arm', 40), level: one('level', 40),
+      outcome: oneOf('outcome', ['won', 'drawn', 'lost', 'live'] as const),
+      sort: oneOf('sort', ['notable', 'new', 'strongest', 'weakest'] as const),
+      page: int('page', 1, 100_000, 1), per: int('per', 1, 60, 24),
+    });
+    return sendCacheable(c, {
+      total: r.total, page: r.page, per: r.per, tally: r.tally,
+      items: r.items.map((g) => ({
+        id: g.id, status: g.status, result: g.result, termination: g.termination, adjudicated: !!g.adjudicated,
+        white: JSON.parse(g.white_player), black: JSON.parse(g.black_player),
+        series_id: g.series_id, series_index: g.series_index, level_id: g.level_id, level_elo: g.level_elo,
+        model_color: g.model_color, model_score: g.model_score,
+        plies: g.plies, cost_usd: g.cost_usd, created_at: g.created_at, final_fen: g.final_fen ?? g.start_fen,
+      })),
+    });
   });
 
   app.get('/games/:id', async (c) => {

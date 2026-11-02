@@ -1,6 +1,7 @@
 <script lang="ts">
   import Viewer from '#lib/Viewer.svelte';
   import { modelHref, money, shortName } from '#lib/leaderboard-model.ts';
+  import { armPresetName } from '#lib/games-model.ts';
   import { playerLabel, resultLabel } from '#lib/viewer-model.ts';
 
   let { data } = $props();
@@ -9,7 +10,7 @@
   const modelSide = $derived(game.config.white.type === 'model' ? game.config.white : game.config.black.type === 'model' ? game.config.black : null);
   const mine = $derived(game.plies.filter((p) => p.by === 'model' && !p.forced && p.judge));
   const acpl = $derived(mine.length ? mine.reduce((s, p) => s + p.judge!.cpl, 0) / mine.length : null);
-  const armName = $derived(modelSide && modelSide.type === 'model' && typeof modelSide.arm === 'string' ? modelSide.arm : null);
+  const armName = $derived(modelSide && modelSide.type === 'model' ? armPresetName(modelSide.arm) : null);
   const bad = (c: string) => mine.filter((p) => p.judge!.class === c).length;
   const title = $derived(`${playerLabel(game.config.white)} vs ${playerLabel(game.config.black)}`);
 </script>

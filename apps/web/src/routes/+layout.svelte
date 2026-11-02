@@ -12,7 +12,9 @@
 
   // The public pages are wide, the data-dense ones too; the older series/game screens keep the narrow column.
   const WIDE = ['/', '/models', '/compare', '/method', '/series'];
-  const wide = $derived(WIDE.some((p) => (p === '/' ? page.url.pathname === '/' : page.url.pathname === p || page.url.pathname.startsWith(`${p}/`))));
+  // `/games` is the browsable list, but `/games/<id>` is the viewer and keeps the narrow column.
+  const WIDE_EXACT = ['/games'];
+  const wide = $derived(WIDE_EXACT.includes(page.url.pathname) || WIDE.some((p) => (p === '/' ? page.url.pathname === '/' : page.url.pathname === p || page.url.pathname.startsWith(`${p}/`))));
   const here = (href: string) => (href === '/' ? page.url.pathname === '/' : page.url.pathname.startsWith(href));
   const links = [
     { href: '/', label: 'Leaderboard', short: 'Board' }, { href: '/models', label: 'Models' },

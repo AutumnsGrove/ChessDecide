@@ -116,6 +116,8 @@ describe('read-only route query budget', () => {
     '/api/health',
     '/api/games',
     '/api/games/S0G0',
+    '/api/games/browse',
+    '/api/games/browse?model=liquid%2Fd1-ultra&arm=hinted&outcome=won&sort=strongest&page=1&per=5',
     '/api/leaderboard',
     '/api/leaderboard/compare?a=liquid/d1-ultra%23hinted&b=typesafe/jev-1.14%23clean',
     '/api/series',
@@ -192,5 +194,58 @@ describe('read-only route query budget', () => {
     expect((await calls('/api/models')).status).toBe(404);
     expect((await calls('/api/spend')).status).toBe(404);
     expect((await app().request('/api/games', { method: 'POST', body: '{}' })).status).toBe(404);
+  });
+});
+
+describe('GET /api/games/browse', () => {
+  const app = () => createApi({ db: counted.db, mode: 'public' });
+  const get = async (qs: string) => {
+    counted.reset();
+    const res = await app().fetch(new Request(`http://x/api/games/browse${qs}`));
+    return { status: res.status, queries: counted.count(), body: (await res.json()) as any };
+  };
+
+  it('is two statements (tally, page) however it is filtered', async () => {
+    expect((await get('')).queries).toBe(2);
+    expect((await get('?model=liquid%2Fd1-ultra&arm=hinted&outcome=lost&sort=weakest&level=uci1500')).queries).toBe(2);
+  });
+
+  it('pages and tallies the whole filtered set, not just the page', async () => {
+    const all = (await get('?per=3&page=1')).body;
+    expect(all.total).toBe(8);
+    expect(all.items).toHaveLength(3);
+    expect(all.tally).toEqual({ w: 4, d: 0, l: 4 });
+    const last = (await get('?per=3&page=3')).body;
+    expect(last.items).toHaveLength(2);
+    expect((await get('?per=3&page=9')).body.items).toEqual([]);
+  });
+
+  it('filters by model + arm through the series, and by outcome', async () => {
+    const one = (await get('?model=liquid%2Fd1-ultra&arm=hinted')).body;
+    expect(one.total).toBe(2);
+    expect(one.items.every((g: any) => g.white.model === 'liquid/d1-ultra' || g.black.model === 'liquid/d1-ultra')).toBe(true);
+    const won = (await get('?outcome=won')).body;
+    expect(won.total).toBe(4);
+    expect(won.items.every((g: any) => g.model_score === 1)).toBe(true);
+    expect((await get('?arm=clean')).body.total).toBe(4);
+    expect((await get('?model=nobody%2Fhome')).body).toMatchObject({ total: 0, items: [], tally: { w: 0, d: 0, l: 0 } });
+  });
+
+  it('defaults to the best results first and can sort the other ways', async () => {
+    const dflt = (await get('?per=8')).body.items.map((g: any) => g.model_score);
+    expect(dflt).toEqual([1, 1, 1, 1, 0, 0, 0, 0]);
+    const newest = (await get('?sort=new&per=8')).body.items.map((g: any) => g.created_at);
+    expect(newest).toEqual([...newest].sort().reverse());
+    expect((await get('?sort=strongest&per=2')).status).toBe(200);
+  });
+
+  it('carries the final position so the list can draw a thumbnail', async () => {
+    const g = (await get('?per=1')).body.items[0];
+    expect(g).toMatchObject({ plies: 2, final_fen: 'f', level_id: 'uci1500', level_elo: 1500 });
+  });
+
+  it('rejects malformed parameters with a 400 instead of guessing', async () => {
+    for (const qs of ['?sort=plies', '?outcome=maybe', '?page=0', '?page=x', '?per=500', `?model=${'a'.repeat(201)}`])
+      expect((await get(qs)).status, qs).toBe(400);
   });
 });
