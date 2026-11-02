@@ -15,6 +15,7 @@
       <a class="ghost" href={PAPER.runData}>Raw run data</a>
       <a class="ghost" href={REPO}>Source code</a>
     </p>
+    <p class="authorship"><b>Authorship.</b> {PAPER.authorship}</p>
   </header>
 
   <section aria-labelledby="abs-h">
@@ -83,6 +84,8 @@
   .primary { background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: var(--radius); min-height: 44px; padding: 0 var(--s4); display: inline-flex; align-items: center; font-size: var(--t-sm); }
   .primary:hover { text-decoration: none; filter: brightness(1.08); }
   .ghost { min-height: 44px; display: inline-flex; align-items: center; font-size: var(--t-sm); }
+  .authorship { font-size: var(--t-sm); color: var(--mute); max-width: 62ch; }
+  .authorship b { color: var(--fg); }
   .points { margin: var(--s3) 0; padding-left: var(--s5); display: grid; gap: var(--s2); }
   b { font-weight: 650; }
   .toc { margin: 0; padding-left: var(--s5); columns: 2; column-gap: var(--s5); }

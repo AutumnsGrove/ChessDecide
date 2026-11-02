@@ -12,6 +12,8 @@ export const PAPER = {
   pdf: '/chessdecide-benchmark-report.pdf',
   markdown: MD,
   runData: `${REPO}/tree/main/docs/build/reports`,
+  /** Who wrote the report and the code behind it; the same sentence opens the report itself. */
+  authorship: 'This report was written by Claude Sonnet 5.5 using extensive data from the benchmark runs themselves. The code behind it was written by two AI coding agents: Claude Sonnet 5.5 (via Claude Code) and DeepSeek V4.1 Flash 1017 (via the Pi coding harness). The benchmark sweep ran in a Claude Code on the web session over about 30 hours.',
   abstract: {
     lead: 'Decision models, which pick one option from a menu and return no reasoning, play chess at 122 to 711 Elo when the menu is bare and 249 to 886 Elo when each option carries a few rule-derived facts. We measured 20 catalog models this way, 50 games per model per arm, against a calibrated ladder of engine opponents.',
     bullets: [

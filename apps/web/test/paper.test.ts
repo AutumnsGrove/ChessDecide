@@ -16,6 +16,10 @@ describe('the paper page stays true to the report', () => {
     expect(plain).toContain(close);
   });
 
+  it('states who wrote the report, in the same words as the report', () => {
+    expect(plain).toContain(`Authorship. ${PAPER.authorship}`);
+  });
+
   it('links every section to a heading that exists in the report', () => {
     for (const s of PAPER.sections) expect(md, s.title).toMatch(new RegExp(`^## ${s.title}$`, 'm'));
     expect(PAPER.sections.map((s) => s.title)).toEqual([...md.matchAll(/^## (.+)$/gm)].map((m) => m[1]).filter((t) => t !== 'Abstract'));

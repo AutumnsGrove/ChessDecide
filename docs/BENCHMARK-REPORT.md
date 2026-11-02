@@ -2,6 +2,8 @@
 
 As of 2026-11-01. This is the Markdown version of the report in `docs/BENCHMARK-REPORT.pdf`. The two figures in the PDF are shown here as a table (results) and a list (system overview).
 
+**Authorship.** This report was written by Claude Sonnet 5.5 using extensive data from the benchmark runs themselves. The code behind it was written by two AI coding agents: Claude Sonnet 5.5 (via Claude Code) and DeepSeek V4.1 Flash 1017 (via the Pi coding harness). The benchmark sweep ran in a Claude Code on the web session over about 30 hours.
+
 ## Abstract
 
 Decision models, which pick one option from a menu and return no reasoning, play chess at 122 to 711 Elo when the menu is bare and 249 to 886 Elo when each option carries a few rule-derived facts. We measured 20 catalog models this way, 50 games per model per arm, against a calibrated ladder of engine opponents.
