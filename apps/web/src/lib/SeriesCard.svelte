@@ -29,18 +29,18 @@
 </a>
 
 <style>
-  .card { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border-radius: 8px; padding: 12px 14px; color: var(--fg); }
+  .card { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border-radius: var(--radius); padding: var(--s3) var(--s4); color: var(--fg); }
   .card:hover { background: var(--panel-2); }
   .top { display: flex; gap: 8px; justify-content: space-between; align-items: baseline; }
-  .name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .name { font-size: var(--t-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mid, .bottom { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-  .arm { font: 600 11px var(--mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
-  .elo { font-size: 20px; color: var(--fg); }
+  .arm { font: 600 var(--t-xs) var(--mono); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+  .elo { font-size: var(--t-lg); color: var(--fg); }
   .bottom { justify-content: space-between; }
-  .chip { font: 600 11px var(--sans); padding: 2px 8px; border-radius: 999px; background: var(--panel-2); color: var(--mute); white-space: nowrap; }
-  .chip.good { background: #2b3a26; color: var(--good); }
-  .chip.live { background: #24303b; color: var(--accent); }
-  .chip.warn { background: #3d3418; color: var(--warn); }
-  .chip.bad { background: #44221e; color: var(--bad); }
-  .notsep { font-size: 11px; color: var(--warn); }
+  .chip { font: 600 var(--t-xs) var(--sans); padding: 2px 8px; border-radius: 999px; background: var(--panel-2); color: var(--mute); white-space: nowrap; }
+  .chip.good { background: color-mix(in oklch, var(--good) 18%, var(--panel)); color: var(--good); }
+  .chip.live { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); color: var(--accent); }
+  .chip.warn { background: color-mix(in oklch, var(--warn) 18%, var(--panel)); color: var(--warn); }
+  .chip.bad { background: color-mix(in oklch, var(--bad) 18%, var(--panel)); color: var(--bad); }
+  .notsep { font-size: var(--t-xs); color: var(--warn); }
 </style>

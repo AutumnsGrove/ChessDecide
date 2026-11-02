@@ -4,7 +4,6 @@
   import { app, openNewSeries } from '#lib/stores.svelte.ts';
   import { listSeries } from '#lib/api.ts';
   import { overlap } from '#lib/series-model.ts';
-  import LadderAxis from '#lib/LadderAxis.svelte';
   import SeriesCard from '#lib/SeriesCard.svelte';
 
   let { data } = $props();
@@ -14,17 +13,23 @@
   // svelte-ignore state_referenced_locally
   let ladder = $state<LadderFile>(data.ladder as LadderFile);
 
-  onMount(() => {
-    const tick = async () => {
-      try { series = await listSeries(); } catch { /* keep the last list */ }
-    };
-    void tick();
+  const tick = async () => {
+    try { series = await listSeries(); } catch { /* keep the last list */ }
+  };
+  // Poll only while something is running; a settled list is refreshed when the tab regains focus.
+  const live = $derived(series.some((s) => s.status === 'running'));
+  $effect(() => {
+    if (!live) return;
     const t = setInterval(() => void tick(), 5000);
     return () => clearInterval(t);
   });
+  onMount(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') void tick(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  });
 
   const rated = $derived(series.filter((s): s is SeriesSummary & { elo: EloEstimate } => s.elo !== null));
-  const axis = $derived(rated.map((s) => ({ id: s.id, label: `${s.model.split('/').pop()} · ${s.arm}`, elo: s.elo })));
   const overlapping = $derived.by(() => {
     const ids = new Set<string>();
     for (let i = 0; i < rated.length; i++)
@@ -43,11 +48,6 @@
   <div class="notice" role="status">Ladder uncalibrated: opponent ratings are nominal until a calibration run finishes.</div>
 {/if}
 
-<section class="card">
-  <h2 class="sub">Where the models sit</h2>
-  <LadderAxis series={axis} levels={ladder.levels} />
-</section>
-
 {#if series.length === 0}
   <div class="empty card">
     <p class="note">No series yet. A Quick series is 25 games and costs a few cents.</p>
@@ -62,12 +62,12 @@
 {/if}
 
 <style>
-  .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .h { font-size: 18px; margin: 0; }
-  .sub { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mute); margin: 0 0 6px; }
-  .new, .primary { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; font-size: 14px; }
-  .primary { background: var(--accent); color: #0d1620; border-color: var(--accent); font-weight: 700; }
-  .notice { background: #3d3418; color: var(--warn); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
-  .empty { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-  .cards { display: flex; flex-direction: column; gap: 8px; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+  .h { font-size: var(--t-xl); }
+  .new, .primary { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 var(--s3); min-height: 40px; font-size: var(--t-sm); }
+  .primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+  .notice { background: color-mix(in oklch, var(--warn) 16%, var(--bg)); color: var(--warn); border-radius: var(--radius); padding: var(--s2) var(--s3); font-size: var(--t-sm); }
+  .empty { display: flex; flex-direction: column; gap: var(--s3); align-items: flex-start; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s2); }
+  @media (min-width: 720px) { .h { font-size: var(--t-2xl); } }
 </style>

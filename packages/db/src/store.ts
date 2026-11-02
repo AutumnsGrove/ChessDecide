@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, getTableColumns, gte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, gte, inArray, sql, type SQL } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import type { Game, GameStore, Ply } from '@chessdecide/core';
 import * as s from './schema.ts';
@@ -115,5 +115,62 @@ export function d1AttemptSink(db: Db, now: () => string = () => new Date().toISO
         .orderBy(desc(s.attempts.id)).limit(1);
       return r?.gz ? { response: JSON.parse(await gunzipB64(r.gz)) } : undefined;
     },
+  };
+}
+
+export type GameSort = 'notable' | 'new' | 'strongest' | 'weakest';
+export type GameOutcome = 'won' | 'drawn' | 'lost' | 'live';
+export interface GameBrowseQuery {
+  model?: string; arm?: string; level?: string; outcome?: GameOutcome;
+  sort?: GameSort; page?: number; per?: number;
+}
+
+/**
+ * A filtered, paged list for the public Games screen. Two statements however many games exist:
+ * a count plus W-D-L tally over the filtered set, and one page of rows. Model and arm are matched through
+ * the series (`series.model_slug`/`arm_id`), so single games outside a series only appear unfiltered.
+ * Sorting by length is deliberately absent: it would count every ply row on every request.
+ */
+export async function browseGames(db: Db, q: GameBrowseQuery) {
+  const per = Math.min(60, Math.max(1, q.per ?? 24));
+  const page = Math.max(1, q.page ?? 1);
+  const where: SQL[] = [];
+  if (q.model) {
+    const seriesIds = db.select({ id: s.series.id }).from(s.series)
+      .where(q.arm ? and(eq(s.series.model_slug, q.model), eq(s.series.arm_id, q.arm)) : eq(s.series.model_slug, q.model));
+    where.push(inArray(s.games.series_id, seriesIds));
+  } else if (q.arm) {
+    where.push(inArray(s.games.series_id, db.select({ id: s.series.id }).from(s.series).where(eq(s.series.arm_id, q.arm))));
+  }
+  if (q.level) where.push(eq(s.games.level_id, q.level));
+  if (q.outcome === 'won') where.push(eq(s.games.model_score, 1));
+  else if (q.outcome === 'drawn') where.push(eq(s.games.model_score, 0.5));
+  else if (q.outcome === 'lost') where.push(eq(s.games.model_score, 0));
+  else if (q.outcome === 'live') where.push(inArray(s.games.status, ['running', 'paused', 'ready']));
+  const cond = where.length ? and(...where) : undefined;
+
+  const [tally] = await db.select({
+    total: count(),
+    w: sql<number>`coalesce(sum(${s.games.model_score} = 1), 0)`,
+    d: sql<number>`coalesce(sum(${s.games.model_score} = 0.5), 0)`,
+    l: sql<number>`coalesce(sum(${s.games.model_score} = 0), 0)`,
+  }).from(s.games).where(cond);
+
+  // `notable` (the default): games in progress first, then the model's best results, hardest opponents first.
+  const live = sql`case when ${s.games.status} in ('running', 'paused', 'ready') then 0 else 1 end`;
+  const order = q.sort === 'strongest' ? [desc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)]
+    : q.sort === 'weakest' ? [asc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)]
+    : q.sort === 'new' ? [desc(s.games.created_at), asc(s.games.series_index), asc(s.games.id)]
+    : [live, desc(s.games.model_score), desc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)];
+  const items = await db.select({
+    ...getTableColumns(s.games),
+    plies: sql<number>`(select count(*) from ${s.plies} where ${s.plies.game_id} = ${s.games.id})`,
+    final_fen: sql<string | null>`(select ${s.plies.fen_after} from ${s.plies} where ${s.plies.game_id} = ${s.games.id} order by ${s.plies.ply} desc limit 1)`,
+  }).from(s.games).where(cond).orderBy(...order).limit(per).offset((page - 1) * per);
+
+  return {
+    total: Number(tally?.total ?? 0), page, per,
+    tally: { w: Number(tally?.w ?? 0), d: Number(tally?.d ?? 0), l: Number(tally?.l ?? 0) },
+    items,
   };
 }

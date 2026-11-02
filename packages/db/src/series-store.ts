@@ -1,8 +1,8 @@
 /** Series persistence and the API `Series` projection. Spec: docs/API.md §3.3. */
-import { and, asc, count, eq, inArray, isNotNull } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import {
   BLOCK_SIZE, PRIOR_START_ELO, estimate, pickLeaderSeriesIds, seriesStats,
-  type ArmSeries, type Block, type Color, type EloEstimate, type EloPoint, type Ply, type Series, type SeriesGame,
+  type ArmSeries, type Block, type Color, type EloEstimate, type EloPoint, type Ply, type Series, type SeriesGame, type SeriesStats,
   type SeriesGameRec, type SeriesSize, type SeriesStatus, type SeriesSummary,
 } from '@chessdecide/core';
 import * as s from './schema.ts';
@@ -178,10 +178,47 @@ export async function seriesSummaries(db: Db): Promise<SeriesSummary[]> {
   });
 }
 
+/** A series that has stopped changing: its frozen `secondary_json` can be trusted. */
+const TERMINAL: readonly string[] = ['finished', 'stopped_budget', 'stopped_error'];
+
+/** Frozen stats for a settled series, or undefined when they must be (re)computed from plies. */
+function frozenStats(row: SeriesRow): SeriesStats | undefined {
+  if (!row.secondary_json || !TERMINAL.includes(row.status)) return undefined;
+  try { return JSON.parse(row.secondary_json) as SeriesStats; } catch { return undefined; }
+}
+
+/**
+ * Compute a series' secondary stats from its plies and store them on the row. Call when a series ends;
+ * `backfillSecondary` uses it for series that finished before the column existed.
+ */
+export async function freezeSecondary(db: Db, id: string): Promise<SeriesStats | undefined> {
+  const series = await buildSeries(db, id);
+  if (!series) return undefined;
+  await db.update(s.series).set({ secondary_json: JSON.stringify(series.secondary) }).where(eq(s.series.id, id));
+  return series.secondary;
+}
+
+/** Freeze stats for every settled series that lacks them. Returns the ids it touched. */
+export async function backfillSecondary(db: Db): Promise<string[]> {
+  const rows = await db.select({ id: s.series.id, status: s.series.status }).from(s.series)
+    .where(isNull(s.series.secondary_json));
+  const done: string[] = [];
+  for (const r of rows) {
+    if (!TERMINAL.includes(r.status)) continue;
+    await freezeSecondary(db, r.id);
+    done.push(r.id);
+  }
+  return done;
+}
+
 /**
  * Leaderboard input: one series per arm on `ladderVersion`, with its rated games and secondary stats.
  * A leaderboard arm is **model + arm** (`liquid/d1-ultra#hinted`): the same arm preset on two models is
  * two different rows. Picks with the metadata-only rule first so untouched series cost no plies.
+ *
+ * Settled series carry frozen stats (`secondary_json`), so the common case reads only series + game
+ * summary rows and never touches `plies`. Only a series without frozen stats (still running, or not yet
+ * backfilled) pays for a ply scan.
  */
 export async function leaderboardInput(db: Db, ladderVersion: number): Promise<ArmSeries[]> {
   const rows = await listSeriesRows(db);
@@ -199,11 +236,16 @@ export async function leaderboardInput(db: Db, ladderVersion: number): Promise<A
   const out: ArmSeries[] = [];
   if (selected.length === 0) return out;
 
-  // One games query + one plies query for every selected arm, instead of 3 queries per arm:
-  // the leaderboard stays a constant number of D1 queries as the arm count grows.
-  const gameRows = await db.select().from(s.games).where(inArray(s.games.series_id, selected.map((r) => r.id)))
-    .orderBy(asc(s.games.series_id), asc(s.games.series_index));
-  const plies = await pliesForGames(db, gameRows.map((g) => g.id));
+  // One games query for every selected arm (never three per arm), and only the columns the board uses.
+  // Chunked like the plies helper: D1 caps bound parameters per statement.
+  const gameRows: Array<Pick<typeof s.games.$inferSelect, 'id' | 'series_id' | 'series_index' | 'status' | 'level_elo' | 'model_score'>> = [];
+  for (let i = 0; i < selected.length; i += 50) {
+    gameRows.push(...await db.select({
+      id: s.games.id, series_id: s.games.series_id, series_index: s.games.series_index,
+      status: s.games.status, level_elo: s.games.level_elo, model_score: s.games.model_score,
+    }).from(s.games).where(inArray(s.games.series_id, selected.slice(i, i + 50).map((r) => r.id)))
+      .orderBy(asc(s.games.series_id), asc(s.games.series_index)));
+  }
   const gamesBySeries = new Map<string, typeof gameRows>();
   for (const g of gameRows) {
     const list = gamesBySeries.get(g.series_id ?? '') ?? [];
@@ -211,19 +253,36 @@ export async function leaderboardInput(db: Db, ladderVersion: number): Promise<A
     gamesBySeries.set(g.series_id ?? '', list);
   }
 
+  // Slow path, batched: series without frozen stats share one full-games query and one plies scan, so the
+  // statement count stays flat as arms grow. Scoped to those series only, never the whole board.
+  const unfrozen = selected.filter((r) => !frozenStats(r));
+  const computed = new Map<string, SeriesStats>();
+  if (unfrozen.length > 0) {
+    const fullGames: (typeof s.games.$inferSelect)[] = [];
+    for (let i = 0; i < unfrozen.length; i += 50) {
+      fullGames.push(...await db.select().from(s.games).where(inArray(s.games.series_id, unfrozen.slice(i, i + 50).map((r) => r.id)))
+        .orderBy(asc(s.games.series_id), asc(s.games.series_index)));
+    }
+    const plies = await pliesForGames(db, fullGames.map((g) => g.id));
+    for (const row of unfrozen) {
+      computed.set(row.id, assembleSeries(row, fullGames.filter((g) => g.series_id === row.id), plies).secondary);
+    }
+  }
+
   for (const row of selected) {
-    const series = assembleSeries(row, gamesBySeries.get(row.id) ?? [], plies);
-    const rated = series.games.filter((g) => g.status === 'finished' && g.model_score !== undefined)
-      .map((g) => ({ opponentElo: g.level_elo, score: g.model_score! }));
+    const mine = gamesBySeries.get(row.id) ?? [];
+    const rated = mine.filter((g) => g.status === 'finished' && typeof g.model_score === 'number')
+      .map((g) => ({ opponentElo: g.level_elo ?? 0, score: g.model_score as 0 | 0.5 | 1 }));
+    const stats = frozenStats(row) ?? computed.get(row.id)!;
     out.push({
       arm_id: armKey(row), model: row.model_slug, arm: row.arm_id,
-      series_id: row.id, status: series.status, ladder_version: row.ladder_version,
+      series_id: row.id, status: row.status as SeriesStatus, ladder_version: row.ladder_version,
       games: rated,
       w: rated.filter((g) => g.score === 1).length,
       d: rated.filter((g) => g.score === 0.5).length,
       l: rated.filter((g) => g.score === 0).length,
-      cost_usd: series.cost_usd,
-      stats: series.secondary,
+      cost_usd: row.cost_usd ?? 0,
+      stats,
     });
   }
   return out;

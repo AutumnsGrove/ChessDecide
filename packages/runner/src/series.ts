@@ -77,7 +77,7 @@ export class SeriesControlPlane implements SeriesPlane {
       ladder_version: ladder.version, seed, budget_usd: cfg.budget_usd,
       concurrency: Math.max(1, Math.min(2, cfg.concurrency ?? 2)), judge_depth: cfg.judge_depth ?? 14,
       cost_usd: 0, elo_mean: null, elo_lo: null, elo_hi: null, w: 0, d: 0, l: 0,
-      elo_history_json: null, blocks_json: null, catalog_snapshot_json: null,
+      elo_history_json: null, blocks_json: null, secondary_json: null, catalog_snapshot_json: null,
       created_at: now(), finished_at: null,
     };
     await saveSeries(this.deps.db, row);
@@ -358,7 +358,13 @@ export class SeriesControlPlane implements SeriesPlane {
     };
     await saveSeries(this.deps.db, finishedRow);
     const built = await buildSeries(this.deps.db, id);
-    if (built) await saveSeries(this.deps.db, { ...finishedRow, blocks_json: JSON.stringify(built.blocks) });
+    // Freeze blocks and secondary stats now: a settled series never changes, and the leaderboard reads these
+    // columns instead of re-deriving them from every ply on each request.
+    if (built) {
+      await saveSeries(this.deps.db, {
+        ...finishedRow, blocks_json: JSON.stringify(built.blocks), secondary_json: JSON.stringify(built.secondary),
+      });
+    }
     this.deps.hub.emit(id, { event: 'status', data: { status, status_reason: reason } });
   }
 

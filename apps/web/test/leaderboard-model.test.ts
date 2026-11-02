@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LeaderRow } from '../src/lib/api.ts';
 import {
   armLabel, comparisonSentence, differenceLabel, money, notSeparableCopy, num1, overlapLines, overlapPairs,
-  overlapsWith, pct0, separationLabel,
+  overlapsWith, pct0, separationLabel, family, hintSummary, modelsOf, shortName, signed, tiers,
 } from '../src/lib/leaderboard-model.ts';
 
 const row = (over: Partial<LeaderRow> & { arm_id: string }): LeaderRow => ({
@@ -73,7 +73,62 @@ describe('leaderboard model', () => {
       p_a_gt_b: 0.826, diff_mean: 243.4, diff_lo: -12.2, diff_hi: 498.6,
     };
     expect(comparisonSentence(c)).toBe('P(d1-ultra · clean stronger) = 83 %');
+    expect(comparisonSentence({ ...c, p_a_gt_b: 0.001 })).toBe('P(d1-ultra · clean stronger) = < 1 %');
+    expect(comparisonSentence({ ...c, p_a_gt_b: 0.999 })).toBe('P(d1-ultra · clean stronger) = > 99 %');
     expect(differenceLabel(c)).toBe('+243 Elo (-12 to 499, 95 %)');
     expect(differenceLabel({ ...c, p_a_gt_b: 0.4, diff_mean: -60.5, diff_lo: -300, diff_hi: 180 })).toBe('-60 Elo (-300 to 180, 95 %)');
+  });
+});
+
+describe('tiers', () => {
+  const arms = [
+    row({ arm_id: 'a', elo: elo(900) }), row({ arm_id: 'b', elo: elo(850) }), row({ arm_id: 'c', elo: elo(780) }),
+    row({ arm_id: 'd', elo: elo(500) }), row({ arm_id: 'e', elo: elo(450) }), row({ arm_id: 'f', elo: elo(100) }),
+  ];
+
+  it('groups arms whose interval overlaps the leader, then restarts at the best arm left', () => {
+    const t = tiers(arms);
+    expect(t.map((x) => x.rows.map((r) => r.arm_id))).toEqual([['a', 'b', 'c'], ['d', 'e'], ['f']]);
+    expect(t.map((x) => x.n)).toEqual([1, 2, 3]);
+    expect(t[0]).toMatchObject({ top: 900, bottom: 780 });
+  });
+
+  it('judges overlap against the leader, not the neighbour (no chaining)', () => {
+    // c overlaps b and b overlaps a, but c (lo 580..hi 780... lead a lo 800) does not overlap a.
+    const t = tiers([row({ arm_id: 'a', elo: elo(900, 100) }), row({ arm_id: 'b', elo: elo(780, 100) }), row({ arm_id: 'c', elo: elo(660, 100) })]);
+    expect(t.map((x) => x.rows.map((r) => r.arm_id))).toEqual([['a', 'b'], ['c']]);
+  });
+
+  it('sorts by mean whatever the input order, and handles empty input', () => {
+    expect(tiers([...arms].reverse())[0]!.leader.arm_id).toBe('a');
+    expect(tiers([])).toEqual([]);
+  });
+});
+
+describe('models and the hint effect', () => {
+  const m = (model: string, arm: string, mean: number, hw = 100) => row({ arm_id: `${model}#${arm}`, model, arm, elo: elo(mean, hw) });
+  const rows = [m('x/alpha', 'clean', 400), m('x/alpha', 'hinted', 700), m('y/beta', 'clean', 600), m('y/beta', 'hinted', 560), m('z/gamma', 'hinted', 300)];
+
+  it('pairs the two arms of a model and computes the gap with its own band', () => {
+    const models = modelsOf(rows);
+    expect(models.map((x) => x.name)).toEqual(['alpha', 'beta', 'gamma']);
+    const alpha = models[0]!;
+    expect(alpha.delta).toBe(300);
+    expect(alpha.deltaHw).toBeCloseTo(Math.hypot(100, 100));
+    expect(models[2]!.delta).toBeNull();
+  });
+
+  it('summarises how many models hints help, and how many gaps clear their band', () => {
+    const s = hintSummary(modelsOf(rows))!;
+    expect(s).toMatchObject({ models: 2, improved: 1, clear: 1, min: -40, max: 300 });
+    expect(s.median).toBe(130);
+    expect(hintSummary(modelsOf([m('z/gamma', 'hinted', 300)]))).toBeNull();
+  });
+
+  it('names and signs things for display', () => {
+    expect(shortName('baseten/mammoth-1')).toBe('mammoth-1');
+    expect(family('baseten/mammoth-1')).toBe('baseten');
+    expect(signed(56.4)).toBe('+56');
+    expect(signed(-12)).toBe('−12');
   });
 });

@@ -68,10 +68,22 @@ pnpm --filter @chessdecide/web build
 pnpm --filter @chessdecide/web exec wrangler deploy --config wrangler.production.jsonc
 ```
 
+`wrangler deploy` uploads whatever is already in `.svelte-kit/cloudflare` and does **not** build, so
+skipping the first command silently ships the previous bundle. Check a deploy took effect with
+`curl -sI <url>/api/leaderboard | grep -i etag` (the board sends an `ETag`; an old bundle does not).
+
 Expect `vite build` to print the client/server chunks, then wrangler to upload the Worker and
 print the URL, e.g. `https://chessdecide-web.<account>.workers.dev`. The production config sets
 `CHESSDECIDE_MODE=public`, so the site is read-only: no New game / New series buttons, no
 spend chip, no control routes.
+
+### Frozen series stats (migration 0003)
+
+The leaderboard reads `series.secondary_json` instead of scanning plies. The runner writes it when a
+series finishes. For series that finished before the column existed, run
+`pnpm cli backfill-stats` against the database that holds their plies, then publish. A database that
+only has published rows (no local plies) can be backfilled from the bench SQL: load it into a scratch
+D1, run `backfillSecondary`, and apply `UPDATE series SET secondary_json = ...` statements.
 
 ## 5. Publish the finished results
 

@@ -1,19 +1,75 @@
-/* Tokens: dark, lichess-like. Raw CSS only (no Tailwind). Copied from docs/mockups/simple.html. */
+/*
+ * Tokens. Raw CSS only (no Tailwind). Dark, warm-tinted neutrals (hue 75) so the page reads as one
+ * material; one UI accent (green); two data colours reserved for the arm encoding (clean / hinted).
+ * Spacing is a 4 px base; type is a fixed 1.2-ish ramp (product surface: no fluid sizes).
+ */
 :root {
-  --bg: #161512; --panel: #262421; --panel-2: #2e2b27; --line: #3a3733;
-  --fg: #e6e3dc; --mute: #9b978e;
-  --good: #7fb069; --warn: #e0b84a; --bad: #d9594c; --accent: #6fa8dc;
-  --sans: 'IBM Plex Sans', system-ui, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* surfaces, darkest to lightest */
+  --bg: oklch(0.175 0.006 75);
+  --bg-deep: oklch(0.145 0.005 75);
+  --panel: oklch(0.215 0.007 75);
+  --panel-2: oklch(0.255 0.008 75);
+  --line: oklch(0.33 0.008 75);
+  --line-soft: oklch(0.27 0.007 75);
+
+  /* text */
+  --fg: oklch(0.94 0.008 80);
+  --mute: oklch(0.72 0.01 80);
+  --faint: oklch(0.6 0.01 80);
+
+  /* ui accent + state */
+  --accent: oklch(0.77 0.15 142);
+  --accent-ink: oklch(0.2 0.04 142);
+  --good: oklch(0.77 0.14 145);
+  --warn: oklch(0.83 0.13 85);
+  --bad: oklch(0.69 0.17 28);
+
+  /* data encoding: the arm, never decoration */
+  --clean: oklch(0.74 0.11 240);
+  --hinted: oklch(0.84 0.14 88);
+
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  --t-xs: 12px; --t-sm: 13px; --t-md: 15px; --t-lg: 18px; --t-xl: 22px; --t-2xl: 28px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 40px;
   --radius: 6px;
+  --tap: 44px;
   color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.45 var(--sans); }
+html { -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: var(--t-md)/1.5 var(--sans); }
+h1, h2, h3 { line-height: 1.2; margin: 0; font-weight: 650; }
+p { margin: 0; }
 a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
 button { font: inherit; cursor: pointer; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.page { max-width: 520px; margin: 0 auto; padding: 12px max(16px, env(safe-area-inset-left, 0px)) 40px max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 14px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
+}
+::selection { background: color-mix(in oklch, var(--accent) 35%, transparent); }
+
+.page {
+  max-width: 560px; margin: 0 auto;
+  padding: var(--s3) max(var(--s4), env(safe-area-inset-left, 0px)) var(--s6) max(var(--s4), env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: var(--s4);
+}
+.page.wide { max-width: 1120px; gap: var(--s5); }
 .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.note { color: var(--mute); font-size: 13px; margin: 0; }
-.card { background: var(--panel); border-radius: var(--radius); padding: 14px; }
+.note { color: var(--mute); font-size: var(--t-sm); }
+.card { background: var(--panel); border-radius: var(--radius); padding: var(--s4); }
+.eyebrow { font-size: var(--t-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+.h2 { font-size: var(--t-lg); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* the arm encoding: a filled square for hinted, a ring for clean, so colour is never the only signal */
+.arm-chip { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-xs); color: var(--mute); white-space: nowrap; }
+.arm-chip::before { content: ''; width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box; }
+.arm-chip.clean::before { border: 2px solid var(--clean); }
+.arm-chip.hinted::before { background: var(--hinted); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
