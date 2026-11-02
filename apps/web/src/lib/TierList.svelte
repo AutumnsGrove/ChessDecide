@@ -54,7 +54,7 @@
   .what { color: var(--mute); }
   ul { list-style: none; margin: var(--s2) 0 0; padding: 0; }
   li {
-    display: grid; grid-template-columns: minmax(0, 1fr) 96px 84px; gap: var(--s3); align-items: center;
+    display: grid; grid-template-columns: minmax(0, 1fr) 64px 84px; gap: var(--s3); align-items: center;
     min-height: 40px; border-top: 1px solid var(--line-soft);
   }
   .who { display: flex; flex-wrap: wrap; gap: 0 var(--s2); align-items: baseline; min-width: 0; font-size: var(--t-md); }
