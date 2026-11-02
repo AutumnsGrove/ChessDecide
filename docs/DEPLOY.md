@@ -77,6 +77,13 @@ print the URL, e.g. `https://chessdecide-web.<account>.workers.dev`. The product
 `CHESSDECIDE_MODE=public`, so the site is read-only: no New game / New series buttons, no
 spend chip, no control routes.
 
+### The paper PDF
+
+`docs/BENCHMARK-REPORT.md` is the source of the report. `node scripts/build-report-pdf.mjs` builds
+`docs/BENCHMARK-REPORT.pdf` from it (pandoc, then headless Chromium) and copies the result to
+`apps/web/static/` for the Paper page to serve. Run it after editing the report, then rebuild and deploy
+the site. A test fails if the served copy differs from the one in `docs/`.
+
 ### Frozen series stats (migration 0003)
 
 The leaderboard reads `series.secondary_json` instead of scanning plies. The runner writes it when a

@@ -1,6 +1,6 @@
 # ChessDecide: Benchmarking Decision Models at Chess
 
-As of 2026-11-01. This is the Markdown version of the report in `docs/BENCHMARK-REPORT.pdf`. The two figures in the PDF are shown here as a table (results) and a list (system overview).
+As of 2026-11-01. The PDF edition of this report, `docs/BENCHMARK-REPORT.pdf`, is built from this file with `node scripts/build-report-pdf.mjs`.
 
 **Authorship.** This report was written by Claude Sonnet 5.5 using extensive data from the benchmark runs themselves. The code behind it was written by two AI coding agents: Claude Sonnet 5.5 (via Claude Code) and DeepSeek V4.1 Flash 1017 (via the Pi coding harness). The benchmark sweep ran in a Claude Code on the web session over about 30 hours.
 
@@ -202,7 +202,7 @@ Each plan sets a cap per series and per run, and a pre-flight check prints a cos
 
 ## Results
 
-Elo on ladder v2: the value is the posterior mean, the bracket the 95% interval, 50 games per value. Sorted by `hinted` Elo. The "gain" column is the `hinted` mean minus the `clean` mean, both rounded. (In the PDF this is a dot plot; the dashed reference lines mark the ladder levels `random` 160, `eps75` 391, `eps50` 614 and `eps30` 819.)
+Elo on ladder v2: the value is the posterior mean, the bracket the 95% interval, 50 games per value. Sorted by `hinted` Elo. The "gain" column is the `hinted` mean minus the `clean` mean, both rounded. (For scale, the ladder levels are `random` 160, `eps75` 391, `eps50` 614 and `eps30` 819. The live leaderboard draws this table as a chart.)
 
 | # | Model | `clean` | `hinted` | Gain |
 | --: | --- | --: | --: | --: |
