@@ -52,6 +52,10 @@ test('estimate turns red over the cap and the server rejects the game', async ({
   const dialog = page.getByRole('dialog');
   await expect(dialog.locator('.estimate')).toContainText(/≈ \$/);
 
+  // The API's minimum cap is $0.001, and the estimator is calibrated on real sweeps (about $0.0009 for a
+  // clean game with the default model), so a text game can no longer exceed it. An image game adds ~600
+  // input tokens per call (about $0.0017), which is over the minimum cap whatever the catalog price drifts to.
+  await dialog.getByLabel('Image').check();
   await dialog.getByLabel('Budget cap (USD)').fill('0.001');
   await expect(dialog.locator('.estimate')).toHaveClass(/over/);
 

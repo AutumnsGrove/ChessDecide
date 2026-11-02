@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { drizzle } from 'drizzle-orm/d1';
 import { getPlatformProxy } from 'wrangler';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { eq } from 'drizzle-orm';
 import * as schema from '@chessdecide/db/schema';
 import { freezeSecondary, saveSeries, type Db } from '@chessdecide/db';
 import { createApi } from '../src/index.ts';
@@ -237,6 +238,22 @@ describe('GET /api/games/browse', () => {
     const newest = (await get('?sort=new&per=8')).body.items.map((g: any) => g.created_at);
     expect(newest).toEqual([...newest].sort().reverse());
     expect((await get('?sort=strongest&per=2')).status).toBe(200);
+  });
+
+  it('keeps a game played by hand on the first page, ahead of the best series games', async () => {
+    const config = JSON.stringify({ white: { type: 'model', model: 'liquid/d1-ultra', arm: 'clean' }, black: { type: 'ladder', level: 'uci1500' } });
+    await db.insert(schema.games).values({
+      id: 'HANDPLAYED', status: 'finished', config_json: config, white_player: JSON.stringify({ type: 'model', model: 'liquid/d1-ultra', arm: 'clean' }),
+      black_player: JSON.stringify({ type: 'ladder', level: 'uci1500' }), start_fen: 'start', result: '1/2-1/2', termination: 'repetition',
+      created_at: '2026-04-01T00:00:00Z',
+    });
+    try {
+      expect((await get('?per=3')).body.items[0].id).toBe('HANDPLAYED');
+      // Sorted by anything else it is just one more game.
+      expect((await get('?sort=weakest&per=1')).status).toBe(200);
+    } finally {
+      await db.delete(schema.games).where(eq(schema.games.id, 'HANDPLAYED'));
+    }
   });
 
   it('carries the final position so the list can draw a thumbnail', async () => {
