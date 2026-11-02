@@ -156,12 +156,15 @@ export async function browseGames(db: Db, q: GameBrowseQuery) {
     l: sql<number>`coalesce(sum(${s.games.model_score} = 0), 0)`,
   }).from(s.games).where(cond);
 
-  // `notable` (the default): games in progress first, then the model's best results, hardest opponents first.
+  // `notable` (the default): games in progress first, then games started by hand (newest first, so the one you
+  // just played is on page 1), then series games by the model's best results against the hardest opponents.
   const live = sql`case when ${s.games.status} in ('running', 'paused', 'ready') then 0 else 1 end`;
+  const standalone = sql`case when ${s.games.series_id} is null then 0 else 1 end`;
+  const standaloneNewest = sql`case when ${s.games.series_id} is null then ${s.games.created_at} else '' end`;
   const order = q.sort === 'strongest' ? [desc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)]
     : q.sort === 'weakest' ? [asc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)]
     : q.sort === 'new' ? [desc(s.games.created_at), asc(s.games.series_index), asc(s.games.id)]
-    : [live, desc(s.games.model_score), desc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)];
+    : [live, standalone, desc(standaloneNewest), desc(s.games.model_score), desc(s.games.level_elo), desc(s.games.created_at), asc(s.games.id)];
   const items = await db.select({
     ...getTableColumns(s.games),
     plies: sql<number>`(select count(*) from ${s.plies} where ${s.plies.game_id} = ${s.games.id})`,
