@@ -11,7 +11,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { getPlatformProxy } from 'wrangler';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import * as schema from '@chessdecide/db/schema';
-import { saveSeries, type Db } from '@chessdecide/db';
+import { freezeSecondary, saveSeries, type Db } from '@chessdecide/db';
 import { createApi } from '../src/index.ts';
 
 const MIGRATIONS = fileURLToPath(new URL('../../db/migrations/', import.meta.url));
@@ -20,14 +20,15 @@ const CONFIG = fileURLToPath(new URL('../../../apps/web/wrangler.jsonc', import.
 /** A D1 binding that counts statements, so a route's query budget is observable. */
 function counting(raw: D1Database) {
   let queries = 0;
+  const seen: string[] = [];
   const target = {
-    prepare(sql: string) { queries++; return raw.prepare(sql); },
-    exec(sql: string) { queries++; return raw.exec(sql); },
+    prepare(sql: string) { queries++; seen.push(sql); return raw.prepare(sql); },
+    exec(sql: string) { queries++; seen.push(sql); return raw.exec(sql); },
     batch(stmts: D1PreparedStatement[]) { queries++; return raw.batch(stmts); },
     dump: () => raw.dump(),
   } as unknown as D1Database;
   const db = drizzle(target, { schema });
-  return { db, reset: () => { queries = 0; }, count: () => queries };
+  return { db, reset: () => { queries = 0; seen.length = 0; }, count: () => queries, statements: () => [...seen] };
 }
 
 const ARMS = [
@@ -92,6 +93,8 @@ beforeAll(async () => {
         { game_id: `${id}G${g}`, ply: 2, side: 'black', by: 'engine', uci: 'e7e5', san: 'e5', fen_after: 'f', forced: 0, engine_json: '{}', eval_json: '{}', created_at: 't' },
       ]);
     }
+    // A settled series is frozen when it ends; seed it the way the runner does.
+    await freezeSecondary(db, id);
   }
 }, 120_000);
 
@@ -134,9 +137,16 @@ describe('read-only route query budget', () => {
 
   it('the leaderboard does not grow its query count with the number of arms', async () => {
     const { queries } = await calls('/api/leaderboard');
-    // rows + finished-game counts + games + plies, plus the published ladder (version + levels).
-    // buildSeries per arm is in memory, so this number does not move when arms are added.
-    expect(queries).toBe(6);
+    // series rows + finished-game counts + game summaries, plus the published ladder (version + levels).
+    // Frozen stats mean no plies query, and nothing here is per arm, so this does not move when arms are added.
+    expect(queries).toBe(5);
+  });
+
+  it('the leaderboard and its CSV never scan plies', async () => {
+    for (const path of ['/api/leaderboard', '/api/leaderboard/export.csv', '/api/leaderboard/compare?a=liquid/d1-ultra%23hinted&b=typesafe/jev-1.14%23clean']) {
+      await calls(path);
+      expect(counted.statements().filter((q) => /\bplies\b/.test(q)), path).toEqual([]);
+    }
   });
 
   it('public mode derives the ruler from the published ladder', async () => {

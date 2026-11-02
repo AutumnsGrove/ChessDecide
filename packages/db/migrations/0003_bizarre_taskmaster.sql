@@ -1,0 +1,1 @@
+ALTER TABLE `series` ADD `secondary_json` text;

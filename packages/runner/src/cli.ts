@@ -5,7 +5,7 @@ import {
   ARM_PRESETS, START_FEN, legalMoves, playToEnd, sideToMove,
   type ArmName, type Game, type GameConfig, type MoveContext,
 } from '@chessdecide/core';
-import { games, loadGame } from '@chessdecide/db';
+import { backfillSecondary, games, loadGame } from '@chessdecide/db';
 import { NativeUciEngine } from '@chessdecide/engine';
 import { DecisionsClient, ModelPlayer, type AttemptRow, type AttemptSink } from '@chessdecide/providers';
 import { openLocalDb } from './d1.ts';
@@ -164,7 +164,7 @@ async function bench() {
     return;
   }
   if (sub !== 'run') {
-    console.error('usage: chessdecide bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] [--commit-each-cell] [--for MINUTES] [--heartbeat SECONDS] | bench status [--run ID] [--json] | bench report [--run ID] | bench models');
+    console.error('usage: chessdecide bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] [--commit-each-cell] [--for MINUTES] [--heartbeat SECONDS] | bench status [--run ID] [--json] | bench report [--run ID] | bench models | backfill-stats');
     process.exit(2);
   }
   const { values: v } = parseArgs({ args: rest.slice(1), options: {
@@ -199,10 +199,20 @@ async function bench() {
   }
 }
 
+/** Freeze `series.secondary_json` for settled series that predate the column; then re-run `publish`. */
+async function backfillStats() {
+  const { db, close } = await openLocalDb();
+  try {
+    const ids = await backfillSecondary(db);
+    console.log(`froze secondary stats for ${ids.length} series${ids.length ? '; run `publish` to push them' : ''}`);
+  } finally { await close(); }
+}
+
 if (cmd === 'game') await game();
 else if (cmd === 'probe') await probe();
 else if (cmd === 'ladder') await ladder();
 else if (cmd === 'serve') { loadEnv(); const { startDaemon } = await import('./serve.ts'); await startDaemon({ mock: isMock() }); }
 else if (cmd === 'publish') await publish();
 else if (cmd === 'bench') await bench();
-else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume] | publish [--out FILE] [--series ID...] [--all-games] [--dry-run] [--remote] [--config FILE] | bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] | bench status [--run ID] [--json] | bench report [--run ID] | bench models'); process.exit(2); }
+else if (cmd === 'backfill-stats') await backfillStats();
+else { console.error('usage: chessdecide serve | game [--white mock|<level>] [--black <level>] [--max-plies N] [--seed N] [--depth N] | probe [--model slug] [--arm clean|hinted] [--fen "<fen>"] | ladder calibrate [--games-per-pair N] [--workers N] [--movetime MS] [--seed N] [--resume] | publish [--out FILE] [--series ID...] [--all-games] [--dry-run] [--remote] [--config FILE] | bench run --plan FILE [--new] [--run ID] [--dry-run] [--mock] [--no-sql] [--stop-on-error] [--allow-over-cap] | bench status [--run ID] [--json] | bench report [--run ID] | bench models | backfill-stats'); process.exit(2); }

@@ -146,12 +146,27 @@ export function createApi(deps: ApiDeps): Hono {
     return v;
   };
 
+  /**
+   * The public board is identical for every visitor and only changes on a publish, so let browsers and the
+   * edge reuse it: a short max-age, a long stale-while-revalidate, and an ETag so a revalidation is a 304.
+   * Local mode serves live series, so it stays uncached.
+   */
+  async function sendCacheable(c: any, body: unknown) {
+    const text = JSON.stringify(body);
+    if (deps.mode !== 'public') return c.body(text, 200, { 'Content-Type': 'application/json' });
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    const etag = `"${[...new Uint8Array(digest).slice(0, 12)].map((b) => b.toString(16).padStart(2, '0')).join('')}"`;
+    const headers = { ETag: etag, 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600' };
+    if (c.req.header('If-None-Match') === etag) return c.body(null, 304, headers);
+    return c.body(text, 200, { ...headers, 'Content-Type': 'application/json' });
+  }
+
   app.get('/leaderboard', async (c) => {
     const ladder = await currentLadder();
     const version = ladderVersion(c, ladder);
     const input = await leaderboardInput(deps.db, version);
     const { rows, reference } = buildLeaderboard(input, version, ladder.levels);
-    return c.json({ ladder: { version: ladder.version, calibrated: ladder.calibrated }, rows, reference });
+    return sendCacheable(c, { ladder: { version: ladder.version, calibrated: ladder.calibrated }, rows, reference });
   });
 
   app.get('/leaderboard/export.csv', async (c) => {

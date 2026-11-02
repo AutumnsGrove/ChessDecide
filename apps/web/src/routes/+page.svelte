@@ -12,12 +12,22 @@
   // svelte-ignore state_referenced_locally
   let board = $state<Leaderboard | null>(data.board as Leaderboard | null);
 
-  onMount(() => {
-    const tick = async () => {
-      try { board = await getLeaderboard(); } catch { /* keep the last board */ }
-    };
-    const t = setInterval(() => void tick(), 10_000);
+  const refresh = async () => {
+    try { board = await getLeaderboard(); } catch { /* keep the last board */ }
+  };
+
+  // The board only moves while a series is running. A settled board is revalidated on focus instead of
+  // polled, so an idle visitor costs the server nothing (and the HTTP cache absorbs the rest).
+  const live = $derived(board?.rows.some((r) => r.status === 'running') ?? false);
+  $effect(() => {
+    if (!live) return;
+    const t = setInterval(() => void refresh(), 10_000);
     return () => clearInterval(t);
+  });
+  onMount(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') void refresh(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   });
 
   const rows = $derived(board?.rows ?? []);

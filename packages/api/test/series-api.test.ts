@@ -34,7 +34,7 @@ const row = (id: string): SeriesRow => ({
   status: 'created', status_reason: null, size_json: JSON.stringify({ preset: 'quick' }),
   ladder_mode: 'adaptive', ladder_level: null, ladder_version: 0, seed: 1, budget_usd: 1,
   concurrency: 2, judge_depth: 14, cost_usd: 0, elo_mean: null, elo_lo: null, elo_hi: null, w: 0, d: 0, l: 0,
-  elo_history_json: null, blocks_json: null, catalog_snapshot_json: null,
+  elo_history_json: null, blocks_json: null, secondary_json: null, catalog_snapshot_json: null,
   created_at: '2026-01-01T00:00:00Z', finished_at: null,
 });
 

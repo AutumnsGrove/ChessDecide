@@ -7,7 +7,7 @@ import { getPlatformProxy } from 'wrangler';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { SeriesRow } from '../src/index.ts';
 import * as schema from '../src/schema.ts';
-import { leaderboardInput, saveSeries, type Db } from '../src/index.ts';
+import { backfillSecondary, leaderboardInput, saveSeries, type Db } from '../src/index.ts';
 
 let db: Db; let dispose: () => Promise<void>;
 const migDir = fileURLToPath(new URL('../migrations/', import.meta.url));
@@ -30,7 +30,7 @@ const seriesRow = (id: string, model: string, arm: string, over: Partial<SeriesR
   ladder_mode: 'adaptive', ladder_level: null, ladder_version: 2, seed: 1,
   budget_usd: 1, concurrency: 2, judge_depth: 14, cost_usd: 0.01,
   elo_mean: null, elo_lo: null, elo_hi: null, w: 0, d: 0, l: 0,
-  elo_history_json: null, blocks_json: null, catalog_snapshot_json: null,
+  elo_history_json: null, blocks_json: null, secondary_json: null, catalog_snapshot_json: null,
   created_at: '2026-01-01T00:00:00Z', finished_at: null, ...over,
 });
 
@@ -78,5 +78,29 @@ describe('leaderboard input', () => {
 
   it('filters by ladder version', async () => {
     expect(await leaderboardInput(db, 3)).toEqual([]);
+  });
+
+  it('reads frozen stats for a settled series instead of scanning plies', async () => {
+    const frozen = { games: 3, model_plies: 0, acpl: 42 } as never;
+    await seedSeries('L00000000000000000000FRZ01', 'frozen/model', 'clean', [1, 1, 0], { secondary_json: JSON.stringify(frozen) });
+    // No plies exist for this series, so a recomputation could never produce acpl 42.
+    const row = (await leaderboardInput(db, 2)).find((s) => s.series_id === 'L00000000000000000000FRZ01')!;
+    expect(row.stats.acpl).toBe(42);
+    expect(row.w).toBe(2);
+  });
+
+  it('ignores frozen stats on a series that is still running', async () => {
+    await seedSeries('L00000000000000000000RUN01', 'running/model', 'clean', [1], {
+      status: 'running', secondary_json: JSON.stringify({ acpl: 999 }),
+    });
+    const row = (await leaderboardInput(db, 2)).find((s) => s.series_id === 'L00000000000000000000RUN01')!;
+    expect(row.stats.acpl).not.toBe(999);
+  });
+
+  it('backfills settled series that predate the column, and only those', async () => {
+    const touched = await backfillSecondary(db);
+    expect(touched).toContain('L00000000000000000000JEV01');
+    expect(touched).not.toContain('L00000000000000000000RUN01');
+    expect(await backfillSecondary(db)).toEqual([]);
   });
 });

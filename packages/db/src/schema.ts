@@ -22,6 +22,8 @@ export const series = sqliteTable('series', {
   w: integer('w').default(0), d: integer('d').default(0), l: integer('l').default(0),
   elo_history_json: text('elo_history_json'),
   blocks_json: text('blocks_json'),
+  /** `SeriesStats` frozen when the series ends, so the leaderboard never has to scan plies. NULL = not computed yet. */
+  secondary_json: text('secondary_json'),
   catalog_snapshot_json: text('catalog_snapshot_json'),
   created_at: text('created_at').notNull(),
   finished_at: text('finished_at'),

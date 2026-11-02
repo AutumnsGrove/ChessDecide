@@ -24,7 +24,7 @@ export const COLUMNS: Record<TableName, readonly string[]> = {
   series: [
     'id', 'name', 'model_slug', 'arm_id', 'arm_json', 'status', 'status_reason', 'size_json',
     'ladder_mode', 'ladder_level', 'ladder_version', 'seed', 'budget_usd', 'concurrency', 'judge_depth',
-    'cost_usd', 'elo_mean', 'elo_lo', 'elo_hi', 'w', 'd', 'l', 'elo_history_json', 'blocks_json',
+    'cost_usd', 'elo_mean', 'elo_lo', 'elo_hi', 'w', 'd', 'l', 'elo_history_json', 'blocks_json', 'secondary_json',
     'catalog_snapshot_json', 'created_at', 'finished_at',
   ],
   games: [
