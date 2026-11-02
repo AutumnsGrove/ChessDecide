@@ -25,6 +25,9 @@ models, two arms each, 2,002 games) ran from this repository's own runner, headl
 VM inside a **Claude Code on the web** session. It took about **30 hours** of wall-clock time in
 time-sliced runs, including restarts of the VM. The report describes the environment in detail.
 
+**The research paper was written by Claude Sonnet 5.5**, using extensive data from the benchmark runs
+themselves.
+
 Treat the results accordingly: the protocol, the opponents and every raw series are in this repository
 so they can be checked and rerun, and there is a test suite (`pnpm verify`), but none of it should be
 taken on trust because of who wrote it.
