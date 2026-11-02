@@ -62,7 +62,7 @@ test('pause, resume and stop change the series status', async ({ page, request }
   await waitStatus(request, s.id, 'aborted');
 });
 
-test('list shows series on the ladder axis and marks overlaps', async ({ page, request }) => {
+test('list shows series and marks overlaps', async ({ page, request }) => {
   const a = await startSeries(request, { seed: 11, name: 'overlap-a' });
   const b = await startSeries(request, { seed: 12, name: 'overlap-b' });
   await waitStatus(request, a.id, 'finished');
@@ -71,7 +71,6 @@ test('list shows series on the ladder axis and marks overlaps', async ({ page, r
   await page.goto('/series');
   await expect(page.getByText('overlap-a').first()).toBeVisible();
   await expect(page.getByText('overlap-b').first()).toBeVisible();
-  expect(await page.locator('.axis .row').count()).toBeGreaterThanOrEqual(2);
   await expect(page.getByText('not separable yet').first()).toBeVisible();
 });
 

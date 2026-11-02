@@ -21,9 +21,9 @@
   .cell.won { background: var(--good); border-color: var(--good); }
   .cell.lost { background: var(--bad); border-color: var(--bad); }
   .cell.draw { background: var(--mute); border-color: var(--mute); }
-  .cell.running { background: #24303b; border-color: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+  .cell.running { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); border-color: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
   .cell.aborted {
-    background: repeating-linear-gradient(45deg, #44221e, #44221e 3px, var(--panel-2) 3px, var(--panel-2) 6px);
+    background: repeating-linear-gradient(45deg, color-mix(in oklch, var(--bad) 20%, var(--panel)), color-mix(in oklch, var(--bad) 20%, var(--panel)) 3px, var(--panel-2) 3px, var(--panel-2) 6px);
     border-color: var(--bad);
   }
   @keyframes pulse { 50% { opacity: 0.45; } }

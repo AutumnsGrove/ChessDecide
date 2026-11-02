@@ -66,5 +66,5 @@
   .lc button:hover:not(:disabled) { border-color: var(--accent); }
   .lc button:disabled { opacity: 0.55; cursor: default; }
   .lc .stop { color: var(--bad); }
-  .lc .stop.confirm { background: #44221e; border-color: var(--bad); color: var(--fg); font-weight: 600; }
+  .lc .stop.confirm { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); border-color: var(--bad); color: var(--fg); font-weight: 600; }
 </style>

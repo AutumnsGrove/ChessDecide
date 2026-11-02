@@ -101,9 +101,9 @@
 
   <div class="graph">
     <svg viewBox="0 0 300 84" preserveAspectRatio="none" role="img" aria-label="Who is ahead over time. Tap to jump." onpointerdown={seekFromGraph}>
-      <line x1="0" x2="300" y1="42" y2="42" stroke="#3a3733" vector-effect="non-scaling-stroke" />
-      <polyline points={graphPoints(plies)} fill="none" stroke="#6fa8dc" stroke-width="2" vector-effect="non-scaling-stroke" />
-      {#if plies.length}<line x1={(cur / plies.length) * 300} x2={(cur / plies.length) * 300} y1="0" y2="84" stroke="#e6e3dc" stroke-width="2" vector-effect="non-scaling-stroke" />{/if}
+      <line x1="0" x2="300" y1="42" y2="42" stroke="var(--line)" vector-effect="non-scaling-stroke" />
+      <polyline points={graphPoints(plies)} fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" />
+      {#if plies.length}<line x1={(cur / plies.length) * 300} x2={(cur / plies.length) * 300} y1="0" y2="84" stroke="var(--fg)" stroke-width="2" vector-effect="non-scaling-stroke" />{/if}
     </svg>
     <div class="lab"><span>White ahead ↑</span><span>Move {Math.ceil(cur / 2)} of {Math.ceil(plies.length / 2)}</span><span>Black ahead ↓</span></div>
   </div>
@@ -134,12 +134,12 @@
   .mv { font-weight: 600; font-size: 17px; }
   .caption p { margin: 6px 0 0; } .caption small { color: var(--mute); }
   .tag { display: inline-block; font: 600 11px var(--sans); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; margin-left: 8px; vertical-align: 2px; }
-  .tag.ok { background: #2b3a26; color: var(--good); } .tag.inaccuracy { background: #3d3418; color: var(--warn); }
-  .tag.mistake, .tag.blunder { background: #44221e; color: var(--bad); } .tag.engine, .tag.forced { background: #24303b; color: var(--accent); }
+  .tag.ok { background: color-mix(in oklch, var(--good) 18%, var(--panel)); color: var(--good); } .tag.inaccuracy { background: color-mix(in oklch, var(--warn) 18%, var(--panel)); color: var(--warn); }
+  .tag.mistake, .tag.blunder { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); color: var(--bad); } .tag.engine, .tag.forced { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); color: var(--accent); }
   .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
   .controls button { padding: 12px 0; font-size: 18px; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); }
-  .controls button.main { background: var(--accent); color: #0d1620; border-color: var(--accent); font-weight: 700; }
-  .pill { align-self: center; background: var(--accent); color: #0d1620; border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 600; }
+  .controls button.main { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+  .pill { align-self: center; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 600; }
   .graph { background: var(--panel); border-radius: 8px; padding: 8px 10px; }
   .graph svg { display: block; width: 100%; height: 84px; touch-action: none; }
   .lab { display: flex; justify-content: space-between; color: var(--mute); font-size: 12px; }

@@ -78,7 +78,7 @@
     background: var(--panel-2); color: var(--fg); border: 1px solid var(--line);
     border-radius: var(--radius); padding: 7px 12px; font-size: 14px;
   }
-  .primary { background: var(--accent); color: #0d1620; border-color: var(--accent); font-weight: 700; }
+  .primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
   .empty { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
   .list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
   .list a {
@@ -90,10 +90,10 @@
     grid-row: span 2; align-self: center; font: 600 11px var(--sans); letter-spacing: 0.03em;
     padding: 3px 8px; border-radius: 999px; white-space: nowrap; background: var(--panel-2); color: var(--mute);
   }
-  .chip.won { background: #2b3a26; color: var(--good); }
-  .chip.lost { background: #44221e; color: var(--bad); }
+  .chip.won { background: color-mix(in oklch, var(--good) 18%, var(--panel)); color: var(--good); }
+  .chip.lost { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); color: var(--bad); }
   .chip.draw { background: var(--panel-2); color: var(--fg); }
-  .chip.live { background: #24303b; color: var(--accent); }
+  .chip.live { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); color: var(--accent); }
   .who { font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .meta { grid-column: 2; font-size: 12px; color: var(--mute); }
   .id { grid-column: 3; grid-row: 1; font-size: 12px; color: var(--mute); }

@@ -11,8 +11,8 @@
 
 <svg viewBox="0 0 {W} {H}" role="img" aria-label="Elo over games with the 95 % interval">
   {#each levels as l (l.id)}
-    <line x1="0" x2={W} y1={g.y(l.elo)} y2={g.y(l.elo)} stroke="#3a3733" stroke-dasharray="2 4" vector-effect="non-scaling-stroke" />
-    <text x="4" y={g.y(l.elo) - 3} font-size="9" fill="#9b978e">{l.id}</text>
+    <line x1="0" x2={W} y1={g.y(l.elo)} y2={g.y(l.elo)} stroke="var(--line)" stroke-dasharray="2 4" vector-effect="non-scaling-stroke" />
+    <text x="4" y={g.y(l.elo) - 3} font-size="9" fill="var(--mute)">{l.id}</text>
   {/each}
   {#if currentLevel !== null}
     <line x1="0" x2={W} y1={g.y(currentLevel)} y2={g.y(currentLevel)} stroke="var(--warn)" stroke-width="1.5" vector-effect="non-scaling-stroke" />

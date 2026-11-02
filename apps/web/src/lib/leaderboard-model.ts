@@ -43,8 +43,87 @@ export function overlapsWith(row: LeaderRow, rows: readonly LeaderRow[]): string
   return rows.filter((o) => o.arm_id !== row.arm_id && !set.has(o.arm_id)).map(armLabel);
 }
 
+/** A probability is never printed as exactly 0 or 100 %: the posterior is never that certain. */
+export const probLabel = (p: number): string => {
+  const v = Math.round(p * 100);
+  return v <= 0 ? '< 1 %' : v >= 100 ? '> 99 %' : `${v} %`;
+};
+
 export const comparisonSentence = (c: CompareResult): string =>
-  `P(${armLabel(c.a)} stronger) = ${Math.round(c.p_a_gt_b * 100)} %`;
+  `P(${armLabel(c.a)} stronger) = ${probLabel(c.p_a_gt_b)}`;
 
 export const differenceLabel = (c: CompareResult): string =>
   `${c.diff_mean >= 0 ? '+' : ''}${Math.round(c.diff_mean)} Elo (${Math.round(c.diff_lo)} to ${Math.round(c.diff_hi)}, 95 %)`;
+
+// ---- redesign: tiers, models, hint effect. Pure; the page only renders these. ----
+
+/** `mammoth-1` from `baseten/mammoth-1`. */
+export const shortName = (model: string): string => model.split('/').pop() ?? model;
+/** Provider prefix, used as the "model family" filter: `baseten`. */
+export const family = (model: string): string => (model.includes('/') ? model.split('/')[0]! : model);
+export const modelHref = (model: string): string => `/models/${model}`;
+
+export interface Tier { n: number; leader: LeaderRow; rows: LeaderRow[]; top: number; bottom: number }
+
+/**
+ * Group arms whose 95 % interval overlaps the tier leader's. The leader is the best arm not yet placed,
+ * so a tier reads "statistically tied with its best". Rank inside a tier is deliberately not shown.
+ */
+export function tiers(rows: readonly LeaderRow[]): Tier[] {
+  const left = [...rows].sort((a, b) => b.elo.mean - a.elo.mean);
+  const out: Tier[] = [];
+  while (left.length > 0) {
+    const leader = left[0]!;
+    const members = left.filter((r) => r.elo.hi >= leader.elo.lo);
+    for (const m of members) left.splice(left.indexOf(m), 1);
+    out.push({ n: out.length + 1, leader, rows: members, top: members[0]!.elo.mean, bottom: members[members.length - 1]!.elo.mean });
+  }
+  return out;
+}
+
+export interface ModelEntry {
+  model: string; name: string; family: string;
+  clean: LeaderRow | null; hinted: LeaderRow | null;
+  /** hinted minus clean, in Elo, with the half-width of that difference (intervals add in quadrature). */
+  delta: number | null; deltaHw: number | null;
+  best: number;
+}
+
+/** One entry per model, sorted by its best arm. */
+export function modelsOf(rows: readonly LeaderRow[]): ModelEntry[] {
+  const by = new Map<string, ModelEntry>();
+  for (const r of rows) {
+    const e = by.get(r.model) ?? { model: r.model, name: shortName(r.model), family: family(r.model), clean: null, hinted: null, delta: null, deltaHw: null, best: 0 };
+    if (r.arm === 'clean') e.clean = r; else if (r.arm === 'hinted') e.hinted = r;
+    by.set(r.model, e);
+  }
+  const list = [...by.values()];
+  for (const e of list) {
+    if (e.clean && e.hinted) {
+      e.delta = e.hinted.elo.mean - e.clean.elo.mean;
+      e.deltaHw = Math.hypot(e.hinted.elo.half_width, e.clean.elo.half_width);
+    }
+    e.best = Math.max(e.clean?.elo.mean ?? -Infinity, e.hinted?.elo.mean ?? -Infinity);
+  }
+  return list.sort((a, b) => b.best - a.best);
+}
+
+export interface HintSummary { models: number; improved: number; clear: number; median: number; min: number; max: number }
+
+/** How much hints change the rating, over models that have both arms. `clear` = gap larger than its own 95 % band. */
+export function hintSummary(models: readonly ModelEntry[]): HintSummary | null {
+  const both = models.filter((m) => m.delta !== null);
+  if (both.length === 0) return null;
+  const d = both.map((m) => m.delta!).sort((a, b) => a - b);
+  const mid = d.length >> 1;
+  return {
+    models: both.length,
+    improved: both.filter((m) => m.delta! > 0).length,
+    clear: both.filter((m) => m.delta! > m.deltaHw!).length,
+    median: d.length % 2 ? d[mid]! : (d[mid - 1]! + d[mid]!) / 2,
+    min: d[0]!, max: d[d.length - 1]!,
+  };
+}
+
+export const signed = (v: number): string => `${v >= 0 ? '+' : '−'}${Math.abs(Math.round(v))}`;
+export const eloLabel = (r: Pick<LeaderRow, 'elo'>): string => `${Math.round(r.elo.mean)} ± ${Math.round(r.elo.half_width)}`;

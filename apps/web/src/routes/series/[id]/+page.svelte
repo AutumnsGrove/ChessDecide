@@ -92,7 +92,7 @@
 
 <div class="head">
   <div>
-    <h1 class="h">{series.name}</h1>
+    <h1 class="h">{series.model.split('/').pop()} · {series.arm}</h1>
     <p class="note">{series.model} · {series.arm} · ladder v{series.ladder_version}</p>
   </div>
   <span class="chip {statusClass}">{series.status.replace('_', ' ')}</span>
@@ -213,18 +213,18 @@
   .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .h { font-size: 18px; margin: 0; }
   .chip { font: 600 11px var(--sans); padding: 3px 9px; border-radius: 999px; background: var(--panel-2); color: var(--mute); white-space: nowrap; }
-  .chip.good { background: #2b3a26; color: var(--good); }
-  .chip.live { background: #24303b; color: var(--accent); }
-  .chip.warn { background: #3d3418; color: var(--warn); }
-  .chip.bad { background: #44221e; color: var(--bad); }
-  .notice { background: #3d3418; color: var(--warn); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
+  .chip.good { background: color-mix(in oklch, var(--good) 18%, var(--panel)); color: var(--good); }
+  .chip.live { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); color: var(--accent); }
+  .chip.warn { background: color-mix(in oklch, var(--warn) 18%, var(--panel)); color: var(--warn); }
+  .chip.bad { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); color: var(--bad); }
+  .notice { background: color-mix(in oklch, var(--warn) 18%, var(--panel)); color: var(--warn); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; }
   .downloads { display: flex; gap: 14px; }
   .downloads a { font-size: 13px; color: var(--accent); }
   .controls { display: flex; gap: 6px; }
   .controls button { flex: 1; padding: 8px 10px; font-size: 13px; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: var(--radius); }
   .controls button:disabled { opacity: 0.55; cursor: default; }
   .controls .stop { color: var(--bad); }
-  .controls .stop.confirm { background: #44221e; border-color: var(--bad); color: var(--fg); font-weight: 600; }
+  .controls .stop.confirm { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); border-color: var(--bad); color: var(--fg); font-weight: 600; }
   .sub { font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--mute); margin: 0 0 8px; }
   .rating .big { font-size: 44px; line-height: 1.1; }
   .rating .big span { font-size: 20px; color: var(--mute); }
@@ -243,10 +243,10 @@
   .tablehead { display: flex; justify-content: space-between; align-items: baseline; }
   .link { background: none; border: 0; color: var(--accent); font-size: 12px; padding: 0; }
   .gchip { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: 0.03em; padding: 2px 6px; border-radius: 4px; background: var(--panel-2); color: var(--mute); }
-  .gchip.won { background: #2b3a26; color: var(--good); }
-  .gchip.lost { background: #44221e; color: var(--bad); }
+  .gchip.won { background: color-mix(in oklch, var(--good) 18%, var(--panel)); color: var(--good); }
+  .gchip.lost { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); color: var(--bad); }
   .gchip.draw { background: var(--panel-2); color: var(--fg); }
-  .gchip.running { background: #24303b; color: var(--accent); }
-  .gchip.aborted { background: #44221e; color: var(--bad); }
+  .gchip.running { background: color-mix(in oklch, var(--accent) 18%, var(--panel)); color: var(--accent); }
+  .gchip.aborted { background: color-mix(in oklch, var(--bad) 20%, var(--panel)); color: var(--bad); }
   @media (max-width: 420px) { .metrics { grid-template-columns: 1fr 1fr; } }
 </style>

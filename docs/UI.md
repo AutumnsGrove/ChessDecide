@@ -15,6 +15,11 @@ leaderboard screens follow once the go/no-go passes. The deployed site is **read
 game/New series buttons, no spend meter); local mode shows the controls. **No generated
 commentary**: the one-line status under the board uses fixed templates over Judge numbers.
 
+> **Public site redesign (2026-11):** the public pages (`/`, `/models`, `/models/<model>`, `/compare`,
+> `/method`) follow `PRODUCT.md` at the repo root and the tokens in `apps/web/src/app.css`, which now
+> supersede the hex values in §2 (OKLCH, warm-tinted neutrals, one green accent, clean = blue and
+> hinted = gold as the arm encoding). Tiers group arms whose 95 % interval overlaps the tier leader's.
+
 ## 1. Principles
 
 1. **Lichess-dark, calm, dense.** Brown board, cburnett pieces, `#161512` page, flat panels with
