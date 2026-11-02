@@ -175,3 +175,13 @@ test('on a phone the filters fold away so a game is on the first screen', async 
   await page.locator('summary', { hasText: 'Filters' }).click();
   await expect(page.getByRole('link', { name: 'Hinted', exact: true })).toBeVisible();
 });
+
+test('a page past the end says so and links to the last page', async ({ page }) => {
+  await stubBrowse(page, [], 30);
+  await page.goto('/games?page=9');
+  await expect(page.getByText('Page 9 is past the end: there are 2 pages.')).toBeVisible();
+  await expect(page.getByText('No games match')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Go to the last page' }).click();
+  await expect(page).toHaveURL(/page=2$/);
+  await expect(page.locator('a.game').first()).toBeVisible();
+});

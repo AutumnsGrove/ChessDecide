@@ -106,8 +106,13 @@
 
   {#if res.items.length === 0}
     <div class="empty card">
-      <p class="note">{filtered ? 'No games match these filters.' : 'No games yet.'}</p>
-      {#if filtered}<a href="/games">Clear filters</a>{:else if app.health?.control}<button class="primary" onclick={openNewGame}>Start a game</button>{/if}
+      {#if res.total > 0}
+        <p class="note">Page {res.page} is past the end: there are {range.pages.toLocaleString()} {range.pages === 1 ? 'page' : 'pages'}.</p>
+        <a href={href({ page: range.pages }, true)}>Go to the last page</a>
+      {:else}
+        <p class="note">{filtered ? 'No games match these filters.' : 'No games yet.'}</p>
+      {/if}
+      {#if res.total > 0}{:else if filtered}<a href="/games">Clear filters</a>{:else if app.health?.control}<button class="primary" onclick={openNewGame}>Start a game</button>{/if}
     </div>
   {:else}
     <ul class="list">
