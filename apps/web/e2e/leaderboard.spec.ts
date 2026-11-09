@@ -68,16 +68,78 @@ test('ticking two rows opens a comparison with a probability and an Elo gap', as
   await hinted.getByRole('checkbox').check();
   await page.getByRole('link', { name: 'Compare', exact: true }).click();
 
-  await expect(page).toHaveURL(/\/compare\?a=.*&b=/);
+  await expect(page).toHaveURL(/\/compare\?arms=.*,/);
   await expect(page.locator('.sentence')).toContainText('stronger');
   await expect(page.locator('.gap')).toContainText('95 %');
 
-  // Swapping the pair flips the probability.
+  // The order of the pair is the order of the sentence: remove the first arm and add it back to swap them.
   const before = await page.locator('.sentence').innerText();
-  const [a, b] = await page.locator('select').evaluateAll((els) => els.map((e) => (e as HTMLSelectElement).value));
-  await page.locator('select').nth(0).selectOption(b!);
-  await page.locator('select').nth(1).selectOption(a!);
+  await page.locator('.chips li').first().getByRole('button').click();
+  await expect(page.locator('.chips li')).toHaveCount(1);
+  await page.locator('.add select').selectOption({ index: 1 });
+  await expect(page.locator('.chips li')).toHaveCount(2);
   await expect(page.locator('.sentence')).not.toHaveText(before);
+});
+
+/** A compare-many stub: every pair of the requested arms, with numbers that depend only on the pair. */
+async function stubCompareMany(page: import('@playwright/test').Page, requested: string[][] = []) {
+  await page.route('**/api/leaderboard/compare-many**', (route) => {
+    const ids = (new URL(route.request().url()).searchParams.get('arms') ?? '').split(',');
+    requested.push(ids);
+    const pairs = ids.flatMap((a, i) => ids.slice(i + 1).map((b) => ({ a, b, p_a_gt_b: 0.97, diff_mean: 251, diff_lo: 104, diff_hi: 398 })));
+    return route.fulfill({ json: {
+      arms: ids.map((id) => ({ arm_id: id, model: id.split('#')[0], arm: id.split('#')[1], series_id: `s-${id}`, games: 50 })), pairs,
+    } });
+  });
+}
+const sixArms = () => ['alpha', 'beta', 'gamma', 'delta'].flatMap((n, i) => [modelRow(`x/${n}`, 'clean', 300 + i * 40), modelRow(`x/${n}`, 'hinted', 600 + i * 40)]);
+
+test('more than two arms can be ticked and every one of them is compared', async ({ page }) => {
+  const requested: string[][] = [];
+  await page.route('**/api/leaderboard', (r) => r.fulfill({ json: stubBoard(sixArms()) }));
+  await stubCompareMany(page, requested);
+  await page.goto('/');
+  const box = (i: number) => page.locator('tbody tr.arm').nth(i).getByRole('checkbox');
+  await box(0).check(); await box(1).check(); await box(2).check();
+  // All three stay ticked (the old table silently dropped the first when a third was ticked).
+  await expect(box(0)).toBeChecked(); await expect(box(1)).toBeChecked(); await expect(box(2)).toBeChecked();
+  await expect(page.getByRole('region', { name: 'Compare selected arms' })).toContainText('3 selected');
+  await page.getByRole('link', { name: 'Compare', exact: true }).click();
+
+  await expect(page).toHaveURL(/\/compare\?arms=/);
+  expect(requested.at(-1)).toHaveLength(3);
+  await expect(page.locator('.chips li')).toHaveCount(3);
+  await expect(page.locator('.cards .card')).toHaveCount(3);
+  await expect(page.locator('.pairs li')).toHaveCount(3);        // 3 arms: 3 pairs
+  await expect(page.getByRole('heading', { name: 'Head to head' })).toBeVisible();
+
+  // Adding and removing arms rewrites the URL and the request.
+  await page.locator('.add select').selectOption({ index: 1 });
+  await expect(page.locator('.cards .card')).toHaveCount(4);
+  await expect(page.locator('.pairs li')).toHaveCount(6);        // 4 arms: 6 pairs
+  expect(requested.at(-1)).toHaveLength(4);
+  await page.locator('.chips li').last().getByRole('button').click();
+  await expect(page.locator('.cards .card')).toHaveCount(3);
+});
+
+test('the table stops at six arms and says so, instead of dropping one', async ({ page }) => {
+  await page.route('**/api/leaderboard', (r) => r.fulfill({ json: stubBoard(sixArms()) }));
+  await page.goto('/');
+  const box = (i: number) => page.locator('tbody tr.arm').nth(i).getByRole('checkbox');
+  for (let i = 0; i < 6; i++) await box(i).check();
+  await expect(page.getByRole('region', { name: 'Compare selected arms' })).toContainText('the most, 6');
+  await expect(box(6)).toBeDisabled();
+  await expect(box(0)).toBeChecked();                            // nothing was dropped
+  await box(2).uncheck();
+  await expect(box(6)).toBeEnabled();
+});
+
+test('an older two-arm compare link still works', async ({ page }) => {
+  await page.route('**/api/leaderboard', (r) => r.fulfill({ json: stubBoard(sixArms()) }));
+  await stubCompareMany(page);
+  await page.goto(`/compare?a=${encodeURIComponent('x/alpha#clean')}&b=${encodeURIComponent('x/alpha#hinted')}`);
+  await expect(page.locator('.chips li')).toHaveCount(2);
+  await expect(page.locator('.sentence')).toContainText('97 %');
 });
 
 test('overlapping arms land in one tier and are not ranked apart', async ({ page }) => {

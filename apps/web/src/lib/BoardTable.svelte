@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { LeaderRow } from './api.ts';
-  import { eloLabel, family, modelHref, money, num1, pct0, shortName, tiers as tiersOf } from './leaderboard-model.ts';
+  import { compareHref, eloLabel, family, MAX_COMPARE, modelHref, money, num1, pct0, shortName, tiers as tiersOf } from './leaderboard-model.ts';
 
   let { rows }: { rows: LeaderRow[] } = $props();
 
@@ -31,10 +31,13 @@
   const filtering = $derived(arm !== 'all' || fam !== 'all' || query.trim() !== '');
   const label = (id: string) => { const r = rows.find((x) => x.arm_id === id); return r ? `${shortName(r.model)} ${r.arm}` : id; };
 
+  // Up to MAX_COMPARE arms. At the limit the other boxes are disabled instead of silently dropping an earlier pick.
   function toggle(id: string) {
-    picked = picked.includes(id) ? picked.filter((x) => x !== id) : [...picked.slice(-1), id];
+    if (picked.includes(id)) picked = picked.filter((x) => x !== id);
+    else if (picked.length < MAX_COMPARE) picked = [...picked, id];
   }
-  const href = $derived(picked.length === 2 ? `/compare?a=${encodeURIComponent(picked[0]!)}&b=${encodeURIComponent(picked[1]!)}` : '');
+  const full = $derived(picked.length >= MAX_COMPARE);
+  const href = $derived(picked.length >= 2 ? compareHref(picked) : '');
 </script>
 
 <div class="tools" role="group" aria-label="Filter the table">
@@ -67,7 +70,7 @@
   <p class="empty note">No arms match these filters.</p>
 {:else}
   <table>
-    <caption class="sr-only">All arms with rating, interval, record and cost. Tick two rows to compare them.</caption>
+    <caption class="sr-only">All arms with rating, interval, record and cost. Tick two to {MAX_COMPARE} rows to compare them.</caption>
     <thead>
       <tr>
         <th scope="col" class="pick"><span class="sr-only">Compare</span></th>
@@ -85,7 +88,7 @@
       {#each (all || filtering ? shown : shown.slice(0, FIRST)) as r (r.arm_id)}
         <tr class="arm" class:sel={picked.includes(r.arm_id)}>
           <td class="pick">
-            <label><input type="checkbox" checked={picked.includes(r.arm_id)} onchange={() => toggle(r.arm_id)} aria-label="Compare {shortName(r.model)} {r.arm}" /></label>
+            <label><input type="checkbox" checked={picked.includes(r.arm_id)} disabled={full && !picked.includes(r.arm_id)} onchange={() => toggle(r.arm_id)} aria-label="Compare {shortName(r.model)} {r.arm}" title={full && !picked.includes(r.arm_id) ? `Up to ${MAX_COMPARE} arms at once: untick one first` : undefined} /></label>
           </td>
           <th scope="row" class="who"><a href={modelHref(r.model)}>{shortName(r.model)}</a> <span class="arm-chip {r.arm}">{r.arm}</span></th>
           <td class="num mono t" data-label="Tier">{tierOf.get(r.arm_id)}</td>
@@ -107,7 +110,7 @@
 
 {#if picked.length > 0}
   <div class="compare" role="region" aria-label="Compare selected arms">
-    <span class="what">{picked.map(label).join(' vs ')}{picked.length === 1 ? ': pick one more' : ''}</span>
+    <span class="what">{picked.length} selected{picked.length === 1 ? ', pick at least one more' : full ? ` (the most, ${MAX_COMPARE})` : ''}: {picked.map(label).join(', ')}</span>
     {#if href}<a class="go" {href}>Compare</a>{/if}
     <button type="button" onclick={() => (picked = [])}>Clear</button>
   </div>
@@ -152,7 +155,7 @@
     background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--s2) var(--s3);
     box-shadow: 0 6px 20px oklch(0 0 0 / 0.35);
   }
-  .compare .what { flex: 1 1 200px; font-size: var(--t-sm); }
+  .compare .what { flex: 1 1 200px; font-size: var(--t-sm); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .go { background: var(--accent); color: var(--accent-ink); font-weight: 700; border-radius: var(--radius); padding: 0 var(--s4); min-height: 40px; display: inline-flex; align-items: center; }
   .go:hover { text-decoration: none; filter: brightness(1.08); }
   .compare button { background: none; border: 0; color: var(--mute); min-height: 40px; padding: 0 var(--s2); }

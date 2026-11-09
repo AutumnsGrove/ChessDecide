@@ -1,14 +1,15 @@
-import type { CompareResult, Leaderboard } from '#lib/api.ts';
+import { armIdsFrom } from '#lib/leaderboard-model.ts';
+import type { CompareMany, Leaderboard } from '#lib/api.ts';
 
 export const load = async ({ fetch, url }) => {
   const r = await fetch('/api/leaderboard');
   const board = r.ok ? (await r.json()) as Leaderboard : null;
-  const a = url.searchParams.get('a'), b = url.searchParams.get('b');
-  let compare: CompareResult | null = null;
+  const ids = armIdsFrom(url.searchParams);
+  let many: CompareMany | null = null;
   let error = '';
-  if (board && a && b && a !== b) {
-    const c = await fetch(`/api/leaderboard/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
-    if (c.ok) compare = (await c.json()) as CompareResult; else error = 'Those two arms are not both on the board.';
+  if (board && ids.length >= 2) {
+    const c = await fetch(`/api/leaderboard/compare-many?arms=${ids.map(encodeURIComponent).join(',')}`);
+    if (c.ok) many = (await c.json()) as CompareMany; else error = 'Some of those arms are not on the board.';
   }
-  return { board, a, b, compare, error };
+  return { board, ids, many, error };
 };

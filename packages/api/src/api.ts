@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import {
-  ARM_PRESETS, DEFAULT_LADDER, buildLeaderboard, compareArms, gameToPgn, leaderboardCsv, seriesCsv,
+  ARM_PRESETS, DEFAULT_LADDER, buildLeaderboard, compareArms, comparePairs, gameToPgn, leaderboardCsv, seriesCsv,
   type Game, type GameConfig, type GameEvent, type LadderFile, type Series, type SeriesConfig, type SeriesEvent,
 } from '@chessdecide/core';
 import { estimateGame, estimateSeries, type ModelInfo } from '@chessdecide/providers';
@@ -184,6 +184,26 @@ export function createApi(deps: ApiDeps): Hono {
     if (!sa || !sb) throw new ApiError('not_found', 'arm not found', 404);
     const brief = (s: typeof sa) => ({ arm_id: s.arm_id, model: s.model, arm: s.arm, series_id: s.series_id, games: s.games.length });
     return c.json({ a: brief(sa), b: brief(sb), ...compareArms(sa.games, sb.games) });
+  });
+
+  /** Compare 2 to 6 arms at once: `?arms=a,b,c` (arm ids are `model#arm`; a comma never occurs in one). */
+  const MAX_COMPARE = 6;
+  app.get('/leaderboard/compare-many', async (c) => {
+    const raw = c.req.query('arms') ?? '';
+    const ids = [...new Set(raw.split(',').map((x) => x.trim()).filter(Boolean))];
+    if (ids.length < 2) throw new ApiError('bad_request', 'arms needs at least two distinct arm ids, comma separated');
+    if (ids.length > MAX_COMPARE) throw new ApiError('bad_request', `at most ${MAX_COMPARE} arms can be compared at once`);
+    if (ids.some((x) => x.length > 200)) throw new ApiError('bad_request', 'an arm id is too long');
+    const ladder = await currentLadder();
+    const input = await leaderboardInput(deps.db, ladder.version);
+    const picked = ids.map((id) => input.find((s) => s.arm_id === id));
+    const missing = ids.filter((_, i) => !picked[i]);
+    if (missing.length) throw new ApiError('not_found', `arm not found: ${missing.join(', ')}`, 404);
+    const arms = picked as NonNullable<(typeof picked)[number]>[];
+    return sendCacheable(c, {
+      arms: arms.map((s) => ({ arm_id: s.arm_id, model: s.model, arm: s.arm, series_id: s.series_id, games: s.games.length })),
+      pairs: comparePairs(arms),
+    });
   });
 
   // ---- series ----

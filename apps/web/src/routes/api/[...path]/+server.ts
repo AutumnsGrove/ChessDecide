@@ -4,8 +4,8 @@ import { createApi, type Mode } from '@chessdecide/api';
 import * as schema from '@chessdecide/db/schema';
 import type { RequestHandler } from './$types';
 
-/** The only route worth an edge cache: identical for every visitor, changes only on a publish. */
-const EDGE_CACHED = '/api/leaderboard';
+/** The routes worth an edge cache: identical for every visitor, change only on a publish. Comparing is the costly one (about 12 ms of CPU per pair). */
+const EDGE_CACHED = new Set(['/api/leaderboard', '/api/leaderboard/compare-many']);
 
 /**
  * Read-only API host (public mode, phase 1 deployment). Control routes are absent because no ControlPlane is passed.
@@ -17,7 +17,7 @@ export const fallback: RequestHandler = async ({ request }) => {
   const url = new URL(request.url);
   // `caches.default` only exists on the deployed Worker, so a missing cache just means "compute it".
   const edge = typeof caches !== 'undefined' ? (caches as unknown as { default?: Cache }).default : undefined;
-  if (mode !== 'public' || request.method !== 'GET' || url.pathname !== EDGE_CACHED || !edge) return handle();
+  if (mode !== 'public' || request.method !== 'GET' || !EDGE_CACHED.has(url.pathname) || !edge) return handle();
 
   const key = new Request(url.toString(), { method: 'GET' });
   const hit = await edge.match(key);

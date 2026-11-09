@@ -114,3 +114,10 @@ export interface BrowseResult {
   total: number; page: number; per: number; tally: { w: number; d: number; l: number }; items: BrowsedGame[];
 }
 export const browseGames = (qs: string) => getJson<BrowseResult>(`/api/games/browse${qs}`);
+
+/** `GET /api/leaderboard/compare-many`: 2 to 6 arms and every pair among them. */
+export interface PairResult { a: string; b: string; p_a_gt_b: number; diff_mean: number; diff_lo: number; diff_hi: number }
+export interface CompareMany {
+  arms: Array<{ arm_id: string; model: string; arm: string; series_id: string; games: number }>;
+  pairs: PairResult[];
+}

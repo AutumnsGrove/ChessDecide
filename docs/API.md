@@ -346,6 +346,16 @@ one's; the UI never ranks arms that overlap.
 
 `GET /api/leaderboard/compare?a=<arm_id>&b=<arm_id>` → `{ p_a_gt_b, diff_mean, diff_lo, diff_hi }`.
 
+`GET /api/leaderboard/compare-many?arms=<arm_id>,<arm_id>[,…]` → `{ arms, pairs }`. Two to six
+distinct arm ids (percent-encoded, comma separated; a comma never occurs inside an id). Duplicates
+collapse, so `arms` in the reply is the selection in order, each entry
+`{ arm_id, model, arm, series_id, games }`. `pairs` holds every pair in selection order (`i < j`),
+each `{ a, b, p_a_gt_b, diff_mean, diff_lo, diff_hi }` where `a`/`b` are arm ids. Each pair is exactly
+what `/compare` returns for that pair, so the two endpoints agree digit for digit. Fewer than two
+distinct ids → 400; an id that is not on the board → 404 naming every unknown id. This is the
+costliest read on the site (≈ 12 ms of CPU per pair), so it is edge-cached in `public` mode:
+**one request per distinct arm list**, not per viewer.
+
 `GET /api/leaderboard/export.csv` → one row per arm:
 `arm_id,model,arm,series_id,status,games,elo_mean,elo_lo,elo_hi,w,d,l,score_pct,acpl,acceptable_rate,blunder_rate,cost_usd`.
 

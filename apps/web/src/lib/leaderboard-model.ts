@@ -1,5 +1,5 @@
 /** Pure helpers for the leaderboard screen. Fixed labels over stored numbers, no commentary. */
-import type { CompareResult, LeaderRow } from './api.ts';
+import type { CompareResult, LeaderRow, PairResult } from './api.ts';
 
 /** `Jev · clean` — the model's short name and its arm. */
 export function armLabel(row: Pick<LeaderRow, 'model' | 'arm'>): string {
@@ -49,8 +49,11 @@ export const probLabel = (p: number): string => {
   return v <= 0 ? '< 1 %' : v >= 100 ? '> 99 %' : `${v} %`;
 };
 
-export const comparisonSentence = (c: CompareResult): string =>
-  `P(${armLabel(c.a)} stronger) = ${probLabel(c.p_a_gt_b)}`;
+export const comparisonSentence = (c: CompareResult): string => {
+  const p = probLabel(c.p_a_gt_b);
+  // `< 1 %` and `> 99 %` carry their own comparison, so they take no `=`.
+  return `P(${armLabel(c.a)} stronger) ${/^[<>]/.test(p) ? p : `= ${p}`}`;
+};
 
 export const differenceLabel = (c: CompareResult): string =>
   `${c.diff_mean >= 0 ? '+' : ''}${Math.round(c.diff_mean)} Elo (${Math.round(c.diff_lo)} to ${Math.round(c.diff_hi)}, 95 %)`;
@@ -127,3 +130,25 @@ export function hintSummary(models: readonly ModelEntry[]): HintSummary | null {
 
 export const signed = (v: number): string => `${v >= 0 ? '+' : '−'}${Math.abs(Math.round(v))}`;
 export const eloLabel = (r: Pick<LeaderRow, 'elo'>): string => `${Math.round(r.elo.mean)} ± ${Math.round(r.elo.half_width)}`;
+
+// ---- comparing several arms at once ----
+
+/** The server compares at most this many arms in one request (every pair costs about 12 ms of CPU). */
+export const MAX_COMPARE = 6;
+
+/** `/compare?arms=a,b,c`. Arm ids are `model#arm`, so each is URL-encoded and the list is comma separated. */
+export const compareHref = (ids: readonly string[]): string => `/compare?arms=${ids.map(encodeURIComponent).join(',')}`;
+
+/** The arms named by a compare URL: `?arms=a,b,c`, or the older `?a=..&b=..`. Distinct, in order, at most `MAX_COMPARE`. */
+export function armIdsFrom(params: URLSearchParams): string[] {
+  const list = params.get('arms');
+  const raw = list !== null ? list.split(',') : [params.get('a'), params.get('b')];
+  return [...new Set(raw.map((x) => (x ?? '').trim()).filter(Boolean))].slice(0, MAX_COMPARE);
+}
+
+/** One pair as the two-arm helpers expect it, so the sentence and gap wording is shared. */
+export function pairAsCompare(p: PairResult, arms: ReadonlyArray<{ arm_id: string; model: string; arm: string }>): CompareResult | null {
+  const a = arms.find((x) => x.arm_id === p.a), b = arms.find((x) => x.arm_id === p.b);
+  // `p` carries its own `a`/`b` (arm ids), so the arm objects must come after the spread.
+  return a && b ? { ...p, a: { ...a, series_id: '', games: 0 }, b: { ...b, series_id: '', games: 0 } } : null;
+}

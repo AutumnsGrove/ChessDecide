@@ -1,5 +1,34 @@
 # Changelog
 
+## T14 — Compare many arms at once
+
+- `packages/core/src/leaderboard.ts`: `comparePairs` — every pair among 2–6 arms in selection order
+  (`i < j`), each pair exactly `compareArms`, so the multi-arm reply agrees with `/compare` to the
+  last digit. +3 tests (order and count, per-pair identity, a clear ladder).
+- `packages/api/src/api.ts`: `GET /leaderboard/compare-many?arms=a,b,c` — 2–6 distinct ids (duplicates
+  collapse, ids trimmed), `{ arms, pairs }`, 400 for fewer than two distinct arms, 404 naming every
+  unknown id (> 200 chars also rejected). Same query cost for 2 arms as for 6, since the leaderboard
+  is read once and only the mixing is per pair. +4 API tests, and the path is in the query-budget list.
+- `apps/web/src/routes/api/[...path]/+server.ts`: `EDGE_CACHED` became a set, so `compare-many` is
+  edge-cached in public mode alongside `/api/leaderboard` — identical for every visitor, changes only
+  on a publish, and it is the costliest read on the site (~12 ms of CPU per pair).
+- `/compare` rewritten from two `<select>`s to removable chips plus N head-to-heads
+  (`P(A stronger)` and the Elo gap per pair), each picked arm keeping its axis line and stat card. The
+  old `?a=&b=` links still resolve (`armIdsFrom` reads either shape); the canonical link is
+  `/compare?arms=a,b,c` with each id percent-encoded.
+- `BoardTable`: ticking now stops at `MAX_COMPARE` (6) and disables the other boxes with the reason,
+  instead of silently dropping the earliest pick the way the two-arm table did. Copy on the table,
+  the footer and the table caption says "two to six".
+- Fixed while wiring: `comparisonSentence` wrote `= < 1 %` for a very certain pair; `< 1 %` and `> 99 %`
+  now take no `=`.
+- Tests: core 99, api 56, web 46, `pnpm typecheck` and `pnpm check` (0/0) green. Checked by hand
+  against the real local D1 (3 arms → 3 ordered pairs; 400/404 paths) and in Chromium on `/compare`
+  (3 chips, 3 cards, 3 pairs, chip removal rewrites the URL, no console errors).
+- Deviation: the new Playwright cases have **not run** — the e2e `webServer` did not come up within
+  120 s here (cold `wrangler`/`workerd` start), so that suite is unverified rather than failing.
+- Unrelated, seen while verifying: `packages/engine` `kills a hung engine and reboots it` flakes with
+  `engine timeout` under load; it fails `pnpm verify` on its own and is not touched by this work.
+
 ## T13 — Headless bench runs
 
 - `packages/core/src/bench.ts` (pure): `parseBenchPlan` (every rule + field name, unknown keys

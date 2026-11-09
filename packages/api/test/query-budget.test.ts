@@ -120,6 +120,7 @@ describe('read-only route query budget', () => {
     '/api/games/browse?model=liquid%2Fd1-ultra&arm=hinted&outcome=won&sort=strongest&page=1&per=5',
     '/api/leaderboard',
     '/api/leaderboard/compare?a=liquid/d1-ultra%23hinted&b=typesafe/jev-1.14%23clean',
+    '/api/leaderboard/compare-many?arms=liquid/d1-ultra%23hinted,typesafe/jev-1.14%23hinted,liquid/d1-ultra%23clean,typesafe/jev-1.14%23clean',
     '/api/series',
     '/api/series/S0',
     '/api/series/S0/games',
@@ -247,5 +248,45 @@ describe('GET /api/games/browse', () => {
   it('rejects malformed parameters with a 400 instead of guessing', async () => {
     for (const qs of ['?sort=plies', '?outcome=maybe', '?page=0', '?page=x', '?per=500', `?model=${'a'.repeat(201)}`])
       expect((await get(qs)).status, qs).toBe(400);
+  });
+});
+
+describe('GET /api/leaderboard/compare-many', () => {
+  const app = () => createApi({ db: counted.db, mode: 'public' });
+  const ids = ['liquid/d1-ultra#hinted', 'typesafe/jev-1.14#hinted', 'liquid/d1-ultra#clean', 'typesafe/jev-1.14#clean'];
+  const get = async (arms: string[] | string) => {
+    counted.reset();
+    const q = Array.isArray(arms) ? arms.map(encodeURIComponent).join(',') : arms;
+    const res = await app().fetch(new Request(`http://x/api/leaderboard/compare-many?arms=${q}`));
+    return { status: res.status, queries: counted.count(), body: (await res.json()) as any };
+  };
+
+  it('returns every pair of the selected arms in selection order', async () => {
+    const r = await get(ids);
+    expect(r.status).toBe(200);
+    expect(r.body.arms.map((a: any) => a.arm_id)).toEqual(ids);
+    expect(r.body.pairs).toHaveLength(6);
+    expect(r.body.pairs.map((p: any) => `${ids.indexOf(p.a)}${ids.indexOf(p.b)}`)).toEqual(['01', '02', '03', '12', '13', '23']);
+    for (const p of r.body.pairs) expect(p).toMatchObject({ p_a_gt_b: expect.any(Number), diff_mean: expect.any(Number), diff_lo: expect.any(Number), diff_hi: expect.any(Number) });
+  });
+
+  it('costs the same number of queries for 2 arms or 4', async () => {
+    expect((await get(ids.slice(0, 2))).queries).toBe((await get(ids)).queries);
+  });
+
+  it('agrees with the two-arm endpoint', async () => {
+    const many = (await get(ids.slice(0, 2))).body.pairs[0];
+    const one = await (await app().fetch(new Request(`http://x/api/leaderboard/compare?a=${encodeURIComponent(ids[0]!)}&b=${encodeURIComponent(ids[1]!)}`))).json() as any;
+    expect(many).toMatchObject({ p_a_gt_b: one.p_a_gt_b, diff_mean: one.diff_mean, diff_lo: one.diff_lo, diff_hi: one.diff_hi });
+  });
+
+  it('rejects too few, too many, duplicate-only and unknown arms', async () => {
+    expect((await get([ids[0]!])).status).toBe(400);
+    expect((await get('')).status).toBe(400);
+    expect((await get([ids[0]!, ids[0]!])).status).toBe(400);                      // one distinct arm
+    expect((await get([...ids, 'a#x', 'b#x', 'c#x'])).status).toBe(400);           // 7 arms
+    const unknown = await get([ids[0]!, 'nobody/home#clean']);
+    expect(unknown.status).toBe(404);
+    expect(unknown.body.error.message).toContain('nobody/home#clean');
   });
 });

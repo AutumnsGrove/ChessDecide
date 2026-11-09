@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildLeaderboard, compareArms, pickLeaderSeries, type ArmSeries } from '../src/leaderboard.ts';
+import { buildLeaderboard, compareArms, comparePairs, pickLeaderSeries, type ArmSeries } from '../src/leaderboard.ts';
 import type { RatedGame } from '../src/elo.ts';
 import type { SeriesStats } from '../src/metrics.ts';
 import type { SeriesStatus } from '../src/series-events.ts';
@@ -149,5 +149,30 @@ describe('compareArms', () => {
     expect(ba.p_a_gt_b).toBeLessThan(0.01);
     expect(ba.diff_mean).toBeCloseTo(-ab.diff_mean, 6);
     expect(ba.diff_lo).toBeCloseTo(-ab.diff_hi, 6);
+  });
+});
+
+describe('comparePairs', () => {
+  const mid = h2h(1000, [1, 0, 1, 0, 0.5, 1, 0]);
+  const arms = [{ arm_id: 'a', games: strong }, { arm_id: 'b', games: mid }, { arm_id: 'c', games: weak }];
+
+  it('returns every pair once, in selection order', () => {
+    expect(comparePairs(arms).map((p) => `${p.a}-${p.b}`)).toEqual(['a-b', 'a-c', 'b-c']);
+    expect(comparePairs(arms.slice(0, 2))).toHaveLength(1);
+    expect(comparePairs(arms.slice(0, 1))).toEqual([]);
+  });
+
+  it('is exactly compareArms for each pair, so it agrees with the two-arm endpoint', () => {
+    const [ab, ac, bc] = comparePairs(arms);
+    expect(ab).toMatchObject({ a: 'a', b: 'b', ...compareArms(strong, mid) });
+    expect(ac).toMatchObject({ ...compareArms(strong, weak) });
+    expect(bc).toMatchObject({ ...compareArms(mid, weak) });
+  });
+
+  it('orders a clear ladder: the strongest beats the middle beats the weakest', () => {
+    const p = Object.fromEntries(comparePairs(arms).map((x) => [`${x.a}${x.b}`, x.p_a_gt_b]));
+    expect(p.ac).toBeGreaterThan(0.99);
+    expect(p.ab).toBeGreaterThan(0.5);
+    expect(p.bc).toBeGreaterThan(0.5);
   });
 });

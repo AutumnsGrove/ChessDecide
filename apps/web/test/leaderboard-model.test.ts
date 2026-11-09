@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LeaderRow } from '../src/lib/api.ts';
 import {
   armLabel, comparisonSentence, differenceLabel, money, notSeparableCopy, num1, overlapLines, overlapPairs,
-  overlapsWith, pct0, separationLabel, family, hintSummary, modelsOf, shortName, signed, tiers,
+  overlapsWith, pct0, separationLabel, armIdsFrom, compareHref, MAX_COMPARE, pairAsCompare, family, hintSummary, modelsOf, shortName, signed, tiers,
 } from '../src/lib/leaderboard-model.ts';
 
 const row = (over: Partial<LeaderRow> & { arm_id: string }): LeaderRow => ({
@@ -73,8 +73,8 @@ describe('leaderboard model', () => {
       p_a_gt_b: 0.826, diff_mean: 243.4, diff_lo: -12.2, diff_hi: 498.6,
     };
     expect(comparisonSentence(c)).toBe('P(d1-ultra · clean stronger) = 83 %');
-    expect(comparisonSentence({ ...c, p_a_gt_b: 0.001 })).toBe('P(d1-ultra · clean stronger) = < 1 %');
-    expect(comparisonSentence({ ...c, p_a_gt_b: 0.999 })).toBe('P(d1-ultra · clean stronger) = > 99 %');
+    expect(comparisonSentence({ ...c, p_a_gt_b: 0.001 })).toBe('P(d1-ultra · clean stronger) < 1 %');
+    expect(comparisonSentence({ ...c, p_a_gt_b: 0.999 })).toBe('P(d1-ultra · clean stronger) > 99 %');
     expect(differenceLabel(c)).toBe('+243 Elo (-12 to 499, 95 %)');
     expect(differenceLabel({ ...c, p_a_gt_b: 0.4, diff_mean: -60.5, diff_lo: -300, diff_hi: 180 })).toBe('-60 Elo (-300 to 180, 95 %)');
   });
@@ -130,5 +130,33 @@ describe('models and the hint effect', () => {
     expect(family('baseten/mammoth-1')).toBe('baseten');
     expect(signed(56.4)).toBe('+56');
     expect(signed(-12)).toBe('−12');
+  });
+});
+
+describe('comparing several arms', () => {
+  it('builds a link that survives arm ids with # and /', () => {
+    const href = compareHref(['x/alpha#hinted', 'y/beta#clean', 'z/gamma#clean']);
+    expect(href).toBe('/compare?arms=x%2Falpha%23hinted,y%2Fbeta%23clean,z%2Fgamma%23clean');
+    expect(armIdsFrom(new URL(href, 'http://x').searchParams)).toEqual(['x/alpha#hinted', 'y/beta#clean', 'z/gamma#clean']);
+  });
+
+  it('still reads the older two-arm links, and ignores blanks and duplicates', () => {
+    expect(armIdsFrom(new URLSearchParams('a=p%23q&b=r%23s'))).toEqual(['p#q', 'r#s']);
+    expect(armIdsFrom(new URLSearchParams('arms=a,,a, b ,'))).toEqual(['a', 'b']);
+    expect(armIdsFrom(new URLSearchParams(''))).toEqual([]);
+  });
+
+  it('caps the list at the server limit', () => {
+    const many = Array.from({ length: 10 }, (_, i) => `m${i}#clean`).join(',');
+    expect(armIdsFrom(new URLSearchParams({ arms: many }))).toHaveLength(MAX_COMPARE);
+    expect(MAX_COMPARE).toBe(6);
+  });
+
+  it('turns a pair back into the two-arm shape so the wording is shared', () => {
+    const arms = [{ arm_id: 'x/alpha#hinted', model: 'x/alpha', arm: 'hinted' }, { arm_id: 'y/beta#clean', model: 'y/beta', arm: 'clean' }];
+    const c = pairAsCompare({ a: 'x/alpha#hinted', b: 'y/beta#clean', p_a_gt_b: 0.97, diff_mean: 251, diff_lo: 104, diff_hi: 398 }, arms)!;
+    expect(comparisonSentence(c)).toBe('P(alpha · hinted stronger) = 97 %');
+    expect(differenceLabel(c)).toBe('+251 Elo (104 to 398, 95 %)');
+    expect(pairAsCompare({ a: 'nope', b: 'y/beta#clean', p_a_gt_b: 0.5, diff_mean: 0, diff_lo: 0, diff_hi: 0 }, arms)).toBeNull();
   });
 });

@@ -120,3 +120,17 @@ export function compareArms(a: readonly RatedGame[], b: readonly RatedGame[]): C
     diff_hi: quantile(0.975),
   };
 }
+
+export interface PairCompare extends CompareResult { a: string; b: string }
+
+/**
+ * Every pair among the given arms, in selection order (a before b, i < j): the multi-arm comparison.
+ * Each pair is exactly `compareArms`, so it agrees with the two-arm endpoint to the last digit.
+ */
+export function comparePairs(arms: ReadonlyArray<{ arm_id: string; games: readonly RatedGame[] }>): PairCompare[] {
+  const out: PairCompare[] = [];
+  for (let i = 0; i < arms.length; i++)
+    for (let j = i + 1; j < arms.length; j++)
+      out.push({ a: arms[i]!.arm_id, b: arms[j]!.arm_id, ...compareArms(arms[i]!.games, arms[j]!.games) });
+  return out;
+}

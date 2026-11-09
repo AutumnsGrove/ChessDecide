@@ -110,7 +110,7 @@
     <section aria-labelledby="all-h">
       <div class="sechead">
         <h2 id="all-h" class="h2">All arms</h2>
-        <p class="note">Tick two rows to compare them. <a class="dl" href="/api/leaderboard/export.csv" download>Download CSV</a></p>
+        <p class="note">Tick up to six rows to compare them. <a class="dl" href="/api/leaderboard/export.csv" download>Download CSV</a></p>
       </div>
       <BoardTable {rows} />
     </section>
